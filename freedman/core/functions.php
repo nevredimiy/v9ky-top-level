@@ -1,6 +1,9 @@
 <?php
 
 
+/**
+ * Красивый распечатка кода как у Laravel
+ */
 function dump($data)
 {
     echo "<pre>";
@@ -8,20 +11,29 @@ function dump($data)
     echo "</pre>";
 }
 
+
+/**
+ * Красивая распечатка кода + die
+ */
 function dd($data)
 {
     dump($data);
     die;
 }
 
+/**
+ * Красивая респечатка массива
+ */
 function dump_arr($data) {
     echo '<pre>' . print_r($data, 1) . '</pre>';
 }
   
+/**
+ * Красивая распечатка массива первого элемента
+ */
 function dump_arr_first($data) {
     echo '<pre>' . print_r(array_slice($data,0,1,true), 1) . '</pre>';
 }
-
 
 
 /**
@@ -38,14 +50,17 @@ function abort($code = 404)
 
 
 /**
- * 
+ * Получает лучших игроков тура.
+ * @param string
+ * @param string
+ * @return array
  */
 
 function getBestPlayerOfTurForAjax($turnir, $tur)
 {
-    global $mysqli;
+    global $dbF;
     
-    $queryCurrentTur = "SELECT 
+    $sql = "SELECT 
     t.season,
     m.date,
     m.tur, 
@@ -75,14 +90,9 @@ function getBestPlayerOfTurForAjax($turnir, $tur)
     ORDER BY 
         m.id";
         
-    // Делаем запрос в БД на игроков которые "вибули"
-    $stmt = $mysqli->prepare($queryCurrentTur);
-    $stmt->bindParam(':turnir', $turnir, PDO::PARAM_INT);
-    $stmt->bindParam(':tur', $tur, PDO::PARAM_INT);
-    $stmt->execute();
-    $bestPlayers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $fields = $dbF->query($sql, [":turnir" => $turnir, ":tur" => $tur])->findAll();
     
-    return $bestPlayers;
+    return $fields;
 }
 
 /**
@@ -93,11 +103,12 @@ function getBestPlayerOfTurForAjax($turnir, $tur)
 function getAllStaticPlayers($turnir) 
 {
 
-    global $mysqli;
+    global $dbF;
     // Получаем данные из БД. Статискика всех игроков учавствуюих в текущей лиге. Статистика вся, кроме забитых голов
-    $queryStaticPlayers = 
+    $sql = 
         "SELECT 
             m.tur, 
+            p.team,
             s.player, 
             s.matc, 
             s.seyv, 
@@ -123,6 +134,7 @@ function getAllStaticPlayers($turnir)
             (SELECT COUNT(*) AS red_cards FROM v9ky_red r WHERE r.player= s.player and r.matc = s.matc) AS red_cards
         FROM `v9ky_sostav` s
         LEFT JOIN `v9ky_match` m ON m.id = s.matc
+        LEFT JOIN `v9ky_player`p ON p.id = s.player
         WHERE s.`player` IN (
             SELECT `id` 
             FROM `v9ky_player` 
@@ -134,14 +146,11 @@ function getAllStaticPlayers($turnir)
         )";
 
     // Делаем запрос в БД на игроков которые "вибули"
-    $stmt = $mysqli->prepare($queryStaticPlayers);
-    $stmt->bindParam(':turnir', $turnir, PDO::PARAM_INT);
-    $stmt->execute();
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $fields = $dbF->query($sql, [":turnir" => $turnir])->findAll();
 
     $allStaticPlayers = [];
 
-    foreach ( $result as $key => $value ) {
+    foreach ( $fields as $key => $value ) {
         $allStaticPlayers[$value['player']][$value['matc']] = $value;
     }
   
@@ -157,7 +166,7 @@ function getAllStaticPlayers($turnir)
 function getDataPlayers($allStaticPlayers) 
 {
     
-    global $mysqli;
+        global $dbF;
 
     // Массив только c идентификаторами игроков
     $arrPlayersId = array_keys($allStaticPlayers);
@@ -165,7 +174,7 @@ function getDataPlayers($allStaticPlayers)
     // Подготовляем список идентификаторов для SQL-запроса  
     $placeholders = implode(',', array_fill(0, count($arrPlayersId), '?'));  
 
-    $queryAllPlayersData = 
+    $sql = 
         "SELECT 
             p.id AS player_id,
             p.team AS team_id,
@@ -194,16 +203,13 @@ function getDataPlayers($allStaticPlayers)
             p.id IN ($placeholders)  
       ";  
 
-    // Делаем запрос в БД на игроков которые "вибули"
-    $stmt = $mysqli->prepare($queryAllPlayersData);
-    // $stmt->bindParam(':strAllPlayersId', $strAllPlayersId);
-    $stmt->execute($arrPlayersId);
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $fields = $dbF->query($sql, $arrPlayersId)->findAll();
 
     $dataAllPlayers = [];
 
     // Меняем структуру массива - для удобства работы с ним
-    foreach ( $result as $key => $value ) {
+    foreach ( $fields as $key => $value ) {
         
         $playerId = $value['player_id'];
 
@@ -221,9 +227,9 @@ function getDataPlayers($allStaticPlayers)
  */
 function getDataCurrentTur($turnir, $currentTur)
 {
-    global $mysqli;
+    global $dbF;
 
-    $queryDataCurrentTur = 
+    $sql = 
         "SELECT 
         m.id,
         m.anons,
@@ -243,7 +249,12 @@ function getDataCurrentTur($turnir, $currentTur)
         m.canseled,
         m.gols1 AS goals1,
         m.gols2 AS goals2,
-        t.ru AS turnir_name
+        t.ru AS turnir_name,
+        m.videohiden AS video_hd,
+        m.video AS video,
+        m.videobest AS videobest,
+        m.video_intervu AS video_intervu,
+        m.video_intervu2 AS video_intervu2
     FROM 
         v9ky_match m
     LEFT JOIN 
@@ -259,13 +270,9 @@ function getDataCurrentTur($turnir, $currentTur)
         m.id";
 
     // Делаем запрос в БД на игроков которые "вибули"
-    $stmt = $mysqli->prepare($queryDataCurrentTur);
-    $stmt->bindParam(':turnir', $turnir, PDO::PARAM_INT);
-    $stmt->bindParam(':currentTur', $currentTur, PDO::PARAM_INT);
-    $stmt->execute();
-    $dataCurrentTur = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $fields = $dbF->query($sql, [":turnir" => $turnir, ":currentTur" => $currentTur])->findAll();
     
-    return $dataCurrentTur;
+    return $fields;
 }
 
 /**
@@ -275,9 +282,9 @@ function getDataCurrentTur($turnir, $currentTur)
 function getDateTurs($turnir)
 {
 
-    global $mysqli;
+    global $dbF;
 
-    $queryDateTurs = "SELECT 
+    $sql = "SELECT 
     tur, 
     MIN(date) AS min_date, 
     MAX(date) AS max_date,
@@ -296,65 +303,81 @@ ORDER BY
     tur ASC;";
 
     // Делаем запрос в БД на игроков которые "вибули"
-    $stmt = $mysqli->prepare($queryDateTurs);
-    $stmt->bindParam(':turnir', $turnir, PDO::PARAM_INT);    
-    $stmt->execute();
-    $dateTurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $fields = $dbF->query($sql, [":turnir" => $turnir])->findAll();
     
-    return $dateTurs;
+    return $fields;
 }
 
 /**
- * 
+ * Получения tournament - название последнего турнира латиницей. Используеться для написания параметра в адресной строке.
+ * @return string
  */
 function getTournament()
 {
-    global $mysqli;
-
+    global $dbF;
     $sql = "SELECT * FROM `v9ky_turnir` WHERE `seasons` = (SELECT id FROM `v9ky_seasons` ORDER BY id DESC LIMIT 1)";
-    $stmt = $mysqli->prepare($sql);
-    $stmt->execute();
-    $dataTurnir = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    $tournament = isset($dataTurnir[0]['name']) ? $dataTurnir[0]['name'] : 'not';
+    $dataTurnir = $dbF->query($sql)->findAll();    
+    $tournament = isset($dataTurnir[0]['name']) ? $dataTurnir[0]['name'] : '';
     return $tournament;
+}
+
+/**
+ * Получения идентификатора турнира
+ * @param string
+ * @return string
+ */
+function getTurnir($tournament = '')
+{
+    global $dbF;
+
+    // Если переменная tournament пустая, тогда берем последний турнир.
+    if($tournament == ''){
+        $tournament = getTournament();
+    }
+
+    $sql = "SELECT `id` FROM `v9ky_turnir` WHERE `name` = :tournament";
+    $turnir = $dbF->query($sql, [":tournament" => $tournament])->find();
+    return $turnir['id'];
 }
 
 
 /**
  * Получает стадионы из базы данных
+ * @return array
  */
 function getFields(){
-    global $mysqli;
-
-    $sql = "SELECT 
+    global $dbF;
+    $fields = $dbF->query("SELECT 
         `name`, 
         `adres` AS address,
         (SELECT `name_ua` FROM `v9ky_city` c WHERE f.city = c.id) AS city
             FROM `v9ky_fields` f
-            WHERE `visible` > 0";
-
-    $stmt = $mysqli-> prepare($sql);
-    $stmt->execute();
-    $fields = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            WHERE `visible` > 0")->findAll();
 
     return $fields;
-
+}
+/**
+ * Функция убирает нежелательные символы. Напримен, "  «Manchester United» " - вернет "%Manchester United%" или "  Chelsea\t" - вернет "%Chelsea%"
+ * Такой результат нужен для апроса в базу данный для поиска команд по названию (WHERE name LIKE :team1)
+ */
+function sanitizeInput($input) {
+    // Убираем нежелательные символы и пробелы
+    return '%' . preg_replace('/[^\w\s]/u', '', trim($input)) . '%';
 }
 
 /**
  *  Функция получает данные матчей из всех сезонов, где встречались две команды
- * @param string - Назвиние команды 1
- * @param string - Назвиние команды 2
+ * @param string - Название команды 1
+ * @param string - Название команды 2
  * @return array - массив матчей
  */
 function getHistoryMeets($team1, $team2) {
-    global $mysqli;
+    global $dbF;
 
-    $team1 = trim($team1);
-    $team2 = trim($team2);
+    $team1 = '%' . trim($team1) . '%';
+    $team2 = '%' . trim($team2) . '%';
 
-    $sql = "SELECT 
+   $sql = "SELECT 
         tr.season AS season_name,
         tr.ru AS liga_name,
         t1.name AS team1_name,
@@ -369,22 +392,301 @@ function getHistoryMeets($team1, $team2) {
     LEFT JOIN 
         `v9ky_turnir` tr ON tr.id = m.turnir
     WHERE `team1` IN (
-        SELECT `id` FROM `v9ky_team` WHERE name = :team1) 
+        SELECT `id` FROM `v9ky_team` WHERE name LIKE :team1) 
     AND `team2` IN (
-        SELECT `id` FROM `v9ky_team` WHERE name = :team2) 
+        SELECT `id` FROM `v9ky_team` WHERE name LIKE :team2) 
     AND `canseled` > 0
     OR `team2` IN (
-        SELECT `id` FROM `v9ky_team` WHERE name = :team2) 
+        SELECT `id` FROM `v9ky_team` WHERE name LIKE :team2) 
     AND `team1` IN (
-        SELECT `id` FROM `v9ky_team` WHERE name = :team1) 
+        SELECT `id` FROM `v9ky_team` WHERE name LIKE :team1) 
     AND `canseled` > 0
     ORDER BY m.date DESC";
 
-    $stmt = $mysqli-> prepare($sql);
-    $stmt->bindParam(':team1', $team1, PDO::PARAM_INT);  
-    $stmt->bindParam(':team2', $team2, PDO::PARAM_INT);  
-    $stmt->execute();
-    $fields = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $fields = $dbF->query($sql, [":team1" => $team1, ":team2" => $team2])->findAll();
+
+
+    return $fields;
+}
+
+/**
+ * Получает состав команды 
+ * @param string - идентификатор матча
+ * @param string - идентификатор команды
+ * @return array
+ */
+function getTeamComposition($matchId, $teamId) {
+    global $dbF;
+
+    // приводим значение к типу integer - от sql-инъекций
+    $matchId = (int) $matchId;
+    $teamId = (int) $teamId;
+    
+    $sql = "SELECT 
+	p.id AS player_id,
+	p.`team` AS team_id,
+	m.`name1` AS lastname,
+	CONCAT(LEFT(m.name2, 1), '.') AS firstname,
+	s.nomer AS nomer
+    FROM `v9ky_player` p
+    LEFT JOIN (
+        SELECT player, nomer FROM v9ky_sostav WHERE `matc` = :match_id
+    ) s ON s.player = p.id
+    LEFT JOIN 
+        v9ky_man m ON m.id = p.man
+
+    WHERE p.`id` IN (
+        SELECT `player` FROM `v9ky_sostav` WHERE `matc`= :match_id
+        )
+    AND p.team = :team_id
+    ORDER BY s.nomer
+    ";
+
+    $fields = $dbF->query($sql, [":match_id" => $matchId, ":team_id" => $teamId])->findAll();
+
+    return $fields;
+}
+
+/**
+ * Получает состав команды и игдивидуальную статистику 
+ * @param string - идентификатор матча
+ * @param string - идентификатор команды
+ * @return array
+ */
+function getTeamCompositionAndStats($matchId, $teamId) {
+    global $dbF;
+
+    $matchId = (int) $matchId;
+    $teamId = (int) $teamId;
+    
+    $sql = "SELECT 
+	p.`id` AS player_id,
+	p.`team` AS team_id,
+	m.`name1` AS lastname,
+	CONCAT(LEFT(m.name2, 1), '.') AS firstname,
+    (SELECT COUNT(*) FROM `v9ky_gol` WHERE matc = :match_id AND player = p.`id`) AS goals_scored,
+    (SELECT COUNT(*) FROM `v9ky_asist` WHERE matc = :match_id AND player = p.`id`) AS asist,
+	s.`zagostrennia` AS build_up,
+	s.`pasplus` AS success_pass,
+	s.`pasminus` AS bad_pass,
+	s.`vtrata` AS loss_ball,
+	s.vstvor AS shot_on,
+	s.mimo AS shot_off,
+	s.obvodkaplus AS successfull_dribble,
+	s.obvodkaminus AS failed_dribble,
+	s.otbor AS successful_tackle,
+	s.otbormin AS failed_tackle,
+	s.blok AS success_block,
+	s.seyv AS success_save ,
+	s.seyvmin AS failed_save
+
+    FROM `v9ky_player` p
+    LEFT JOIN (
+        SELECT * FROM `v9ky_sostav`  WHERE `matc` = :match_id
+    ) s ON s.player = p.id
+
+    LEFT JOIN 
+        `v9ky_man` m ON m.`id` = p.`man`
+
+    WHERE p.`id` IN (
+        SELECT `player` FROM `v9ky_sostav` WHERE `matc`= :match_id
+        )
+    AND p.team = :team_id
+    ORDER BY s.nomer
+
+    ";
+
+    $fields = $dbF->query($sql, [":match_id" => $matchId, ":team_id" => $teamId])->findAll();
+
+    $arr = [];
+
+    // Обработка данных и добавление ключа `total`
+    foreach ($fields as $key => $field) {
+        $arr[$key] = $field; // Копируем все данные игрока
+        $arr[$key]['total'] = $field['goals_scored'] * 15 
+                            + $field['asist'] * 10 
+                            + $field['build_up'] * 10 
+                            + $field['success_pass'] * 3 
+                            - $field['bad_pass'] * 3 
+                            - $field['loss_ball'] * 3 
+                            + $field['shot_on'] * 7 
+                            - $field['shot_off'] * 4 
+                            + $field['successfull_dribble'] * 5 
+                            - $field['failed_dribble'] * 3 
+                            + $field['successful_tackle'] * 8 
+                            - $field['failed_tackle'] * 5 
+                            + $field['success_block'] * 4 
+                            + $field['success_save'] * 15 
+                            - $field['failed_save'] * 7;
+    }
+
+    return $arr;
+}
+
+/**
+ * Получаем ФИО тренера и менеджера
+ * @param string - идентификатор команды
+ * @return array - массив из двух элементов
+ */
+function getTrainerAndManager($teamId){
+    global $dbF;
+
+    $sql = "SELECT 
+    name1 AS lastname,
+    name2 AS firstname
+    FROM `v9ky_man`
+    WHERE id IN (
+        SELECT man FROM `v9ky_player` WHERE id = (SELECT trainer FROM `v9ky_team` WHERE id = :team_id)
+        UNION
+        SELECT man FROM `v9ky_player` WHERE id = (SELECT manager FROM `v9ky_team` WHERE id = :team_id)
+    )";
+
+    $fields = $dbF->query($sql, [":team_id" => $teamId])->findAll();
+
+    return $fields;
+}
+
+/**
+ * Получает все видео матча
+ * @param string
+ * @return array
+ */
+function getVideo($matchId){
+    global $dbF;
+
+    $sql = "SELECT 
+    video, videohiden, videobest, video_intervu, video_intervu2
+    FROM `v9ky_match`
+    WHERE id = :match_id";
+
+    $fields = $dbF->query($sql, [":match_id" => $matchId])->findAll();
+
+    return $fields;
+}
+
+/**
+ * Получение протокола матча
+ * @param string - идентификатор матча
+ * @return array
+ */
+function getMatchReport($matchId) {
+    global $dbF;
+
+    $sql = "SELECT 
+        'assist' AS event_type, 
+        a.player AS player_id, 
+        m.name1 AS lastname,
+        m.name2 AS firstname,
+        a.team AS team_id,     
+        NULL AS goal_id,       
+        NULL AS card_color,    
+        a.time AS event_time   
+    FROM v9ky_asist a
+    LEFT JOIN v9ky_man m ON m.id = (SELECT man FROM v9ky_player WHERE id = a.player)
+    WHERE a.matc = :match_id
+
+    UNION ALL
+
+    SELECT 
+        'goal' AS event_type,
+        g.player AS player_id,
+        m.name1 AS lastname,
+        m.name2 AS firstname,
+        g.team AS team_id,
+        g.id AS goal_id,
+        NULL AS card_color,
+        g.time AS event_time
+    FROM v9ky_gol g
+    LEFT JOIN v9ky_man m ON m.id = (SELECT man FROM v9ky_player WHERE id = g.player)
+    WHERE g.matc = :match_id
+
+    UNION ALL
+
+    SELECT 
+        'yellow_card' AS event_type,
+        y.player AS player_id,
+        m.name1 AS lastname,
+        m.name2 AS firstname,
+        y.team AS team_id,
+        NULL AS goal_id,
+        'yellow' AS card_color,
+        y.time AS event_time
+    FROM v9ky_yellow y
+    LEFT JOIN v9ky_man m ON m.id = (SELECT man FROM v9ky_player WHERE id = y.player)
+    WHERE y.matc = :match_id
+
+    UNION ALL
+
+    SELECT 
+        'red_card' AS event_type,
+        r.player AS player_id,
+        m.name1 AS lastname,
+        m.name2 AS firstname,
+        r.team AS team_id,
+        NULL AS goal_id,
+        'red' AS card_color,
+        r.time AS event_time
+    FROM v9ky_red r
+    LEFT JOIN v9ky_man m ON m.id = (SELECT man FROM v9ky_player WHERE id = r.player)
+    WHERE r.matc = :match_id
+
+    UNION ALL
+
+    SELECT 
+        'yellow_red_card' AS event_type,
+        yr.player AS player_id,
+        m.name1 AS lastname,
+        m.name2 AS firstname,
+        yr.team AS team_id,
+        NULL AS goal_id,
+        'yellow_red' AS card_color,
+        yr.time AS event_time
+    FROM v9ky_yellow_red yr
+    LEFT JOIN v9ky_man m ON m.id = (SELECT man FROM v9ky_player WHERE id = yr.player)
+    WHERE yr.matc = :match_id
+
+    ORDER BY event_time ASC, -- Сортировка по времени события
+    CASE 
+        WHEN event_type = 'assist' THEN 1 -- Приоритет assist
+        WHEN event_type = 'goal' THEN 2   -- Затем goal
+        WHEN event_type = 'yellow_card' THEN 3
+        WHEN event_type = 'red_card' THEN 4
+        WHEN event_type = 'yellow_red_card' THEN 5
+        ELSE 6                            -- Другие события (если есть)
+    END";
+
+    $fields = $dbF->query($sql, [":match_id" => $matchId])->findAll();
+
+    return $fields;
+
+}
+
+
+/**
+ * Получает все команды выбранной Лиги
+ */
+function getTeamsOfLeague($turnir)
+{
+    global $dbF;
+
+    $sql = "SELECT * FROM v9ky_team WHERE turnir= :turnir ORDER BY name ASC";
+
+    $fields = $dbF->query($sql, [":turnir" => $turnir])->findAll();
+    
+    return $fields;
+
+}
+
+/**
+ * Получаем данные команды по идентификатору команды
+ */
+function getTeamData($teamId)
+{
+    global $dbF;
+
+    $sql = "SELECT * FROM `v9ky_team` WHERE `id` = :team_id ";
+
+    $fields = $dbF->query($sql, [":team_id" => $teamId])->find();
 
     return $fields;
 }
@@ -392,25 +694,93 @@ function getHistoryMeets($team1, $team2) {
 /**
  * 
  */
-function getTeamComposition($match_id, $tem_id) {
-    global $mysqli;
-    
-    $sql = "SELECT 
-	p.id AS player_id,
-	p.`team` AS team_id,
-	m.`name1` AS player_lastname,
-	m.`name2` AS player_firstname,
-	s.nomer AS nomer_sostav
-FROM `v9ky_player` p
-LEFT JOIN (
-    SELECT player, nomer FROM v9ky_sostav WHERE `matc` = 18580
-) s ON s.player = p.id
-LEFT JOIN 
-	v9ky_man m ON m.id = p.man
+function getPlayersOfTeam($teamId)
+{
+    global $dbF;
 
-WHERE p.`id` IN (
-	SELECT `player` FROM `v9ky_sostav` WHERE `matc`=18580
-	)
-AND p.team = 5256
-";
+    $sql = "SELECT * FROM `v9ky_player` p 
+        WHERE `team` = :team_id 
+        AND `active` = '1' 
+        ORDER BY 
+            `active` desc, 
+            `vibuv`, 
+            `id` = (
+                SELECT `capitan` FROM `v9ky_team` WHERE `id` = :team_id) DESC, 
+            (SELECT count(*) AS kol FROM `v9ky_gol` WHERE `player` = p.id 
+                AND `team` = :team_id) DESC, 
+            (SELECT count(*) FROM `v9ky_sostav` WHERE `player` = p.id) DESC, 
+            (SELECT `name1` FROM `v9ky_man` WHERE `id` = p.man)";
+
+     $fields = $dbF->query($sql, [":team_id" => $teamId])->findAll();
+
+     return $fields;
 }
+
+/**
+ * Получаем капитана, менеджера, тренера.
+ */
+function getTeamHeads($teamId)
+{
+    global $dbF;
+
+    $sql = "SELECT p.id as player_id,
+                p.name1 as player_lastname, 
+                p.name2 as player_firstname, 
+                p.name3 as player_middlename,
+                mf.pict as player_photo, 
+                t.pict as team_photo,
+                p.amplua as amplua
+          FROM v9ky_team t 
+          LEFT JOIN 
+            v9ky_player p ON p.id IN (t.capitan, t.manager, t.trainer)
+          LEFT JOIN
+            v9ky_man_face mf ON p.man = mf.man
+            WHERE t.id = :team_id
+            GROUP BY p.id
+            ORDER BY p.amplua DESC";
+
+    $fields = $dbF->query($sql, [":team_id" => $teamId])->findAll();
+
+    $teamHeads = [];
+    $iconHeads = [ 0 => 'manager-icon.svg', 4 => 'coach-icon.svg', 5 => 'cap-icon.svg'];
+
+    foreach ($fields as $field) {
+        $amplua = $field['amplua'];
+        $teamHeads[$amplua] = $field;  
+        $teamHeads[$amplua]['icon'] = $iconHeads[$amplua];
+    }
+
+
+     return $teamHeads;
+}
+
+/**
+ * 
+ */
+
+ function getMatches($turnir, $teamId)
+ {
+    global $dbF;
+
+    $sql = "SELECT 
+        `id`, 
+        `canseled`, 
+        `date`, 
+        `tur`, 
+        `field`, 
+        (SELECT `name` FROM `v9ky_fields` WHERE `id` = a.field) AS field_name, 
+        gols1, 
+        gols2, 
+        (SELECT `ru` FROM `v9ky_turnir` WHERE `id` = a.turnir) AS turnir_name, 
+        (SELECT `name` FROM `v9ky_team` WHERE `id` = a.team1) AS team1, 
+        (SELECT pict FROM v9ky_team WHERE `id` = a.team1) AS team1_photo, 
+        (SELECT name FROM v9ky_team WHERE `id` = a.team2) AS team2, 
+        (SELECT pict FROM v9ky_team WHERE `id` = a.team2) AS team2_photo 
+        FROM v9ky_match a 
+        WHERE turnir=:turnir_id 
+        AND (team1=:team_id OR team2=:team_id) 
+        ORDER BY `date` DESC";
+
+    $fields = $dbF->query($sql, [":team_id" => $teamId, ":turnir_id" => $turnir])->findAll();
+    return $fields;
+ }

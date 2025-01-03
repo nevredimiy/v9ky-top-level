@@ -544,9 +544,11 @@ function getIndStaticPlayer($allStaticPlayers, $player_id){
 
   if(isset($allStaticPlayers[$player_id]) && is_array($allStaticPlayers[$player_id])) {
     
-    $coutnGoals = 0;
+    $countGoals = 0;
     // Иконка зведочка
     $countNominationPlayerOfMatch = 0;
+
+    $countBestPlayerOfMatch = 0;
     
     // Иконка футболка
     // $countInTour = 0;
@@ -570,7 +572,17 @@ function getIndStaticPlayer($allStaticPlayers, $player_id){
     //Количество отборов
     $accuracyOfTackles = 0;
 
-    // dump_arr($allStaticPlayers[$player_id]);
+    $vstvor = 0;
+    $mimo = 0;
+    $pasplus = 0;
+    $pasminus = 0;
+    $obvodkaplus = 0;
+    $obvodkaminus = 0;
+    $zagostrennia = 0;
+    $otbor = 0;
+    $blok = 0;
+
+
     foreach($allStaticPlayers[$player_id] as $matches => $stats){      
 
         // Индивид. статистика игрока. Для карточки игрока где иконки, мяч, звездочка и т.д.
@@ -628,19 +640,19 @@ function getIndStaticPlayer($allStaticPlayers, $player_id){
     } 
 
     $indStatPlayer = [
-      'count_goals' => $countGoals != '' ? $countGoals : 0,
-      'count_best_player_of_match' => $countBestPlayerOfMatch != '' ? $countBestPlayerOfMatch : 0,
+      'count_goals' => isset($countGoals) && $countGoals != '' ? $countGoals : 0,
+      'count_best_player_of_match' => isset($countBestPlayerOfMatch) && $countBestPlayerOfMatch != '' ? $countBestPlayerOfMatch : 0,
       // 'count_in_tour' => $countInTour != '' ? $countInTour : 0,
-      'count_asists' => $countAsists != '' ? $countAsists : 0,
-      'count_matches' => $countMatches != '' ? $countMatches : 0,
-      'yellow_cards' => $yellowCards != '' ? $yellowCards : 0,
-      'yellow_red_cards' => $yellowRedCards != '' ? $yellowRedCards : 0,
-      'red_cards' => $redCards != '' ? $redCards : 0,
-      'accuracy_of_kicking' => round($accuracyOfKicking, 1, PHP_ROUND_HALF_UP),
-      'accuracy_of_passing' => round($accuracyOfPassing, 1, PHP_ROUND_HALF_UP),
-      'accuracy_of_dribbles' => round($accuracyOfDribbles, 1, PHP_ROUND_HALF_UP),
-      'count_of_aggravations' => $countOfAggravations != '' ? $countOfAggravations : 0,
-      'accuracy_of_tackles' => $accuracyOfTackles != '' ? $accuracyOfTackles : 0,
+      'count_asists' => isset($countAsists) && $countAsists != '' ? $countAsists : 0,
+      'count_matches' => isset($countMatches) && $countMatches != '' ? $countMatches : 0,
+      'yellow_cards' => isset($yellowCards) && $yellowCards != '' ? $yellowCards : 0,
+      'yellow_red_cards' => isset($yellowRedCards) && $yellowRedCards != '' ? $yellowRedCards : 0,
+      'red_cards' => isset($redCards) && $redCards != '' ? $redCards : 0,
+      'accuracy_of_kicking' => isset($accuracyOfKicking) ? round($accuracyOfKicking, 1, PHP_ROUND_HALF_UP) : 0,
+      'accuracy_of_passing' => isset($accuracyOfPassing) ? round($accuracyOfPassing, 1, PHP_ROUND_HALF_UP) : 0,
+      'accuracy_of_dribbles' => isset($accuracyOfDribbles) ? round($accuracyOfDribbles, 1, PHP_ROUND_HALF_UP) : 0,
+      'count_of_aggravations' => isset($countOfAggravations) && $countOfAggravations != '' ? $countOfAggravations : 0,
+      'accuracy_of_tackles' => isset($accuracyOfTackles) && $accuracyOfTackles != '' ? $accuracyOfTackles : 0,
     ];
 
   return $indStatPlayer;
@@ -972,11 +984,21 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
       
       // Шаг 1: Вычисляем тотал для каждого элемента
       foreach ($playerOfTur as $key => $item) {
-          $total[$key] = $item['count_goals'] * 15 + $item['count_asists'] * 10 +  $item['zagostrennia'] * 10 +
-          + $item['pasplus'] * 3 - $item['pasminus'] * 3 - $item['vtrata'] * 3 +
-          + $item['vstvor'] * 7 - $item['mimo'] * 4 +  $item['obvodkaplus'] * 5 -
-          + $item['obvodkaminus'] * 3 + $item['otbor'] * 8 -  $item['otbormin'] * 5 +
-          + $item['blok'] * 4 + $item['seyv'] * 15 - $item['seyvmin'] * 7;
+          $total[$key] = $item['count_goals'] * 15 
+          + $item['count_asists'] * 10 
+          + $item['zagostrennia'] * 10
+          + $item['pasplus'] * 3 
+          - $item['pasminus'] * 3 
+          - $item['vtrata'] * 3 
+          + $item['vstvor'] * 7 
+          - $item['mimo'] * 4 
+          + $item['obvodkaplus'] * 5 
+          - $item['obvodkaminus'] * 3 
+          + $item['otbor'] * 8 
+          - $item['otbormin'] * 5 
+          + $item['blok'] * 4 
+          + $item['seyv'] * 15 
+          - $item['seyvmin'] * 7;
       }
   
       // Шаг 2: Находим максимальное значение тотала
@@ -984,11 +1006,21 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
   
       // Шаг 3: Отбираем всех игроков, у которых maxTotal равна максимальной
       $result = array_filter($playerOfTur, function ($item) use ($maxTotal) {
-          return ( $item['count_goals'] * 15 + $item['count_asists'] * 10 +  $item['zagostrennia'] * 10 +
-          + $item['pasplus'] * 3 - $item['pasminus'] * 3 - $item['vtrata'] * 3 +
-          + $item['vstvor'] * 7 - $item['mimo'] * 4 +  $item['obvodkaplus'] * 5 -
-          + $item['obvodkaminus'] * 3 + $item['otbor'] * 8 -  $item['otbormin'] * 5 +
-          + $item['blok'] * 4 + $item['seyv'] * 15 - $item['seyvmin'] * 7 ) == $maxTotal;
+          return ( $item['count_goals'] * 15 
+          + $item['count_asists'] * 10 
+          + $item['zagostrennia'] * 10 
+          + $item['pasplus'] * 3 
+          - $item['pasminus'] * 3 
+          - $item['vtrata'] * 3 
+          + $item['vstvor'] * 7 
+          - $item['mimo'] * 4 
+          + $item['obvodkaplus'] * 5 
+          + $item['obvodkaminus'] * 3 
+          + $item['otbor'] * 8 
+          - $item['otbormin'] * 5 
+          + $item['blok'] * 4 
+          + $item['seyv'] * 15 
+          - $item['seyvmin'] * 7 ) == $maxTotal;
       });
   
       // Добавляем игроку ключ что он лучший в туре
