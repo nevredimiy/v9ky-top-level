@@ -1,0 +1,115 @@
+@import url(../card-of-matches/card-of-matches.css);
+@import url(./preview.css);
+@import url(./swiper-matches.style.css);
+@import url(../photo-of-match/photo-of-match.style.css);
+@import url(../video-content/video-content.style.css);
+@import url(../month-controls/month-controls.css);
+
+
+.calendar-of-matches {}
+
+.calendar-of-matches__grid-container {
+  display: block;
+}
+
+.calendar-of-matches__head {
+  margin: 0 10px 10px;
+}
+
+.calendar-of-matches__head-nav {
+  margin-bottom: 30px;
+}
+
+.calendar-of-matches__aside {
+  margin-bottom: 30px;
+}
+
+.calendar-of-matches__dynamic-content {
+  display: block;
+  margin: 0 10px;
+}
+
+
+@media screen and (min-width: 1260px) {
+  .calendar-of-matches {
+    max-width: 1440px;
+    margin: 0 50px;
+  }
+
+  .calendar-of-matches__head {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+  }
+
+  .calendar-of-matches__head .title {
+    margin-bottom: 0px;
+    padding: 0;
+  }
+
+  /* .calendar-of-matches__head-nav {
+    margin: 0;
+    max-width: calc(100vw - 330px - 100px);
+  } */
+
+  .calendar-of-matches__aside {
+    margin-bottom: 0px;
+  }
+
+  .calendar-of-matches__dynamic-content {
+    padding: 0;
+    margin: 0;
+  }
+
+  .calendar-of-matches__grid-container {
+    display: grid;
+    grid-template-columns: 303px 1fr;
+    gap: 30px 27px;
+  }
+
+  .swiper-matches div.swiper-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* .calendar-of-matches div.swiper-slide {
+    height: auto;
+  } */
+
+
+  .calendar-of-matches__head-nav {
+    /* gap: 10px; */
+    margin-bottom: 0;
+  }
+
+  .calendar-of-matches__dynamic-content {
+    height: fit-content;
+    position: relative;
+    overflow: hidden;
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    box-shadow: 0px 4px 23px rgba(8, 20, 33, 0.04);
+    border-radius: var(--border-radius-l);
+  }
+}
+
+@media screen and (min-width: 1540px) {
+  .calendar-of-matches {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .calendar-of-matches__head-nav {
+    margin: 0;
+    max-width: 1110px;
+  }
+
+  .match-calendar .calendar-of-matches__head-nav {
+    margin: 0;
+    max-width: none;
+    margin-bottom: 20px;
+  }
+
+}

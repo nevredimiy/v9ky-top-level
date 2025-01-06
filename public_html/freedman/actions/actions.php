@@ -41,7 +41,14 @@ if(isset($data['action']) && $data['action'] == 'calendar_of_matches' ) {
         
         $allStaticPlayers = getAllStaticPlayers($turnir);
         $dataAllPlayers = getDataPlayers($allStaticPlayers);
+        // Получаем массив с датами каждого тура
         $dateTurs = getDateTurs($turnir);
+        // Добавляем элемент link в массив
+        $dateTurs = addLinkItem($dateTurs);
+
+        
+
+
 
         if($currentTur <= $lastTur) {
             // Все игроки из выбранного тура
@@ -68,7 +75,7 @@ if(isset($data['action']) && $data['action'] == 'calendar_of_matches' ) {
         // Добавляем два элемента в массивы - форматированная дата и время матча.
         $dataCurrentTurWithDate = getArrayWithFormattedDate($dataCurrentTur);   
         
-        require_once '../views/calendar_of_matches.tpl.php';
+        require_once VIEWS . '/calendar_of_matches.tpl.php';
         
         die;
     }
@@ -104,8 +111,71 @@ if(isset($data['action']) && $data['action'] == 'anons' ) {
 
         $historyMeets = getHistoryMeets($dataMatch['team1_name'], $dataMatch['team2_name']);
 
+
+        // количество побед, ничих, количество голов
+        $team1Wins = 0;
+        $team2Wins = 0;
+        $draws = 0;
+        $countGoals1 = 0;
+        $countGoals2 = 0;
+
+        foreach($historyMeets as $match){
+            if($match['goals1'] > $match['goals2']) {
+                $team1Wins ++; 
+            } elseif ($match['goals1'] < $match['goals2']) {
+                $team2Wins ++;
+            } else {
+                $draws ++;
+            }
+            $countGoals1 += $match['goals1'];
+            $countGoals2 += $match['goals2'];
+        }
+
+        // Находим прогноз на будущие матчи
+        // Рассчитываем общее количество матчей
+        $totalMatches = count($historyMeets);
+
+        // Вычисляем проценты
+        $team1WinPercent = ($team1Wins / $totalMatches) * 100;
+        $drawPercent = ($draws / $totalMatches) * 100;
+        $team2WinPercent = ($team2Wins / $totalMatches) * 100;
+
+        // Проверяем и корректируем проценты
+        $minimumPercent = 10;
+
+        // Список для перераспределения
+        $percentages = [
+            'team1Win' => $team1WinPercent,
+            'draw' => $drawPercent,
+            'team2Win' => $team2WinPercent,
+        ];
+
+        // Найти, какие значения меньше минимального
+        $totalReduction = 0;
+        foreach ($percentages as $key => &$percent) {
+            if ($percent < $minimumPercent) {
+                $totalReduction += $minimumPercent - $percent;
+                $percent = $minimumPercent;
+            }
+        }
+        unset($percent);
+
+        // Перераспределить излишек между остальными
+        $remainingKeys = array_keys(array_filter(
+            $percentages, 
+            function ($p) use ($minimumPercent) { 
+                
+                return $p > $minimumPercent;
+            } 
+        ));
+        if (count($remainingKeys) > 0) {
+            foreach ($remainingKeys as $key) {
+                $percentages[$key] -= $totalReduction / count($remainingKeys);
+            }
+        }
+
     
-        require_once "../views/anons.tpl.php";
+        require_once VIEWS . "/anons.tpl.php";
         die;
     }
 }
@@ -160,7 +230,7 @@ if(isset($data['action']) && $data['action'] == 'match_stats' ) {
         $trainerAndManager1 = getTrainerAndManager($dataMatch['team1_id']);
         $trainerAndManager2 = getTrainerAndManager($dataMatch['team2_id']);
     
-        require_once "../views/match_stats.tpl.php";
+        require_once VIEWS . "/match_stats.tpl.php";
         die;
     }
 }
@@ -200,7 +270,7 @@ if( isset($data['action']) && $data['action'] == 'kkd' ) {
         $teamCompositionAndStats1 = getTeamCompositionAndStats($data['match_id'], $dataMatch['team1_id']);
         $teamCompositionAndStats2 = getTeamCompositionAndStats($data['match_id'], $dataMatch['team2_id']);
     
-        require_once "../views/kkd.tpl.php";
+        require_once VIEWS . "/kkd.tpl.php";
         die;
     }
 }
@@ -239,7 +309,7 @@ if( isset($data['action']) && $data['action'] == 'preview' ) {
 
         $video = getVideo($data['match_id']);
     
-        require_once "../views/preview.tpl.php";
+        require_once VIEWS . "/preview.tpl.php";
         die;
     }
 }
@@ -278,7 +348,7 @@ if( isset($data['action']) && $data['action'] == 'video' ) {
 
         $video = getVideo($data['match_id']);
     
-        require_once "../views/video.tpl.php";
+        require_once VIEWS . "/video.tpl.php";
         die;
     }
 }
@@ -318,7 +388,71 @@ if( isset($data['action']) && $data['action'] == 'photo' ) {
         $photoPath = PHOTO . "/{$data['match_id']}/";
         $photo = scandir($photoPath); 
     
-        require_once "../views/photo.tpl.php";
+        require_once VIEWS . "/photo.tpl.php";
         die;
     }
+}
+// Этот аяксприходит со страницы /match_calendar
+if( isset($data['action']) && $data['action'] == 'match_calendar' ) {
+
+
+
+
+
+    $lastTur = $data['lasttur'];
+    $currentTur = $data['tur'];
+    $turnir = $data['turnir'];
+    $url = $data['url'];
+
+    if(!isset($turnir) && !isset($tournament)){
+        $turnir = getTurnir();
+    }
+    if(!isset($turnir)){
+        $turnir = getTurnir($tournament);
+    }
+    
+    
+    $dateTurs = getDateTurs($turnir);
+      
+    // Добавляем элемент link в массив
+    $dateTurs = addLinkItem($dateTurs, $url);
+        
+    // Данные тура
+    $dataCurrentTur = getDataCurrentTur($turnir, $currentTur);
+
+    // Создаем массив для группировки
+    $groupedData = [];
+
+    // Проходим по исходному массиву
+    foreach ($dataCurrentTur as $item) {
+        // Получаем дату без времени
+        $dateWithoutTime = (new DateTime($item['date']))->format('Y-m-d');
+
+        // Группируем по дате
+        if (!isset($groupedData[$dateWithoutTime])) {
+            $groupedData[$dateWithoutTime] = [];
+        }
+
+        $groupedData[$dateWithoutTime][] = $item;
+    }
+
+    $tshirtImages = [
+        0 => IMAGES . "/t-shirt/azure-shirt.png",
+        1 => IMAGES . "/t-shirt/yellow-shirt.png",
+        2 => IMAGES . "/t-shirt/white-shirt.png",
+        3 => IMAGES . "/t-shirt/azure-shirt.png",
+        4 => IMAGES . "/t-shirt/blue-shirt.png",
+        5 => IMAGES . "/t-shirt/red-shirt.png",
+        6 => IMAGES . "/t-shirt/azure-shirt.png",
+        7 => IMAGES . "/t-shirt/orange-shirt.png",
+        8 => IMAGES . "/t-shirt/rose-shirt.png",
+        9 => IMAGES . "/t-shirt/azure-shirt.png",
+        10 => IMAGES . "/t-shirt/azure-shirt.png",
+        11 => IMAGES . "/t-shirt/azure-shirt.png",
+        12 => IMAGES . "/t-shirt/azure-shirt.png",
+    ];
+
+    require_once VIEWS . "/match_calendar_content.tpl.php";
+    die;
+    
 }

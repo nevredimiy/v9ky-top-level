@@ -6,7 +6,10 @@
         <div class="anons__head">
             <div class="anons__teams">
                 <div class="anons__teams-content">
-                    <div class="anons__logo logo-team1"><img src="<?= $team_logo_path ?>/<?= $dataMatch['team1_photo'] ?>"></div>
+                    <div class="anons__logo logo-team1">
+                        <img src="<?= $team_logo_path ?>/<?= $dataMatch['team1_photo'] ?>">
+                        <div class="anons__team-name"><?= $dataMatch['team1_name'] ?></div>
+                    </div>
                     <div class="match-state state">
                         <?php if($dataMatch['goals1'] != null) :?>
                         <div class="state__score"><?= $dataMatch['goals1'] ?></div>
@@ -16,7 +19,10 @@
                             <div class="state__score-middle grey-text">VS</div>
                         <?php endif ?>
                     </div>
-                    <div class="anons__logo logo-team2"><img src="<?= $team_logo_path ?>/<?= $dataMatch['team2_photo'] ?>"></div>
+                    <div class="anons__logo logo-team2">
+                        <img src="<?= $team_logo_path ?>/<?= $dataMatch['team2_photo'] ?>">
+                        <div class="anons__team-name"><?= $dataMatch['team2_name'] ?></div>
+                    </div>
                 </div>
                 <?php if($dataMatch['goals1'] != null) :?>
                 <div class="state__text">Матч завершено</div>
@@ -55,19 +61,19 @@
                 <table class="table__count">
                     <tbody>
                         <tr>
-                            <td>3</td>
+                            <td><?= $team1Wins ?></td>
                             <td>Перемог</td>
-                            <td>4</td>
+                            <td><?= $team2Wins ?></td>
                         </tr>
                         <tr>
-                            <td>5</td>
+                            <td><?= $draws ?></td>
                             <td>Нічиїх</td>
-                            <td>5</td>
+                            <td><?= $draws ?></td>
                         </tr>
                         <tr>
-                            <td>13</td>
+                            <td><?= $countGoals1 ?></td>
                             <td>Забитих м'ячів</td>
-                            <td>24</td>
+                            <td><?= $countGoals2 ?></td>
                         </tr>
                     </tbody>
                 </table>
@@ -79,15 +85,15 @@
                 <div class="totalizator totalizator-text">Шанси команд на думку редакції</div>
                 <div class="totalizator totalizator-t1">
                     <div class="totalizator__item value">П1</div>
-                    <div class="totalizator__item percent">70%</div>
+                    <div class="totalizator__item percent"><?= round($percentages['team1Win']) ?>%</div>
                 </div>
                 <div class="totalizator totalizator-x">
                     <div class="totalizator__item value">Х</div>
-                    <div class="totalizator__item percent">20%</div>
+                    <div class="totalizator__item percent"><?= round($percentages['draw']) ?>%</div>
                 </div>
                 <div class="totalizator totalizator-t2">
                     <div class="totalizator__item value">П2</div>
-                    <div class="totalizator__item percent">10%</div>
+                    <div class="totalizator__item percent"><?= round($percentages['team2Win']) ?>%</div>
                 </div>
             </div>
         </div>

@@ -1,13 +1,11 @@
 <?php
 
+if(!isset($turnir)){
+    $turnir = getTurnir();
+}
 
-// Получаем количество сыграных туров в турнире. Это нужно для отображения в таблице знака вопроса для несыграных матчей. 
-$queryLastTur = $db->Execute(
-    "SELECT tur as last_tur FROM `v9ky_match` WHERE `canseled`=1 and `turnir` = $turnir order by tur desc limit 1"
-    );
-    
 // Последний тур в турнире (в лиге).
-$lastTur = intval($queryLastTur->fields[0]);
+$lastTur = intval(getLastTur($turnir));
 
 if (!isset($allStaticPlayers)) {
     
@@ -20,7 +18,10 @@ if(!isset($dataAllPlayers)) {
   $dataAllPlayers = getDataPlayers($allStaticPlayers); 
 }
   
+// Получаем массив с датами каждого тура
 $dateTurs = getDateTurs($turnir);
+// Добавляем элемент link в массив
+$dateTurs = addLinkItem($dateTurs);
 
 // Выбранный тур
 $currentTur = $lastTur != '' ? $lastTur : 1;

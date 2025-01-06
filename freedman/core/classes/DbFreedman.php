@@ -21,6 +21,10 @@ final class DbFreedman
 
     public function getConnection($db_config) 
     {
+        if ($this->connection instanceof PDO) {
+            return $this;
+        }
+
         $dsn = "mysql:host={$db_config['host']};dbname={$db_config['dbname']};charset={$db_config['charset']}";
 
         try {

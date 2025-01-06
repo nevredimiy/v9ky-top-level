@@ -237,10 +237,12 @@ function getDataCurrentTur($turnir, $currentTur)
         m.date,
         m.tur, 
         m.team1,
+        m.tcolor1 as color_tshirt1,
         t1.id AS team1_id,
         t1.name AS team1_name,
         t1.pict AS team1_photo,
         m.team2,    
+        m.tcolor2 as color_tshirt2,
         t2.id AS team2_id,
         t2.name AS team2_name,
         t2.pict AS team2_photo,
@@ -374,37 +376,45 @@ function sanitizeInput($input) {
 function getHistoryMeets($team1, $team2) {
     global $dbF;
 
-    $team1 = '%' . trim($team1) . '%';
-    $team2 = '%' . trim($team2) . '%';
+    // Обрабатываем входные данные для использования с LIKE и REGEXP
+    $team1 = trim($team1);
+    $team2 = trim($team2);
 
-   $sql = "SELECT 
-        tr.season AS season_name,
-        tr.ru AS liga_name,
-        t1.name AS team1_name,
-        t2.name AS team2_name,
-        m.gols1 AS goals1, 
-        m.gols2 AS goals2
-    FROM `v9ky_match` m 
-    LEFT JOIN 
-        `v9ky_team` t1 ON t1.id = m.team1
-    LEFT JOIN 
-        `v9ky_team` t2 ON t2.id = m.team2
-    LEFT JOIN 
-        `v9ky_turnir` tr ON tr.id = m.turnir
-    WHERE `team1` IN (
-        SELECT `id` FROM `v9ky_team` WHERE name LIKE :team1) 
-    AND `team2` IN (
-        SELECT `id` FROM `v9ky_team` WHERE name LIKE :team2) 
-    AND `canseled` > 0
-    OR `team2` IN (
-        SELECT `id` FROM `v9ky_team` WHERE name LIKE :team2) 
-    AND `team1` IN (
-        SELECT `id` FROM `v9ky_team` WHERE name LIKE :team1) 
-    AND `canseled` > 0
-    ORDER BY m.date DESC";
+    // SQL-запрос
+    $sql = "SELECT 
+            tr.season AS season_name,
+            tr.ru AS liga_name,
+            t1.name AS team1_name,
+            t2.name AS team2_name,
+            m.gols1 AS goals1, 
+            m.gols2 AS goals2
+        FROM `v9ky_match` m
+        LEFT JOIN `v9ky_team` t1 ON t1.id = m.team1
+        LEFT JOIN `v9ky_team` t2 ON t2.id = m.team2
+        LEFT JOIN `v9ky_turnir` tr ON tr.id = m.turnir
+        WHERE (
+            -- Условие для team1 и team2
+            (t1.name LIKE :team1 OR t1.name REGEXP :regex1) AND 
+            (t2.name LIKE :team2 OR t2.name REGEXP :regex2)
+        ) OR (
+            -- Условие для team2 и team1 (обратный порядок)
+            (t2.name LIKE :team1 OR t2.name REGEXP :regex1) AND 
+            (t1.name LIKE :team2 OR t1.name REGEXP :regex2)
+        )
+        AND m.canseled > 0
+        ORDER BY m.date DESC
+    ";
 
-    $fields = $dbF->query($sql, [":team1" => $team1, ":team2" => $team2])->findAll();
+    // Параметры для подстановки
+    $params = [
+        ":team1" => '%' . $team1 . '%',
+        ":team2" => '%' . $team2 . '%',
+        ":regex1" => "[[:<:]]" . preg_quote($team1, '/') . "[[:>:]]",
+        ":regex2" => "[[:<:]]" . preg_quote($team2, '/') . "[[:>:]]",
+    ];
 
+    // Выполняем запрос
+    $fields = $dbF->query($sql, $params)->findAll();
 
     return $fields;
 }
@@ -769,8 +779,8 @@ function getTeamHeads($teamId)
         `tur`, 
         `field`, 
         (SELECT `name` FROM `v9ky_fields` WHERE `id` = a.field) AS field_name, 
-        gols1, 
-        gols2, 
+        gols1 AS goals1, 
+        gols2 AS goals2, 
         (SELECT `ru` FROM `v9ky_turnir` WHERE `id` = a.turnir) AS turnir_name, 
         (SELECT `name` FROM `v9ky_team` WHERE `id` = a.team1) AS team1, 
         (SELECT pict FROM v9ky_team WHERE `id` = a.team1) AS team1_photo, 
@@ -784,3 +794,215 @@ function getTeamHeads($teamId)
     $fields = $dbF->query($sql, [":team_id" => $teamId, ":turnir_id" => $turnir])->findAll();
     return $fields;
  }
+
+ /**
+  * Получает массив лиг текущего сезона и выбранного города. 
+  */
+
+ function getLeagues($turnir)
+ {
+    global $dbF;
+
+    $sql = "SELECT 
+    t.`id`,
+    t.`name` AS slug,
+    t.`ru` AS name,
+    c.`name_ua` AS city_name -- Название города из таблицы v9ky_city
+    FROM v9ky_turnir t
+    LEFT JOIN v9ky_city c ON c.`id` = t.`city` -- Присоединяем таблицу v9ky_city
+    WHERE t.`city` = (
+            SELECT city FROM v9ky_turnir WHERE id = :turnir
+        ) 
+        AND t.`season` = (
+            SELECT season FROM v9ky_turnir WHERE id = :turnir
+        ) 
+    ORDER BY t.`priority` ASC;
+    ";
+
+    $fields = $dbF->query($sql, [":turnir" => $turnir])->findAll();
+    return $fields;
+
+ }
+
+ /**
+  * 
+  */
+  function getCalendar()
+  {
+    global $dbF;
+
+    $sql = "SELECT 
+    m.`date`,
+    m.`tur`,
+    m.`field` AS field_id,
+    f.`name` AS field_name,
+    f.`adres` AS field_address,
+    m.`tcolor1` AS tshirt_1,
+    m.`tcolor2` AS tshirt_2,
+    m.`turnir` AS turnir_id,
+    t.`ru` AS turnir_name,
+    m.`team1` AS team1_id,
+    t1.`name` AS team1_name,
+    t1.`pict` AS team1_photo,
+    m.`team2` AS team2_id,
+    t2.`name` AS team2_name,
+    t2.`pict` AS team2_photo
+FROM `v9ky_match` m 
+LEFT JOIN `v9ky_team` t1 
+    ON t1.`id` = m.`team1`
+LEFT JOIN `v9ky_team` t2 
+    ON t2.`id` = m.`team2`
+LEFT JOIN `v9ky_fields` f 
+    ON f.`id` = m.`field`
+LEFT JOIN `v9ky_turnir` t 
+    ON t.`id` = m.`turnir`
+WHERE `canseled` = 0 
+AND m.`turnir` IN (SELECT `id` FROM `v9ky_turnir` WHERE `active` = 1 ) 
+ORDER BY 
+    YEAR(m.`date`) ASC, 
+    DAYOFYEAR(m.`date`) ASC, 
+    (SELECT `priority` FROM `v9ky_fields` WHERE `id` = m.`field`), 
+    m.`date` ASC";
+
+    $fields = $dbF->query($sql)->findAll();
+
+    return $fields;
+  }
+
+/**
+ * Получает строку последнего тура.
+ * @param string
+ * @return string
+ */
+function getLastTur($turnirId)
+{
+    global $dbF;
+
+    $sql = "SELECT tur as last_tur FROM `v9ky_match` WHERE `canseled` = 1 AND `turnir` = :turnir ORDER BY tur DESC LIMIT 1";
+
+    $lastTur = $dbF->query($sql, [":turnir" => $turnirId])->find();
+
+    return $lastTur['last_tur'];
+}
+
+/**
+ * Формирует ссылку для элементов массива на основе денного слага.
+ */
+function addLinkItem($array, $url='')
+{
+    if($url == '')  {
+        // Получаем текущий URL
+        $currentUrl = $_SERVER['REQUEST_URI'];        
+    } else  {
+        $currentUrl = $url; 
+    } 
+
+    // Разбираем URL на части
+    $urlParts = parse_url($currentUrl);
+
+    // Извлекаем параметры из строки запроса
+    $queryParams = [];
+    if (isset($urlParts['query'])) {
+        parse_str($urlParts['query'], $queryParams);
+    }
+
+   
+    // Обрабатываем каждый элемент массива. 
+    // Формируем ссылку исходя из адресной строки и добавляем в массив leagues.
+    foreach ($array as $key => $value) {
+        // Проверяем наличие параметра 'tur' и заменяем его
+        // if (isset($queryParams['tur'])) {
+        //     $queryParams['tur'] = $value['tur']; // Задаем новое значение
+        // } else {
+        //     // Если параметра 'tur' нет, можно добавить его
+        //     $queryParams['tur'] = $value['tur'];
+        // }
+
+        $queryParams['tur'] = $value['tur'];
+
+        // Собираем строку запроса обратно
+        $newQuery = http_build_query($queryParams);
+
+        // Собираем новый URL
+        $newUrl = $urlParts['path'] . '?' . $newQuery;
+
+        // Добавляем ссылку в массив с ключом link
+        $array[$key]['link'] = $newUrl;
+    }
+
+    return $array;
+}
+
+/**
+ * Меняем формат датты из такой 2024-12-22 11:35:00 в такую - 22 грудня ( неділя )
+ * @param string
+ * @return string
+ */
+ function getFormateDate($dateString, $short = false)
+ {
+    
+    // Создаем объект DateTime
+    $date = new DateTime($dateString);
+
+    // Массивы для перевода месяцев и дней недели на украинский
+    $months = [
+        'January' => 'січня',
+        'February' => 'лютого',
+        'March' => 'березня',
+        'April' => 'квітня',
+        'May' => 'травня',
+        'June' => 'червня',
+        'July' => 'липня',
+        'August' => 'серпня',
+        'September' => 'вересня',
+        'October' => 'жовтня',
+        'November' => 'листопада',
+        'December' => 'грудня'
+    ];
+
+    if($short) {        
+        $daysOfWeek = [
+            'Monday' => 'пн',
+            'Tuesday' => 'вт',
+            'Wednesday' => 'ср',
+            'Thursday' => 'чт',
+            'Friday' => 'пт',
+            'Saturday' => 'сб',
+            'Sunday' => 'нд'
+        ];
+    } else  {
+        $daysOfWeek = [
+            'Monday' => 'понеділок',
+            'Tuesday' => 'вівторок',
+            'Wednesday' => 'середа',
+            'Thursday' => 'четвер',
+            'Friday' => 'п’ятниця',
+            'Saturday' => 'субота',
+            'Sunday' => 'неділя'
+        ];
+    }
+
+    // Форматируем дату
+    $day = $date->format('j'); // День
+    $month = $months[$date->format('F')]; // Месяц на украинском
+    $dayOfWeek = $daysOfWeek[$date->format('l')]; // День недели на украинском
+
+    // Собираем строку
+    $formattedDate = "$day $month ($dayOfWeek)";
+
+    return $formattedDate;
+
+}
+/**
+ * Получает время из даты
+ */
+function getTime($date)
+{
+     // Преобразуем дату в объект DateTime
+  $date = new DateTime($date);
+
+  // Форматируем дату
+  $formattedTime = strftime('%H:%M', $date->getTimestamp());
+
+  return $formattedTime;
+}

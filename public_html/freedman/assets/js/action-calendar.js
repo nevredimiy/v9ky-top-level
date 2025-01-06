@@ -17,7 +17,7 @@ $(document).ready(function () {
         if (tur) {
             $.ajax({
                 type: "post",
-                url: "actions.php",
+                url: "../freedman/actions/actions.php",
                 data: JSON.stringify({ tur: tur, turnir: turnir, lasttur: lastTur, action: 'calendar_of_matches' }),
                 success: function (response) {
                     $(".calendar-of-matches__grid-container").html(response);
@@ -84,7 +84,7 @@ $(document).ready(function () {
         if (matchId) {
             $.ajax({
                 type: "post",
-                url: "actions.php",
+                url: "../freedman/actions/actions.php",
                 data: JSON.stringify({ match_id: matchId, tur: tur, turnir: turnir, action: 'anons' }),
                 success: function (response) {
                     $('.green-zone').html(response);
@@ -132,7 +132,7 @@ $(document).ready(function () {
         if (matchId) {
             $.ajax({
                 type: "post",
-                url: "actions.php",
+                url: "../freedman/actions/actions.php",
                 data: JSON.stringify({ match_id: matchId, tur: tur, turnir: turnir, action: 'match_stats', team1_id: team1Id, team2_id: team2Id }),
                 success: function (response) {
                     $('.green-zone').html(response);
@@ -176,7 +176,7 @@ $(document).ready(function () {
         if (matchId) {
             $.ajax({
                 type: "post",
-                url: "actions.php",
+                url: "../freedman/actions/actions.php",
                 data: JSON.stringify({ match_id: matchId, tur: tur, turnir: turnir, action: 'kkd' }),
                 success: function (response) {
                     $('.green-zone').html(response);
@@ -220,7 +220,7 @@ $(document).ready(function () {
         if (matchId) {
             $.ajax({
                 type: "post",
-                url: "actions.php",
+                url: "../freedman/actions/actions.php",
                 data: JSON.stringify({ match_id: matchId, tur: tur, turnir: turnir, action: 'preview' }),
                 success: function (response) {
                     $('.green-zone').html(response);
@@ -264,7 +264,7 @@ $(document).ready(function () {
         if (matchId) {
             $.ajax({
                 type: "post",
-                url: "actions.php",
+                url: "../freedman/actions/actions.php",
                 data: JSON.stringify({ match_id: matchId, tur: tur, turnir: turnir, action: 'video' }),
                 success: function (response) {
                     $('.green-zone').html(response);
@@ -308,11 +308,62 @@ $(document).ready(function () {
         if (matchId) {
             $.ajax({
                 type: "post",
-                url: "actions.php",
+                url: "../freedman/actions/actions.php",
                 data: JSON.stringify({ match_id: matchId, tur: tur, turnir: turnir, action: 'photo' }),
                 success: function (response) {
                     $('.green-zone').html(response);
                 }, // Привязываем контекст к функции 
+                error: function (xhr, status, error) {
+                    console.error('Ошибка AJAX:', error); // Логируем ошибку
+                    alert('Ошибка при загрузке данных. Попробуйте позже.');
+                }
+            });
+        }
+    });
+
+    $('.match-calendar').on('click', '[data-switch-tur]', function (e) {
+
+
+        e.preventDefault();
+
+        // Получаем URL из атрибута href
+        var newUrl = $(this).attr('href');
+        // Обновляем адресную строку  
+        window.history.pushState({ path: newUrl }, '', newUrl);
+
+        let tur = $(this).attr('data-switch-tur');
+        let turnir = $(this).attr('data-turnir');
+        let lastTur = $(this).attr('data-lasttur');
+        let originalUrl= $(this).attr('href');
+
+        if (tur) {
+            $.ajax({
+                type: "post",
+                url: "../freedman/actions/actions.php",
+                data: JSON.stringify({ tur: tur, turnir: turnir, lasttur: lastTur, action: 'match_calendar', url: originalUrl }),
+                success: function (response) {
+                    $(".match-calendar").html(response);
+
+                    swipersLeagues = new Swiper(".swiper-month-controls", {
+                        slidesPerView: 'auto',
+                        spaceBetween: 20,
+                        scrollbar: {
+                            el: '.swiper-scrollbar',
+                            hide: false,
+                            draggable: true,
+                        },
+                    });
+
+                    swipersLeagues = new Swiper(".swiper-matches", {
+                        slidesPerView: 'auto',
+                        spaceBetween: 20,
+                        scrollbar: {
+                            el: '.swiper-scrollbar',
+                            hide: false,
+                            draggable: true,
+                        },
+                    });
+                },
                 error: function (xhr, status, error) {
                     console.error('Ошибка AJAX:', error); // Логируем ошибку
                     alert('Ошибка при загрузке данных. Попробуйте позже.');

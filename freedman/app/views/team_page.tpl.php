@@ -196,20 +196,23 @@
         <?php foreach($matches as $match) :?>
         <tr>
             <td><?= $match['tur'] ?> тур</td>
-            <td><?= $match['date'] ?></td>
-            <td><?= $match['date'] ?></td>
+            <td><?= $match['match_day'] ?></td>
+            <td><?= $match['match_time'] ?></td>
             <td><?= $match['field_name']?></td>
 
-            <td  style="text-align: right">
-                <span class="team_name"><?=$match['team1'];?></span>
+            <td class="team__info team1" style="text-align: right">
+                <span class="team_name truncate"><?=$match['team1'];?></span>
                 <img style="margin-left: 10px" src="<?= $team_logo_path ?><?= $match['team1_photo'] ?>" alt="" width=30>
             </td>
+            <?php if(empty($match['goals1'])):?>
+              <td>VS</td>
+            <?php else :?>
+            <td><?= $match['goals1'] ?> :  <?= $match['goals2'] ?></td>
+            <?php endif ?>
 
-            <td>  555 </td>
-
-            <td style="text-align: left">
+            <td class="team__info team2" style="text-align: left">
                 <img style="margin-right: 10px" src="<?=$team_logo_path?><?= $match['team2_photo'] ?>" alt="" width=30>
-                <span class="team_name"><?=$match['team2'];?></span>
+                <span class="team_name truncate"><?=$match['team2'];?></span>
             </td>
 
         </tr>

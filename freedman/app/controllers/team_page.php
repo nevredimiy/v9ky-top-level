@@ -121,9 +121,12 @@ $players = getPlayersOfTeam($teamId);
 $teamHeads = getTeamHeads($teamId);
 $matches = getMatches($turnir, $teamId);
 
+// Добавляем два элемента в массив с форматированными датами: match_day и match_time
+$matches = getArrayWithFormattedDate($matches);
+
 // dump_arr_first($allStaticPlayers);
-// dump_arr_first($dataAllPlayers);
-// dump_arr_first($players);
+// dump_arr_first($matches);
+
 
 require_once VIEWS . '/team_page.tpl.php';
 

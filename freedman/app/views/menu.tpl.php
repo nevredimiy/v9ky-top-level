@@ -10,7 +10,7 @@
             </div>
             <div class="swiper-slide swiper-slide-nav">
                 <div class="swiper-slide navigation__item"><a
-                        href="<?=$site_url?>/<?=$tournament ?>/calendar">календар</a></div>
+                        href="<?=$site_url?>/<?=$tournament ?>/match_calendar">календар</a></div>
             </div>
             <div class="swiper-slide swiper-slide-nav">
                 <div class="swiper-slide navigation__item"><a

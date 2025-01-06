@@ -747,28 +747,28 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
       "Sat" => "Сб",
       "Sunday" => "Неділя",
       "Sun" => "Нд",
-      "January" => "Січень",
+      "January" => "Січня",
       "Jan" => "Січ",
-      "February" => "Лютий",
+      "February" => "Лютого",
       "Feb" => "Лют",
-      "March" => "Березень",
+      "March" => "Березня",
       "Mar" => "Бер",
-      "April" => "Квітень",
+      "April" => "Квітня",
       "Apr" => "Кві",
-      "May" => "Травень",
-      "June" => "Червень",
+      "May" => "Травня",
+      "June" => "Червня",
       "Jun" => "Чер",
-      "July" => "Липень",
+      "July" => "Липня",
       "Jul" => "Лип",
-      "August" => "Серпень",
+      "August" => "Серпня",
       "Aug" => "Сер",
-      "September" => "Вересень",
+      "September" => "Вересня",
       "Sep" => "Вер",
-      "October" => "Жовтень",
+      "October" => "Жовтня",
       "Oct" => "Жов",
-      "November" => "Листопад",
+      "November" => "Листопада",
       "Nov" => "Лис",
-      "December" => "Грудень",
+      "December" => "Грудня",
       "Dec" => "Гру",
       "st" => "ое",
       "nd" => "ое",
@@ -850,7 +850,12 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
 
     // --- Бомбардир ---
     // Находим максимальное значение count_goals. 
-    $maxGoals = max(array_column($playerOfTur, 'count_goals'));
+    if(empty($playerOfTur)){
+      $maxGoals = 0;
+    } else {
+      $maxGoals = max(array_column($playerOfTur, 'count_goals'));
+    }
+    // $maxGoals = max(array_column($playerOfTur, 'count_goals'));
 
     // Отбираем все элементы с максимальным значением count_goals
     $bombardirs = array_filter($playerOfTur, function ($item) use ($maxGoals) {
@@ -873,7 +878,11 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
 
     // --- Асистент ---
     // Находим максимальное значение count_asists. 
-    $maxAsist = max(array_column($playerOfTur, 'count_asists'));
+    if(empty($playerOfTur)){
+      $maxAsist = 0;
+    } else {
+      $maxAsist = max(array_column($playerOfTur, 'count_asists'));
+    }
 
     // Отбираем все элементы с максимальным значением count_goals
     $asists = array_filter($playerOfTur, function ($item) use ($maxAsist) {
@@ -1000,9 +1009,13 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
           + $item['seyv'] * 15 
           - $item['seyvmin'] * 7;
       }
-  
+      
       // Шаг 2: Находим максимальное значение тотала
-      $maxTotal = max($total);
+      if(empty($total)){
+        $maxTotal = 0;
+      } else {
+        $maxTotal = max($total);
+      }
   
       // Шаг 3: Отбираем всех игроков, у которых maxTotal равна максимальной
       $result = array_filter($playerOfTur, function ($item) use ($maxTotal) {
@@ -1039,7 +1052,11 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
       }
   
       // Шаг 2: Находим максимальное значение тотала
-      $maxTotal = max($total);
+      if(empty($total)){
+        $maxTotal = 0;
+      } else {
+        $maxTotal = max($total);
+      }
   
       // Шаг 3: Отбираем все элементы, у которых сумма равна максимальной
       $result = array_filter($playerOfTur, function ($item) use ($maxTotal) {
@@ -1064,7 +1081,11 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
       }
   
       // Шаг 2: Находим максимальное значение суммы
-      $maxTotal = max($total);
+      if(empty($total)){
+        $maxTotal = 0;
+      } else {
+        $maxTotal = max($total);
+      }
   
       // Шаг 3: Отбираем все элементы, у которых сумма равна максимальной
       $result = array_filter($playerOfTur, function ($item) use ($maxTotal) {
@@ -1087,7 +1108,11 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
       }
   
       // Шаг 2: Находим максимальное значение тотала
-      $maxTotal = max($total);
+      if(empty($total)){
+        $maxTotal = 0;
+      } else {
+        $maxTotal = max($total);
+      }
   
       // Шаг 3: Отбираем все элементы, у которых сумма равна максимальной
       $result = array_filter($playerOfTur, function ($item) use ($maxTotal) {
@@ -1110,7 +1135,11 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
       }
   
       // Шаг 2: Находим максимальное значение тотала
-      $maxTotal = max($total);
+      if(empty($total)){
+        $maxTotal = 0;
+      } else {
+        $maxTotal = max($total);
+      }
   
       // Шаг 3: Отбираем все элементы, у которых сумма равна максимальной
       $result = array_filter($playerOfTur, function ($item) use ($maxTotal) {
@@ -1133,7 +1162,11 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
       }
   
       // Шаг 2: Находим максимальное значение тотала
-      $maxTotal = max($total);
+      if(empty($total)){
+        $maxTotal = 0;
+      } else {
+        $maxTotal = max($total);
+      }
   
       // Шаг 3: Отбираем все элементы, у которых сумма равна максимальной
       $result = array_filter($playerOfTur, function ($item) use ($maxTotal) {
