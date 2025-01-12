@@ -21,10 +21,7 @@ WHERE
 ORDER BY 
     t1.name ASC, t2.name ASC";
 
-$stmt = $mysqli->prepare($sql);
-$stmt->bindParam(':turnir', $turnir, PDO::PARAM_INT);
-$stmt->execute();
-$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result = $dbF->query($sql, [":turnir" => $turnir])->findAll();
 
 if (!$result) {
     die('Ошибка выполнения запроса: ' . $mysqli->error);

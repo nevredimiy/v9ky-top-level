@@ -310,6 +310,8 @@ ORDER BY
     return $fields;
 }
 
+
+
 /**
  * Получения tournament - название последнего турнира латиницей. Используеться для написания параметра в адресной строке.
  * @return string
@@ -317,7 +319,7 @@ ORDER BY
 function getTournament()
 {
     global $dbF;
-    $sql = "SELECT * FROM `v9ky_turnir` WHERE `seasons` = (SELECT id FROM `v9ky_seasons` ORDER BY id DESC LIMIT 1)";
+    $sql = "SELECT * FROM `v9ky_turnir` WHERE `seasons` = (SELECT id FROM `v9ky_seasons` ORDER BY id DESC LIMIT 1) AND `city` = 2 LIMIT 1";
     $dataTurnir = $dbF->query($sql)->findAll();    
     $tournament = isset($dataTurnir[0]['name']) ? $dataTurnir[0]['name'] : '';
     return $tournament;
@@ -342,6 +344,18 @@ function getTurnir($tournament = '')
     return $turnir['id'];
 }
 
+/**
+ * 
+ */
+function getSeasonName($turnirId)
+{
+    global $dbF;
+    $sql = "SELECT `season` FROM `v9ky_turnir` WHERE `id` = :turnir_id";
+    $fields = $dbF->query($sql, [":turnir_id" => $turnirId])->find();
+    $seasonName = $fields['season'];
+    return $seasonName;
+}
+
 
 /**
  * Получает стадионы из базы данных
@@ -352,6 +366,14 @@ function getFields(){
     $fields = $dbF->query("SELECT 
         `name`, 
         `adres` AS address,
+        `photo`,
+        `fields_40x20`,
+        `fields_60x40`,
+        `parking`,
+        `shower`,
+        `loudspeaker`,
+        `cloakroom`,
+        `toilet`,
         (SELECT `name_ua` FROM `v9ky_city` c WHERE f.city = c.id) AS city
             FROM `v9ky_fields` f
             WHERE `visible` > 0")->findAll();
@@ -396,7 +418,9 @@ function getHistoryMeets($team1, $team2) {
             -- Условие для team1 и team2
             (t1.name LIKE :team1 OR t1.name REGEXP :regex1) AND 
             (t2.name LIKE :team2 OR t2.name REGEXP :regex2)
-        ) OR (
+        ) 
+        AND m.canseled > 0
+        OR (
             -- Условие для team2 и team1 (обратный порядок)
             (t2.name LIKE :team1 OR t2.name REGEXP :regex1) AND 
             (t1.name LIKE :team2 OR t1.name REGEXP :regex2)
@@ -702,13 +726,14 @@ function getTeamData($teamId)
 }
 
 /**
- * 
+ * Получение данных игроков по идентификатору команды
  */
 function getPlayersOfTeam($teamId)
 {
     global $dbF;
 
-    $sql = "SELECT * FROM `v9ky_player` p 
+    $sql = "SELECT * 
+        FROM `v9ky_player` p 
         WHERE `team` = :team_id 
         AND `active` = '1' 
         ORDER BY 
@@ -1005,4 +1030,236 @@ function getTime($date)
   $formattedTime = strftime('%H:%M', $date->getTimestamp());
 
   return $formattedTime;
+}
+
+/**
+ * 
+ */
+ function getTransfers($turnirId)
+ {
+    global $dbF;
+    $sql = "SELECT * FROM `v9ky_transfer_log` WHERE `turnir` = :turnir_id ORDER BY `date` DESC";
+
+    $fields = $dbF->query($sql, [":turnir_id" => $turnirId])->findAll();
+    
+    $transfers = [];
+
+    foreach ($fields as $key => $field) {
+        // Получаем фото игрока из таблицы `v9ky_man_face`
+        if ( array_key_exists('man_id', $field) && $field['man_id'] === NULL ) {   
+            $arr = explode(" ", $field['log']);
+            // создаем запрос в БД
+            $sql_man = "SELECT `pict` AS photo FROM `v9ky_man_face` WHERE `man` = (SELECT `id` FROM `v9ky_man` WHERE `name1` = :lastname AND `name2` = :firstname ORDER BY `id` DESC LIMIT 1)";
+            // Получаем фото по Фамилии и Имени
+            $playerData = $dbF->query( $sql_man, [ ":lastname" => $arr[1], ":firstname" => $arr[2] ] )->find();   
+             // Создаем объект DateTime
+            $date = new DateTime($field['date']);
+            // Преобразуем дату в формат дд.мм.гггг
+            $formattedDate = $date->format('d.m.Y');
+            
+            $transfers[$key]['date'] = $formattedDate;
+            $transfers[$key]['lastname'] = $arr[1];
+            $transfers[$key]['firstname'] = $arr[2];
+            $transfers[$key]['photo'] = $playerData['photo'] ? $playerData['photo'] : 'avatar1.jpg';
+            $transfers[$key]['action'] = $field['del_id'] ?  0 : 1; // если в $field['del_id'] = 0 - это добавление игрока в команду. Иначе удаление.
+                                
+        } else {
+            $sql_man = "SELECT 
+                mf.`pict` AS photo,
+                m.`name1`AS lastname,
+                m.`name2` AS firstname
+                FROM `v9ky_man_face` mf
+                LEFT JOIN `v9ky_man` m ON m.`id` = mf.`man`
+                WHERE `man` = :man_id";
+            $playerData = $dbF->query( $sql_man, [ ":man_id" => $field['man_id'] ] )->find();   
+            // Создаем объект DateTime
+            $date = new DateTime($field['date']);
+            // Преобразуем дату в формат дд.мм.гггг
+            $formattedDate = $date->format('d.m.Y');
+            $transfers[$key]['date'] = $formattedDate;
+            $transfers[$key]['lastname'] = $playerData['lastname'];
+            $transfers[$key]['firstname'] = $playerData['firstname'];
+            $transfers[$key]['photo'] = $playerData['photo'] ? $playerData['photo'] : 'avatar1.jpg';
+            $transfers[$key]['action'] = $field['del_id'] ?  0 : 1; // если в $field['del_id'] = 0 - это добавление игрока в команду. Иначе удаление.         
+        }
+
+        if( array_key_exists('team_id', $field) && $field['team_id'] === NULL ){
+
+            // Регулярное выражение для поиска текста после "команди" или "команды"
+            $pattern = '/(?:команди|команды)\s+["«]?([^"»]+)["»]?/u';
+        
+            if (preg_match($pattern, $field['log'], $matches)) {
+                // Подстрока после "команди" или "команды" находится в $matches[1]  
+                $strTeamName = '%' . trim($matches[1]) . '%';              
+                $sqlTeam = "SELECT `pict` AS photo, `name` FROM `v9ky_team` WHERE `name` LIKE :team_name ORDER BY id DESC LIMIT 1";
+                $teamData = $dbF->query( $sqlTeam, [ ":team_name" => $strTeamName ] )->find();
+                $transfers[$key]['team_photo'] = $teamData['photo'];
+                $transfers[$key]['team_name'] = $teamData['name'];
+            }            
+            
+        } else {
+            $sqlTeam = "SELECT `pict` AS photo, `name` FROM `v9ky_team` WHERE `id` = :team_id ORDER BY id DESC LIMIT 1";
+            $teamData = $dbF->query( $sqlTeam, [ ":team_id" => $field['team_id'] ] )->find();
+            $transfers[$key]['team_photo'] = $teamData['photo'];
+            $transfers[$key]['team_name'] = $teamData['name'];
+        }        
+    }
+
+    return $transfers; 
+ }
+
+//  /**
+//   * Получает статистику мастча.
+//   * @param string
+//   * @return array
+//   */
+//   function getStaticMatch($matchId)
+//   {
+//     global $dbF;
+
+//     $sql = "SELECT 
+//         `stat_vladen1`, 
+//         `stat_vladen2`, 
+//         `stat_ydari1`, 
+//         `stat_ydari2`, 
+//         `stat_vstvor1`, 
+//         `stat_vstvor2`, 
+//         `stat_pas1`, 
+//         `stat_pas2`, 
+//         `stat_ygol1`, 
+//         `stat_ygol2`, 
+//         `stat_fols1`, 
+//         `stat_fols2` 
+//     FROM `v9ky_match` 
+//     WHERE `id` = :match_id";
+
+//     $fields = $dbF->query($sql, [":match_id" => $matchId])->find();
+
+//     // Заменяем null на 0
+//     foreach( $fields as $key => $field ){
+//         if( $field == null ) {
+//             $fields[$key] = 0;
+//         }
+//     }
+
+//     // Владение мячом
+//     $stat_vladen_percent = getPercentAge($fields['stat_vladen1'], $fields['stat_vladen2']);
+//     $fields['stat_vladen1_percent'] = $stat_vladen_percent[0];
+//     $fields['stat_vladen2_percent'] = $stat_vladen_percent[1];
+
+//     // Удары
+//     $stat_ydari_percent = getPercentAge($fields['stat_ydari1'], $fields['stat_ydari2']);
+//     $fields['stat_ydari1_percent'] = $stat_ydari_percent[0];
+//     $fields['stat_ydari2_percent'] = $stat_ydari_percent[1];
+
+//     // Удары в створ ворот
+//     $stat_vstvor_percent = getPercentAge($fields['stat_vstvor1'], $fields['stat_vstvor2']);
+//     $fields['stat_vstvor1_percent'] = $stat_vstvor_percent[0];
+//     $fields['stat_vstvor2_percent'] = $stat_vstvor_percent[1];
+
+//     // Пасы
+//     $stat_pas_percent = getPercentAge($fields['stat_pas1'], $fields['stat_pas2']);
+//     $fields['stat_pas1_percent'] = $stat_pas_percent[0];
+//     $fields['stat_pas2_percent'] = $stat_pas_percent[1];
+
+//     // Угловые
+//     $stat_ygol_percent = getPercentAge($fields['stat_ygol1'], $fields['stat_ygol2']);
+//     $fields['stat_ygol1_percent'] = $stat_ygol_percent[0];
+//     $fields['stat_ygol2_percent'] = $stat_ygol_percent[1];
+
+//     // Фолы
+//     $stat_fols_percent = getPercentAge($fields['stat_fols1'], $fields['stat_fols2']);
+//     $fields['stat_fols1_percent'] = $stat_fols_percent[0];
+//     $fields['stat_fols2_percent'] = $stat_fols_percent[1];
+    
+//     return $fields;
+//   }
+
+//   /**
+//    * Получает процентное соотношение из двух цифр
+//    * @param string|integer
+//    * @param string|integer
+//    * @return array
+//    */
+//   function getPercentAge($ageTeam1, $ageTeam2)
+//   {
+    
+//     if ($ageTeam1 + $ageTeam2 > 0) {
+//         // Вычисляем процентное соотношение
+//         $team1_percentage = round( ( $ageTeam1 / ($ageTeam1 + $ageTeam2) * 100 ), 0 );
+//         $team2_percentage = round( ($ageTeam2 / ($ageTeam1 + $ageTeam2) * 100), 0 );
+    
+//     } else {
+//         $team1_percentage = 50;
+//         $team2_percentage = 50;
+//     }
+
+//     return [$team1_percentage, $team2_percentage ];
+//   }
+
+  function getStaticMatch($matchId, $team1_id, $team2_id)
+  {
+    global $dbF;
+
+    $sql = "SELECT 
+        SUM(s.`vstvor`) AS total_vstvor,
+        SUM(s.`mimo`) AS total_mimo,
+        SUM(s.`pasplus`) AS total_pasplus,
+        SUM(s.`pasminus`) AS total_pasminus,
+        p.`team`
+    FROM `v9ky_sostav` s
+    LEFT JOIN `v9ky_player` p
+        ON p.`id` = s.`player`
+    WHERE s.`matc` = :match_id
+    AND p.`team` IN (:team1_id, :team2_id)
+    GROUP BY p.`team`";
+
+    $results = $dbF->query($sql, [
+        ":match_id" => $matchId,
+        ":team1_id" => $team1_id,
+        ":team2_id" => $team2_id
+    ])->findAll();
+
+    $team1_data = [];
+    $team2_data = [];
+
+    foreach ($results as $row) {
+        if ($row['team'] == $team1_id) {
+            $team1_data = $row;
+        } elseif ($row['team'] == $team2_id) {
+            $team2_data = $row;
+        }
+    }
+
+    // получаем количество ударов команды за матч
+    $team1_data['total_udar'] = $team1_data['total_vstvor'] + $team1_data['total_mimo'];
+    $team2_data['total_udar'] = $team2_data['total_vstvor'] + $team2_data['total_mimo'];
+
+    $team1_data['vstvor_percentage_team'] = calculate_percentage($team1_data['total_vstvor'], $team2_data['total_vstvor']);
+    $team2_data['vstvor_percentage_team'] = 100 - $team1_data['vstvor_percentage_team'];
+    
+    $team1_data['pasplus_percentage_team'] = calculate_percentage($team1_data['total_pasplus'], $team2_data['total_pasplus']);
+    $team2_data['pasplus_percentage_team'] = 100 - $team1_data['pasplus_percentage_team'];
+    
+    $team1_data['udar_percentage_team'] = calculate_percentage($team1_data['total_udar'], $team2_data['total_udar']);
+    $team2_data['udar_percentage_team'] = 100 - $team1_data['udar_percentage_team'];
+
+    // Возвращаем структурированный массив
+    return [
+        'team1' => [
+            'id' => $team1_id,
+            'data' => $team1_data
+        ],
+        'team2' => [
+            'id' => $team2_id,
+            'data' => $team2_data
+        ]
+    ];
+    
+  }
+
+  // Рассчитываем проценты
+function calculate_percentage($value1, $value2) {
+    $total = $value1 + $value2;
+    return $total > 0 ? ($value1 / $total) * 100 : 50;
 }

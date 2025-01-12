@@ -1,6 +1,7 @@
-﻿<?
+﻿<?php
+
 //проверка на вшивость
-if (!defined('READFILE')) {exit('Wrong way to file');};
+if (!defined('READFILE')) {exit('Wrong way to file');}
 
 $items_num=5;
 $date=date("d.m.Y"); // ?????.?????.???
@@ -15,11 +16,13 @@ $player_face_path = "https://v9ky.in.ua/face/";
 $photo_papka = "2v_turnir/";
 $reglament_path="https://v9ky.in.ua/reglamenty/";
 
-Error_Reporting(E_ALL & ~E_NOTICE);
+
+
+// Error_Reporting(E_ALL & ~E_NOTICE);
 
 //error_reporting(E_ALL); # report all errors
 //ini_set("display_errors", "0"); # but do not echo the errors
-define('ADODB_ERROR_LOG_TYPE',3);
+// define('ADODB_ERROR_LOG_TYPE',3);
 //define('ADODB_ERROR_LOG_DEST','/sql_errors.txt');
 //include('adodb5/adodb-errorhandler.inc.php');
 //include('adodb5/adodb.inc.php');
@@ -34,7 +37,10 @@ define('ADODB_ERROR_LOG_TYPE',3);
 
 
 
-   include('adodb5/adodb.inc.php');
+  include 'adodb5/adodb.inc.php';
+
+
+   
    //$ADODB_CACHE_DIR = 'ADODB_cache';
    $db = ADONewConnection('mysql'); # eg 'mysql' or 'postgres'
    $db->debug = false;
@@ -43,12 +49,10 @@ define('ADODB_ERROR_LOG_TYPE',3);
    $db->SetCharSet('utf8');
    $db->LogSQL(true); // turn on logging
    //????????? ?????????? ??????
-
-    $mysqli = new PDO('mysql:host=localhost;dbname=corsa134_v9kyv2', 'corsa134_v9kyv2', '2pnr5p92', [
-      PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8mb4'"
-    ]);
-    if ($mysqli->connect_error) {
-      die('Ошибка подключения: ' . $mysqli->connect_error);
-    }
-
-?>
+  
+    // $mysqli = new PDO('mysql:host=localhost;dbname=corsa134_v9kyv2', 'corsa134_v9kyv2', '2pnr5p92', [
+    //   PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8mb4'"
+    // ]);
+    // if ($mysqli->connect_error) {
+    //   die('Ошибка подключения: ' . $mysqli->connect_error);
+    // }

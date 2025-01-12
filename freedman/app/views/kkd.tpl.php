@@ -1,7 +1,9 @@
 <section class="controls">
-	<div class="controls__container">
+	<div id="kkd-players" class="controls__container">
 		<div class="controls__share">
-			<button class="controls__share-btn"><img src="css/components/match-stats/assets/images/button-share-icon.svg" alt="Зберегти зображення"></button>
+			<button class="controls__share-btn save-image" data-target="kkd-players">
+				<img src="css/components/match-stats/assets/images/button-share-icon.svg" alt="Зберегти зображення">
+			</button>
 		</div>
 		<div class="controls__head">
 			<div class="controls__head-title">ККД Гравців</div>
@@ -191,3 +193,29 @@
 
 	</div>
 </section>
+
+<script>
+$(document).ready(function(){
+	
+	// -- Save image
+	$(".save-image").click(function (e) {
+		e.preventDefault(); // Отключаем переход по ссылке
+
+		// Получаем ID блока из атрибута data-target
+		var targetId = $(this).data("target");
+		var content = $("#" + targetId); // Находим блок по ID
+
+		// Сохраняем блок в изображение
+		html2canvas(content[0]).then(function (canvas) {
+			// Создаем ссылку для скачивания изображения
+			var link = document.createElement("a");
+			link.download = targetId + ".png"; // Название файла совпадает с ID блока
+			link.href = canvas.toDataURL("image/png");
+			link.click(); // Автоматически кликаем по ссылке для загрузки
+		}).catch(function (error) {
+			console.error("Ошибка при сохранении изображения:", error);
+		});
+	});
+});
+
+</script>

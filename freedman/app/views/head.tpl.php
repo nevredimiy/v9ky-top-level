@@ -1,6 +1,4 @@
 <html lang="ru">
-
-
 <head>
 
     <meta charset="utf-8">
@@ -53,7 +51,7 @@
                 <div class="nav__block">
                     <div class="nav__item nav__title-block">
                         <a href="<?=$site_url?>"><strong>V9KY.INUA</strong></a>
-                        &nbsp;|&nbsp;&nbsp;<?=$gorod_en->fields['name_en']?>&nbsp;&nbsp;|&nbsp;&nbsp;<?=$season_name->fields['season']?>
+                        &nbsp;|&nbsp;&nbsp;<?=$gorod_en['name_en']?>&nbsp;&nbsp;|&nbsp;&nbsp;<?=$season_name['season']?>
                     </div>
 
                     <div class="nav__item">

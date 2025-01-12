@@ -38,6 +38,7 @@
 .team-page__logo {
   height: 90px;
   width: 90px;
+  filter: drop-shadow(1px 1px 6px #ffffff);
 }
 
 .team-page__stars img {

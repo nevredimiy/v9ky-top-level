@@ -13,4 +13,9 @@ if(!isset($turnir)){
 
 $teams = getTeamsOfLeague($turnir);
 
+require_once CONTROLLERS . '/head.php';
+require_once CONTROLLERS . '/leagues.php';
+
 require  VIEWS . '/teams_of_league.tpl.php';
+
+require_once CONTROLLERS . '/footer.php';

@@ -9,6 +9,7 @@ error_reporting(E_ALL);
 
 
 $turnir = getTurnir($tournament);  
+$seasonName = getSeasonName($turnir);
 
 // Получаем идентификатор команды из адресной строки
 if (isset($params['id'])) {

@@ -47,9 +47,9 @@
 
 <section class="controls">
     <div class="controls__container">
-        <div class="controls__share">
+        <!-- <div class="controls__share">
             <button class="controls__share-btn"><img src="css/components/match-stats/assets/images/button-share-icon.svg" alt="Зберегти зображення"></button>
-        </div>
+        </div> -->
         <div class="controls__head">
             <div class="controls__head-title">Прев'ю матчу</div>
             <div class="controls__head-info">

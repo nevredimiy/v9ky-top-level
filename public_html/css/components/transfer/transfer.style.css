@@ -1,0 +1,216 @@
+.transfer {}
+
+.transfer__title {
+  margin-bottom: 15px;
+}
+
+.transfer__cards>div {
+  margin-bottom: 11px;
+}
+
+
+.transfer-card {
+  background: #FFFFFF;
+  box-shadow: 0px 4px 23px rgba(8, 20, 33, 0.04);
+  border-radius: var(--border-radius-l);
+  height: 165px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-sizing: border-box;
+  padding: 20px;
+}
+
+.transfer-card--arrival {
+  flex-direction: row;
+}
+
+.transfer-card--departure {
+  flex-direction: row-reverse;
+}
+
+.transfer-card__player {
+  display: block;
+  background: rgba(9, 9, 9, 0.05);
+  border-radius: var(--border-radius-m);
+  bottom: 0;
+  width: 90px;
+  height: 120px;
+  object-fit: contain;
+  position: relative;
+  cursor: pointer;
+}
+
+.transfer-card__player>img {
+  width: 100%;
+}
+
+.transfer-card__player>p {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 600;
+  font-size: var(--font-size-s);
+  text-align: center;
+  color: #FFFFFF;
+  line-height: 19.4px;
+  background: linear-gradient(90.21deg, #292929 15.28%, #000000 94.83%);
+  position: absolute;
+  bottom: 0;
+  margin: 0;
+  display: block;
+  width: 100%;
+  border-radius: 0 0 var(--border-radius-m) var(--border-radius-m);
+}
+
+.transfer-card>div:has(.transfer-card__arrow) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.transfer-card__arrow {
+  width: 31px;
+  height: 31px;
+  margin-bottom: 8px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.transfer-card--arrival .transfer-card__arrow {
+  background-image: url(./assets/images/arrow-green.svg);
+
+}
+
+.transfer-card--departure .transfer-card__arrow {
+  background-image: url(./assets/images/arrow-red.svg);
+}
+
+.transfer-card__date {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 600;
+  font-size: var(--font-size-s);
+  text-align: center;
+  padding: 2px 8px;
+  margin: 0;
+  border-radius: var(--border-radius-m);
+  box-sizing: border-box;
+}
+
+.transfer-card--arrival .transfer-card__date {
+  color: #59C65D;
+  background: rgba(89, 198, 93, 0.1);
+}
+
+.transfer-card--departure .transfer-card__date {
+  color: #FF3B3B;
+  background: rgba(255, 59, 59, 0.1);
+}
+
+.transfer-card__team {
+  background: rgba(9, 9, 9, 0.05);
+  border-radius: var(--border-radius-m);
+  bottom: 0;
+  width: 90px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.transfer-card__team img {
+  width: 70px;
+  margin-bottom: 8px;
+}
+
+.transfer-card__team p {
+  width: 100%;
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-size: var(--font-size-s);
+  text-align: center;
+  text-transform: uppercase;
+  color: #0B0B0B;
+  opacity: 0.7;
+  margin: 0;
+}
+
+@media screen and (min-width: 1260px) {
+  .transfer__cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    justify-content: center;
+    justify-items: center;
+    gap: 20px;
+  }
+
+  .transfer__title {
+    margin-bottom: 40px;
+  }
+
+  .transfer__cards>div {
+    margin: 0;
+  }
+
+  .transfer-card {
+    box-shadow: 0px 4px 23px rgba(8, 20, 33, 0.04);
+    border-radius: var(--border-radius-l);
+    height: 256px;
+    padding: 30px;
+  }
+
+  .transfer-card:nth-child(n + 4) {
+    display: flex;
+  }
+
+  .transfer-card__player {
+    border-radius: var(--border-radius-l);
+    bottom: 0;
+    width: 144px;
+    height: 196px;
+    background-position: center bottom 30px;
+  }
+
+  .transfer-card__player>p {
+    font-size: var(--font-size-m);
+    line-height: 30px;
+    display: block;
+    width: 100%;
+    border-radius: 0 0 var(--border-radius-l) var(--border-radius-l);
+  }
+
+  .transfer-card__arrow {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 10px;
+  }
+
+  .transfer-card__date {
+    padding: 3px 12px;
+    border-radius: var(--border-radius-m);
+    font-size: var(--font-size-m);
+  }
+
+  .transfer-card__team {
+    border-radius: var(--border-radius-l);
+    width: 144px;
+    height: 196px;
+    padding: 17px;
+  }
+
+  .transfer-card__team img {
+    width: 109px;
+    margin-bottom: 18px;
+  }
+
+  .transfer-card__team p {
+    font-size: var(--font-size-l);
+  }
+}

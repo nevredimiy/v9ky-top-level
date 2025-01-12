@@ -1,9 +1,3 @@
-<?php 
-require_once CONTROLLERS . '/head.php';
-require_once CONTROLLERS . '/menu.php';
-require_once CONTROLLERS . '/leagues.php';
-?>
-
 <section class="teams">
     <div class="teams__wrap">
         <div class="teams__list team">
@@ -19,4 +13,3 @@ require_once CONTROLLERS . '/leagues.php';
     </div>
 </section>
 
-<?php require_once CONTROLLERS . '/footer.php'; ?>

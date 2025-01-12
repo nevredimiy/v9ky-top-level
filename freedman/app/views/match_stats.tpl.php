@@ -1,8 +1,10 @@
 
 <section class="controls">
-    <div class="controls__container">
+    <div id="match-static" class="controls__container">
         <div class="controls__share">
-            <button class="controls__share-btn"><img src="css/components/match-stats/assets/images/button-share-icon.svg" alt="Зберегти зображення"></button>
+            <button class="controls__share-btn save-image" data-target="match-static">
+                <img src="css/components/match-stats/assets/images/button-share-icon.svg" alt="Зберегти зображення">
+            </button>
         </div>
         <div class="controls__head">
             <div class="controls__head-title">Статистика матчу</div>
@@ -114,31 +116,36 @@
                 </div>
                 <div class="tabs__block">
                     <div class="tabs__block-stats stats ball__procession">
-                        <div class="stats__title">Володіння м'ячем</div>
+                        <div class="stats__title">Кількість ударів</div>
                         <div class="stats__view">
-                            <div class="stats__view-blue" data-value="10">10</div>
-                            <div class="stats__view-red" data-value="90">90</div>
+                            <div class="stats__view-blue" data-value="<?= $staticMatch['team1']['data']['udar_percentage_team']?>">
+                                <?= $staticMatch['team1']['data']['total_udar']?>
+                            </div>
+                            <div class="stats__view-red" data-value="<?= $staticMatch['team2']['data']['udar_percentage_team']?>">
+                                <?= $staticMatch['team2']['data']['total_udar']?>
+                            </div>
                         </div>
                     </div>
                     <div class="tabs__block-stats stats goal__area">
                         <div class="stats__title">Удари в площину воріт</div>
                         <div class="stats__view">
-                            <div class="stats__view-blue" data-value="30">30</div>
-                            <div class="stats__view-red" data-value="70">70</div>
+                            <div class="stats__view-blue" data-value="<?= $staticMatch['team1']['data']['vstvor_percentage_team']?>">
+                                <?= $staticMatch['team1']['data']['total_vstvor']?>
+                            </div>
+                            <div class="stats__view-red" data-value="<?= $staticMatch['team2']['data']['vstvor_percentage_team']?>">
+                                <?= $staticMatch['team2']['data']['total_vstvor']?>
+                            </div>
                         </div>
                     </div>
                     <div class="tabs__block-stats stats passes">
                         <div class="stats__title">Вдалі паси</div>
                         <div class="stats__view">
-                            <div class="stats__view-blue" data-value="50">50</div>
-                            <div class="stats__view-red" data-value="50">50</div>
-                        </div>
-                    </div>
-                    <div class="tabs__block-stats stats dribbling">
-                        <div class="stats__title">Вдалі обводки</div>
-                        <div class="stats__view">
-                            <div class="stats__view-blue" data-value="60">60</div>
-                            <div class="stats__view-red" data-value="40">40</div>
+                            <div class="stats__view-blue" data-value="<?= $staticMatch['team1']['data']['pasplus_percentage_team']?>">
+                                <?= $staticMatch['team1']['data']['total_pasplus']?>
+                            </div>
+                            <div class="stats__view-red" data-value="<?= $staticMatch['team2']['data']['pasplus_percentage_team']?>">
+                                <?= $staticMatch['team2']['data']['total_pasplus']?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -149,28 +156,49 @@
 
 <script>
 $(document).ready(function() {
-// -- MATCH-STATS
-$('.tabs__block:first').show();
-$('.tabs__item:first').addClass('btn-red deactive');
+    // -- MATCH-STATS
+    $('.tabs__block:first').show();
+    $('.tabs__item:first').addClass('btn-red deactive');
 
-$('.tabs__item').click(function() {
-    index = $(this).index();
-    $('.tabs__item').removeClass('btn-red deactive');
-    $('.tabs__block').hide();
-    $(this).addClass('btn-red deactive');
-    $('.tabs__block').eq(index).show();
-});
+    $('.tabs__item').click(function() {
+        index = $(this).index();
+        $('.tabs__item').removeClass('btn-red deactive');
+        $('.tabs__block').hide();
+        $(this).addClass('btn-red deactive');
+        $('.tabs__block').eq(index).show();
+    });
 
-$('[data-value]').each(function () {
-    var $this = $(this); // Текущий элемент
-    var value = parseInt($this.data('value'), 10); // Получаем значение из атрибута data-value
+    $('[data-value]').each(function () {
+        var $this = $(this); // Текущий элемент
+        var value = parseInt($this.data('value'), 10); // Получаем значение из атрибута data-value
 
-    if (value >= 0 && value <= 100) {
-        $this.css('width', value + '%'); // Устанавливаем ширину блока
-    } else {
-        console.error('Недопустимое значение: ', value); // Логируем ошибку, если значение выходит за диапазон
-    }
-});
+        
+        if (value >= 0 && value <= 100) {
+            $this.css('width', value + '%'); // Устанавливаем ширину блока
+        } else {
+            console.error('Недопустимое значение: ', value); // Логируем ошибку, если значение выходит за диапазон
+        }
+    });
+    
+    // -- Save image
+    $(".save-image").click(function (e) {
+        e.preventDefault(); // Отключаем переход по ссылке
+
+        // Получаем ID блока из атрибута data-target
+        var targetId = $(this).data("target");
+        var content = $("#" + targetId); // Находим блок по ID
+
+        // Сохраняем блок в изображение
+        html2canvas(content[0]).then(function (canvas) {
+            // Создаем ссылку для скачивания изображения
+            var link = document.createElement("a");
+            link.download = targetId + ".png"; // Название файла совпадает с ID блока
+            link.href = canvas.toDataURL("image/png");
+            link.click(); // Автоматически кликаем по ссылке для загрузки
+        }).catch(function (error) {
+            console.error("Ошибка при сохранении изображения:", error);
+        });
+    });
 
 });
 </script>

@@ -1,7 +1,17 @@
 ﻿<!DOCTYPE html>
 <?php
 
+if(isset($_GET['foo'])) {
+	// Увімкнення відображення помилок
+	ini_set('display_errors', 1);
+	ini_set('display_startup_errors', 1);
+
+	// Встановлення рівня звітності помилок
+	error_reporting(E_ALL);
+}
+
 session_start();
+
 $page=2;
 //ini_set('error_log', '/error_jeka.txt');
 // Define the rate limit settings
@@ -28,9 +38,9 @@ if ($_SESSION['request_count'] >= $limit) {
     // Handle rate limit exceeded (e.g., show an error message, redirect, etc.)
 	echo "Перевищена частота запитів. Спробуйте пізніше.";
     //http_response_code(429); // HTTP 429 Too Many Requests
-    
     exit;
 }
+
 // Increment the request count
 $_SESSION['request_count']++;
 
@@ -55,7 +65,13 @@ if (in_array($userAgent, $blacklist)) {
 $start = microtime(true);
 
 define('READFILE', true);
-include_once "config.php";
+
+if(!isset($_GET['foo'])){
+
+	require_once "config.php";
+}
+
+
 
 // ----- Freedman -----
 require dirname(__DIR__) . '/freedman/config.php';
@@ -74,15 +90,20 @@ $dbF = $dbFreedman->getConnection($db_config);
 $module = 'index';
 $action = 'calendar';
 
-//турнир поумолчанию
-$recligi = $db->Execute("select name from v9ky_turnir where city=2 and active=1 ORDER BY priority ASC limit 1");
-$tournament = $recligi->fields['name'];
+
+if(!isset($_GET['foo'])){
+	//турнир поумолчанию
+	$recligi = $db->Execute("select name from v9ky_turnir where city=2 and active=1 ORDER BY priority ASC limit 1");
+	$tournament = $recligi->fields['name'];
+
+}
 
 // Массив параметров из URI запроса.
 $params = array();
 
 // Если запрошен любой URI, отличный от корня сайта.
-if ($_SERVER['REQUEST_URI'] != '/') {
+if (parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) != '/') {
+
 	try {
 		// Для того, что бы через виртуальные адреса можно было также передавать параметры
 		// через QUERY_STRING (т.е. через "знак вопроса" - ?param=value),
@@ -127,14 +148,15 @@ if ($_SERVER['REQUEST_URI'] != '/') {
 		
 		// Разбиваем виртуальный URL по символу "/"
 		$uri_parts = explode('/', trim($url_path, ' /'));
-		
+
 		// Если количество частей не кратно 2, значит, в URL присутствует ошибка и такой URL
 		// обрабатывать не нужно - кидаем исключение, что бы назначить в блоке catch модуль и действие,
 		// отвечающие за показ 404 страницы.
+		
         $tournament = array_shift($uri_parts); // Получили имя турнира
-		$module = $uri_parts[0]; // Получили имя модуля
+		$module = empty($uri_parts[0]) ? '' : $uri_parts[0]; // Получили имя модуля
+		// $module = $uri_parts[0]; // Получили имя модуля
 		try {$action = array_shift($uri_parts);} catch (Exception $e) {}
-
 
 		// Получили имя действия
         $paths = "../../";//находим поднятие по папкам
@@ -149,8 +171,15 @@ if ($_SERVER['REQUEST_URI'] != '/') {
 	}
 }
 
+// Получаем турнир латиницей. Эта функция находиться в freedman/core/functions.php
+if(empty($tournament)){
+	$tournament = getTournament();
+}
+
 $url = $site_url.'/'.$tournament;
 $db_pref = str_replace("-", "_", $tournament)."_v9ky_";
+
+
 
 switch($tournament) {
     
@@ -184,6 +213,7 @@ switch($tournament) {
 			case "photo": $title="Фото матчу"; require_once("photo.php"); break;
             case "transfer": $title="Трансфери гравців"; require_once("transfer.php"); break;
             case "onlines": $title="Онлайн відео трансляції"; require_once("onlines.php"); break;
+            case "bombardir": $title="Бомбардири ліги"; require_once("bombardir.php"); break;
 			
 			case "index_2023": $title="Всеукраїнський турнір з мініфутболу"; require_once("index_2023.php"); break;
 			
@@ -199,6 +229,8 @@ switch($tournament) {
 			case "teams_of_league": $title="Команди ліги"; require_once(CONTROLLERS . "/teams_of_league.php"); break;
 			case "team_page": $title="Інформація про команду"; require_once(CONTROLLERS . "/team_page.php"); break;
 			case "match_calendar": $title="Календар матчів міста"; require_once(CONTROLLERS . "/match_calendar.php"); break;
+			case "transfers": $title="Календар матчів міста"; require_once(CONTROLLERS . "/transfers.php"); break;
+			case "contacts_championship": $title="Календар матчів міста"; require_once(CONTROLLERS . "/contacts_championship.php"); break;
 			
 			case "violators": $title="Порушники ліги"; require_once("violators.php"); break;
             case "violators_new": $title="Порушники ліги"; require_once("violators_new.php"); break;
@@ -223,6 +255,3 @@ switch($tournament) {
         }
 	break;
 }
-
-
-?>

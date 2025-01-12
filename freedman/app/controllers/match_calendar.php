@@ -69,7 +69,6 @@ $tshirtImages = [
 
 
 require_once CONTROLLERS . "/head.php";
-require_once CONTROLLERS . "/menu.php";
 require_once CONTROLLERS . "/leagues.php";
 
 require_once VIEWS . "/match_calendar.tpl.php";

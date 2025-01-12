@@ -222,35 +222,17 @@
 
     <div class="team-page__players">
     <?php $idx = 0 ?>
+    <div style="display: none;"><?php  dump($players) ?></div>
     <?php foreach ($players as $player): ?>
 
-      <?php
-      
-        // while (!$recordSet->EOF) {
-        //   $recordsostav = $db->Execute("select count(*) as kol from v9ky_sostav where player='".$recordSet->fields['id']."' ");
-        //   $recordgols = $db->Execute("select count(*) as kol from v9ky_gol where player='".$recordSet->fields['id']."' and team='".$id."' ");
-        //   $recordagols = $db->Execute("select count(*) as kol from v9ky_gol where player='".$recordSet->fields['id']."' and team<>'".$id."' ");
-        //   $recordyel = $db->Execute("select count(*) as kol from v9ky_yellow where player='".$recordSet->fields['id']."' ");
-        //   $recordasist = $db->Execute("select count(*) as kol from v9ky_asist where player='".$recordSet->fields['id']."' ");
-        //   $recordred = $db->Execute("select count(*) as kol from v9ky_red where player='".$recordSet->fields['id']."' ");
-        //   $recordface = $db->Execute("select * from v9ky_man_face where man='".$recordSet->fields['man']."' ORDER BY data desc LIMIT 1");
-        //   $recordname = $db->Execute("select * from v9ky_man where id='".$recordSet->fields['man']."' LIMIT 1");
-          
-        //   if ($recordface->fields['pict']) $face = $recordface->fields['pict']; else $face = "avatar1.jpg";
-          
+      <?php          
           // Получение индивидуальной статистики. Player Card.
-          if (isset($allStaticPlayers)) { $indStaticPlayer = getIndStaticPlayer($allStaticPlayers, $player['id']); }
-            
+          if (isset($allStaticPlayers)) { $indStaticPlayer = getIndStaticPlayer($allStaticPlayers, $player['id']); }            
       ?>
-
-      
-
-    <!-- Если тренер или менеджер, то не показываем карточку игрока -->
-    <?php if ( $player['amplua'] != 4 && $player['amplua'] != 5 && isset( $dataAllPlayers[$player['id']] ) )  :?>
-      
+      <!-- Если тренер или менеджер, то не показываем карточку игрока -->
+      <?php if ( $player['amplua'] != 4 && $player['amplua'] != 5 && isset( $dataAllPlayers[$player['id']] ) )  :?>      
 
       <div id="playerCard<?= $idx ?>" class="card-player-full content-image">
-
           <?php 
             // Место в рейтинге
             $bestGravetc   = getBestPlayer($topGravetc, $player['id'], 'player_id');
@@ -277,11 +259,8 @@
             // 0 - star-icon.png, 1 - gloves-icon.png, 2 - football-icon.png, 3 - boots-icon.svg, 4 - pitt-icon.svg, 5 - player-icon.svg
             // 6 - rocket-ball-icon.png, 7 - ball-icon.png
             $arrayCategoryPlayers = ['star-icon.png', 'gloves-icon.png', 'football-icon.png', 'boots-icon.png', 'pitt-icon.png', 'player-icon.png', 'rocket-ball-icon.png', 'ball-icon.png'];
-            
             $categoryBestPlayers = $arrayCategoryPlayers[$indexCPB];
-          ?>
-
-          
+          ?>        
         
         <div class="card-player-full__photo">
           <img src="<?=$player_face_path?><?= $dataAllPlayers[$player['id']]['player_photo'] ?>" alt="photo_player">
@@ -437,7 +416,7 @@
           
           <div>
             
-            <p><?=$season_name->fields['season']?></p>
+            <p><?= $seasonName ?></p>
             
           </div>
           
@@ -461,8 +440,8 @@
         </div>
 
       </div><!-- card-player-full__photo -->
-    <?php endif ?>
-    <?php $idx++ ?>
+      <?php endif ?>
+      <?php $idx++ ?>
     <?php endforeach?>
 
     </div><!-- team-page__players -->

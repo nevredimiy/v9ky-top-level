@@ -7,35 +7,25 @@
 $allStaticPlayers = getAllStaticPlayers($turnir);
   
 // Получаем игрока матча
-$queryBestPlayerOfMatch = $db->Execute(
-  "SELECT `best_player`, id, tur FROM `v9ky_match` WHERE `turnir`= $turnir and `best_player`>0 ORDER by tur"
-);
-
-// Получаем количество сыграных туров в турнире. Это нужно для отображения в таблице знака вопроса для несыграных матчей. 
-$queryLastTur = $db->Execute(
-  "SELECT tur as last_tur FROM `v9ky_match` WHERE `canseled`=1 and `turnir` = $turnir order by tur desc limit 1"
-);
+$queryBestPlayerOfMatch = $dbF->query("SELECT `best_player`, id, tur FROM `v9ky_match` WHERE `turnir`= :turnir and `best_player` > 0 ORDER by tur", [":turnir" => $turnir])->findAll();
 
 // Последний тур в турнире (в лиге).
-$lastTur = intval($queryLastTur->fields[0]);
+$lastTur = getLastTur($turnir);
 
 // Массив для лучшего игрока матча (иконка ведочка)
 $nominationPlayerOfMatch = [];
 
 // Заполняем массив лучшего игрока матча
-while(!$queryBestPlayerOfMatch->EOF){
+foreach($queryBestPlayerOfMatch as $value){
 
-  foreach($queryBestPlayerOfMatch as $value){
-
-    $player = $value['best_player'];
-    $match = $value['id'];    
+  $player = $value['best_player'];
+  $match = $value['id'];    
     
-    // Заполняем массив. Проверки не нужно. Так как в одном матче лучший игрок может быть только один.
-    $nominationPlayerOfMatch[$player][$match]['count_best_player_of_match'] = 1;
+  // Заполняем массив. Проверки не нужно. Так как в одном матче лучший игрок может быть только один.
+  $nominationPlayerOfMatch[$player][$match]['count_best_player_of_match'] = 1;
     
-  }
-  $queryBestPlayerOfMatch->MoveNext();
 }
+
 
 // Получаем общий массив. Добавляем в основной массив статистику лучший игрок матча.
 $allStaticPlayers = megreTwoMainArrays($allStaticPlayers, $nominationPlayerOfMatch, 'count_best_player_of_match');

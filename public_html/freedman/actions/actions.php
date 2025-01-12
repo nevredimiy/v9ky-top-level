@@ -136,9 +136,9 @@ if(isset($data['action']) && $data['action'] == 'anons' ) {
         $totalMatches = count($historyMeets);
 
         // Вычисляем проценты
-        $team1WinPercent = ($team1Wins / $totalMatches) * 100;
-        $drawPercent = ($draws / $totalMatches) * 100;
-        $team2WinPercent = ($team2Wins / $totalMatches) * 100;
+        $team1WinPercent = $totalMatches == 0 ? 0 : ($team1Wins / $totalMatches) * 100;
+        $drawPercent = $totalMatches == 0 ? 0 : ($draws / $totalMatches) * 100;
+        $team2WinPercent = $totalMatches == 0 ? 0 : ($team2Wins / $totalMatches) * 100;
 
         // Проверяем и корректируем проценты
         $minimumPercent = 10;
@@ -225,6 +225,9 @@ if(isset($data['action']) && $data['action'] == 'match_stats' ) {
         // Состав команды
         $team1Composition = getTeamComposition($data['match_id'], $dataMatch['team1_id']);
         $team2Composition = getTeamComposition($data['match_id'], $dataMatch['team2_id']);
+
+        // Стастистика матча
+        $staticMatch = getStaticMatch($data['match_id'], $dataMatch['team1_id'], $dataMatch['team2_id']);
 
         // Получение тренера и менеджера
         $trainerAndManager1 = getTrainerAndManager($dataMatch['team1_id']);
