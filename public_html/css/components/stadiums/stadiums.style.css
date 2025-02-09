@@ -39,10 +39,10 @@
   background-position: center center; */
 }
 
-.stadium-card__photo img{
+.stadium-card__photo img {
   width: 100%;
   height: 100%;
-  object-fit: cover; 
+  object-fit: cover;
 }
 
 .stadium-card__description {
@@ -138,8 +138,13 @@
   font-size: var(--font-size-s);
   line-height: var(--font-size-s);
   text-align: center;
-
+  text-decoration: none;
   color: #000000;
+  transition: all 0.3s ease-in-out;
+}
+
+.stadium-card__phone-button:hover {
+  text-decoration: underline;
 }
 
 .stadium-card__phone-button img {

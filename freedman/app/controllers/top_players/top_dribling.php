@@ -24,9 +24,9 @@ $topDribling = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'dribling', $la
     <table id="top-dribling" class="draggable-container">
       <caption>
         ТОП-Дріблінг
-        <button>
+        <a class="statistic__link-to-home" href="<?= $site_url?><?=$get_query_temp?>">
           <img src="/css/components/statistic/assets/images/button-exit.svg" alt="exit">
-        </button>
+        </a>
       </caption>
 
       <thead>

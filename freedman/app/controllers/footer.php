@@ -24,7 +24,6 @@
     <script src="<?= JS . '/variables.js' ?>"></script>
     <script src="<?= JS . '/script.js' ?>"></script>
     <script src="<?= JS . '/swiper-nav.js' ?>"></script>
-    <script src="<?= JS . '/swiper-controls.js' ?>"></script>
     <script src="<?= JS . '/swiper-ratings.js' ?>"></script>
     <script src="<?= JS . '/swiper-disqualification.js' ?>"></script>
     <script src="<?= JS . '/swiper-leagues.js' ?>"></script>

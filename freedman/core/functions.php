@@ -127,6 +127,7 @@ function getAllStaticPlayers($turnir)
             s.vkidmin, 
             s.blok, 
             s.vtrata,
+            m.best_player AS count_best_player_of_match,
             (SELECT COUNT(*) AS count_goals FROM v9ky_gol g WHERE g.player= s.player and g.matc = s.matc) AS count_goals,
             (SELECT COUNT(*) AS count_asists FROM v9ky_asist a WHERE a.player= s.player and a.matc = s.matc) AS count_asists,
             (SELECT COUNT(*) AS yellow_cards FROM v9ky_yellow y WHERE y.player= s.player and y.matc = s.matc) AS yellow_cards,
@@ -165,8 +166,10 @@ function getAllStaticPlayers($turnir)
  */
 function getDataPlayers($allStaticPlayers) 
 {
-    
-        global $dbF;
+    if(empty($allStaticPlayers)){
+        return false;
+    }
+    global $dbF;
 
     // Массив только c идентификаторами игроков
     $arrPlayersId = array_keys($allStaticPlayers);
@@ -361,7 +364,7 @@ function getSeasonName($turnirId)
  * Получает стадионы из базы данных
  * @return array
  */
-function getFields(){
+function getDataFields(){
     global $dbF;
     $fields = $dbF->query("SELECT 
         `name`, 
@@ -374,6 +377,8 @@ function getFields(){
         `loudspeaker`,
         `cloakroom`,
         `toilet`,
+        `latitude`,
+        `longitude`,
         (SELECT `name_ua` FROM `v9ky_city` c WHERE f.city = c.id) AS city
             FROM `v9ky_fields` f
             WHERE `visible` > 0")->findAll();
@@ -437,8 +442,14 @@ function getHistoryMeets($team1, $team2) {
         ":regex2" => "[[:<:]]" . preg_quote($team2, '/') . "[[:>:]]",
     ];
 
+
     // Выполняем запрос
     $fields = $dbF->query($sql, $params)->findAll();
+
+    foreach($fields as $field){
+            $field['team1_name'] = trim($field['team1_name']);
+            $field['team2_name'] = trim($field['team2_name']);
+    }
 
     return $fields;
 }
@@ -461,14 +472,18 @@ function getTeamComposition($matchId, $teamId) {
 	p.`team` AS team_id,
 	m.`name1` AS lastname,
 	CONCAT(LEFT(m.name2, 1), '.') AS firstname,
-	s.nomer AS nomer
+	s.nomer AS nomer,
+    t.capitan AS capitan_id,
+    t.manager AS manager_id,    
+    t.trainer AS trainer_id
     FROM `v9ky_player` p
     LEFT JOIN (
         SELECT player, nomer FROM v9ky_sostav WHERE `matc` = :match_id
     ) s ON s.player = p.id
     LEFT JOIN 
         v9ky_man m ON m.id = p.man
-
+    LEFT JOIN
+        v9ky_team t ON t.id = p.team
     WHERE p.`id` IN (
         SELECT `player` FROM `v9ky_sostav` WHERE `matc`= :match_id
         )
@@ -581,6 +596,50 @@ function getTrainerAndManager($teamId){
 }
 
 /**
+ * Получаем ФИО тренера
+ * @param string - идентификатор команды
+ * @return array - массив
+ */
+function getTrainerName($teamId){
+    global $dbF;
+
+    $sql = "SELECT 
+    m.name1 AS lastname,
+    m.name2 AS firstname,
+    p.id AS player_id
+    FROM `v9ky_man` m
+    LEFT JOIN `v9ky_player` p
+        ON p.man = m.id
+    WHERE m.id = (SELECT man FROM `v9ky_player` WHERE id = (SELECT trainer FROM `v9ky_team` WHERE id = :team_id))";
+
+    $fields = $dbF->query($sql, [":team_id" => $teamId])->findAll();
+
+    return $fields;
+}
+
+/**
+ * Получаем ФИО менеджера
+ * @param string - идентификатор команды
+ * @return array - массив
+ */
+function getManagerName($teamId){
+    global $dbF;
+
+    $sql = "SELECT 
+    m.name1 AS lastname,
+    m.name2 AS firstname,
+    p.id AS player_id
+    FROM `v9ky_man` m
+    LEFT JOIN `v9ky_player` p
+        ON p.man = m.id
+    WHERE m.id = (SELECT man FROM `v9ky_player` WHERE id = (SELECT manager FROM `v9ky_team` WHERE id = :team_id))";
+
+    $fields = $dbF->query($sql, [":team_id" => $teamId])->findAll();
+
+    return $fields;
+}
+
+/**
  * Получает все видео матча
  * @param string
  * @return array
@@ -614,7 +673,9 @@ function getMatchReport($matchId) {
         a.team AS team_id,     
         NULL AS goal_id,       
         NULL AS card_color,    
-        a.time AS event_time   
+        a.time AS event_time,
+        (SELECT team FROM v9ky_player p WHERE p.id = a.player) AS team_id_player_belong,
+        NULL AS status_penalty
     FROM v9ky_asist a
     LEFT JOIN v9ky_man m ON m.id = (SELECT man FROM v9ky_player WHERE id = a.player)
     WHERE a.matc = :match_id
@@ -629,7 +690,9 @@ function getMatchReport($matchId) {
         g.team AS team_id,
         g.id AS goal_id,
         NULL AS card_color,
-        g.time AS event_time
+        g.time AS event_time,
+        (SELECT team FROM v9ky_player p WHERE p.id = g.player) AS team_id_player_belong,
+        NULL AS status_penalty
     FROM v9ky_gol g
     LEFT JOIN v9ky_man m ON m.id = (SELECT man FROM v9ky_player WHERE id = g.player)
     WHERE g.matc = :match_id
@@ -644,7 +707,9 @@ function getMatchReport($matchId) {
         y.team AS team_id,
         NULL AS goal_id,
         'yellow' AS card_color,
-        y.time AS event_time
+        y.time AS event_time,
+        (SELECT team FROM v9ky_player p WHERE p.id = y.player) AS team_id_player_belong,
+        NULL AS status_penalty
     FROM v9ky_yellow y
     LEFT JOIN v9ky_man m ON m.id = (SELECT man FROM v9ky_player WHERE id = y.player)
     WHERE y.matc = :match_id
@@ -659,7 +724,9 @@ function getMatchReport($matchId) {
         r.team AS team_id,
         NULL AS goal_id,
         'red' AS card_color,
-        r.time AS event_time
+        r.time AS event_time,
+        (SELECT team FROM v9ky_player p WHERE p.id = r.player) AS team_id_player_belong,
+        NULL AS status_penalty
     FROM v9ky_red r
     LEFT JOIN v9ky_man m ON m.id = (SELECT man FROM v9ky_player WHERE id = r.player)
     WHERE r.matc = :match_id
@@ -674,10 +741,29 @@ function getMatchReport($matchId) {
         yr.team AS team_id,
         NULL AS goal_id,
         'yellow_red' AS card_color,
-        yr.time AS event_time
+        yr.time AS event_time,
+        (SELECT team FROM v9ky_player p WHERE p.id = yr.player) AS team_id_player_belong,
+        NULL AS status_penalty
     FROM v9ky_yellow_red yr
     LEFT JOIN v9ky_man m ON m.id = (SELECT man FROM v9ky_player WHERE id = yr.player)
     WHERE yr.matc = :match_id
+
+    UNION ALL
+
+    SELECT 
+        'penalty' AS event_type,
+        pn.player AS player_id,
+        m.name1 AS lastname,
+        m.name2 AS firstname,
+        pn.team AS team_id,
+        NULL AS goal_id,
+        NULL AS card_color,
+        pn.time AS event_time,
+        (SELECT team FROM v9ky_player p WHERE p.id = pn.player) team_id_player_belong,
+        pn.status AS status_penalty
+    FROM v9ky_penalty pn
+    LEFT JOIN v9ky_man m ON m.id = (SELECT man FROM v9ky_player WHERE id = pn.player)
+    WHERE pn.matc = :match_id
 
     ORDER BY event_time ASC, -- Сортировка по времени события
     CASE 
@@ -831,7 +917,7 @@ function getTeamHeads($teamId)
     $sql = "SELECT 
     t.`id`,
     t.`name` AS slug,
-    t.`ru` AS name,
+    t.`ru` AS full_name,
     c.`name_ua` AS city_name -- Название города из таблицы v9ky_city
     FROM v9ky_turnir t
     LEFT JOIN v9ky_city c ON c.`id` = t.`city` -- Присоединяем таблицу v9ky_city
@@ -908,6 +994,22 @@ function getLastTur($turnirId)
     $lastTur = $dbF->query($sql, [":turnir" => $turnirId])->find();
 
     return $lastTur['last_tur'];
+}
+
+/**
+ * Получает строку последнего тура.
+ * @param string
+ * @return string
+ */
+function getLastTurDate($turnirId)
+{
+    global $dbF;
+
+    $sql = "SELECT `date` as last_tur_date FROM `v9ky_match` WHERE `canseled` = 1 AND `turnir` = :turnir ORDER BY tur DESC LIMIT 1";
+
+    $lastTur = $dbF->query($sql, [":turnir" => $turnirId])->find();
+
+    return $lastTur['last_tur_date'];
 }
 
 /**
@@ -1016,7 +1118,6 @@ function addLinkItem($array, $url='')
     $formattedDate = "$day $month ($dayOfWeek)";
 
     return $formattedDate;
-
 }
 /**
  * Получает время из даты
@@ -1108,94 +1209,6 @@ function getTime($date)
     return $transfers; 
  }
 
-//  /**
-//   * Получает статистику мастча.
-//   * @param string
-//   * @return array
-//   */
-//   function getStaticMatch($matchId)
-//   {
-//     global $dbF;
-
-//     $sql = "SELECT 
-//         `stat_vladen1`, 
-//         `stat_vladen2`, 
-//         `stat_ydari1`, 
-//         `stat_ydari2`, 
-//         `stat_vstvor1`, 
-//         `stat_vstvor2`, 
-//         `stat_pas1`, 
-//         `stat_pas2`, 
-//         `stat_ygol1`, 
-//         `stat_ygol2`, 
-//         `stat_fols1`, 
-//         `stat_fols2` 
-//     FROM `v9ky_match` 
-//     WHERE `id` = :match_id";
-
-//     $fields = $dbF->query($sql, [":match_id" => $matchId])->find();
-
-//     // Заменяем null на 0
-//     foreach( $fields as $key => $field ){
-//         if( $field == null ) {
-//             $fields[$key] = 0;
-//         }
-//     }
-
-//     // Владение мячом
-//     $stat_vladen_percent = getPercentAge($fields['stat_vladen1'], $fields['stat_vladen2']);
-//     $fields['stat_vladen1_percent'] = $stat_vladen_percent[0];
-//     $fields['stat_vladen2_percent'] = $stat_vladen_percent[1];
-
-//     // Удары
-//     $stat_ydari_percent = getPercentAge($fields['stat_ydari1'], $fields['stat_ydari2']);
-//     $fields['stat_ydari1_percent'] = $stat_ydari_percent[0];
-//     $fields['stat_ydari2_percent'] = $stat_ydari_percent[1];
-
-//     // Удары в створ ворот
-//     $stat_vstvor_percent = getPercentAge($fields['stat_vstvor1'], $fields['stat_vstvor2']);
-//     $fields['stat_vstvor1_percent'] = $stat_vstvor_percent[0];
-//     $fields['stat_vstvor2_percent'] = $stat_vstvor_percent[1];
-
-//     // Пасы
-//     $stat_pas_percent = getPercentAge($fields['stat_pas1'], $fields['stat_pas2']);
-//     $fields['stat_pas1_percent'] = $stat_pas_percent[0];
-//     $fields['stat_pas2_percent'] = $stat_pas_percent[1];
-
-//     // Угловые
-//     $stat_ygol_percent = getPercentAge($fields['stat_ygol1'], $fields['stat_ygol2']);
-//     $fields['stat_ygol1_percent'] = $stat_ygol_percent[0];
-//     $fields['stat_ygol2_percent'] = $stat_ygol_percent[1];
-
-//     // Фолы
-//     $stat_fols_percent = getPercentAge($fields['stat_fols1'], $fields['stat_fols2']);
-//     $fields['stat_fols1_percent'] = $stat_fols_percent[0];
-//     $fields['stat_fols2_percent'] = $stat_fols_percent[1];
-    
-//     return $fields;
-//   }
-
-//   /**
-//    * Получает процентное соотношение из двух цифр
-//    * @param string|integer
-//    * @param string|integer
-//    * @return array
-//    */
-//   function getPercentAge($ageTeam1, $ageTeam2)
-//   {
-    
-//     if ($ageTeam1 + $ageTeam2 > 0) {
-//         // Вычисляем процентное соотношение
-//         $team1_percentage = round( ( $ageTeam1 / ($ageTeam1 + $ageTeam2) * 100 ), 0 );
-//         $team2_percentage = round( ($ageTeam2 / ($ageTeam1 + $ageTeam2) * 100), 0 );
-    
-//     } else {
-//         $team1_percentage = 50;
-//         $team2_percentage = 50;
-//     }
-
-//     return [$team1_percentage, $team2_percentage ];
-//   }
 
   function getStaticMatch($matchId, $team1_id, $team2_id)
   {
@@ -1206,10 +1219,13 @@ function getTime($date)
         SUM(s.`mimo`) AS total_mimo,
         SUM(s.`pasplus`) AS total_pasplus,
         SUM(s.`pasminus`) AS total_pasminus,
-        p.`team`
+        p.`team`,
+        m.date AS match_date
     FROM `v9ky_sostav` s
     LEFT JOIN `v9ky_player` p
         ON p.`id` = s.`player`
+    LEFT JOIN `v9ky_match` m
+        ON m.`id` = :match_id
     WHERE s.`matc` = :match_id
     AND p.`team` IN (:team1_id, :team2_id)
     GROUP BY p.`team`";
@@ -1232,16 +1248,22 @@ function getTime($date)
     }
 
     // получаем количество ударов команды за матч
-    $team1_data['total_udar'] = $team1_data['total_vstvor'] + $team1_data['total_mimo'];
-    $team2_data['total_udar'] = $team2_data['total_vstvor'] + $team2_data['total_mimo'];
+    $team1_data['total_udar'] = isset($team1_data['total_vstvor']) || isset($team1_data['total_mimo']) ? $team1_data['total_vstvor'] + $team1_data['total_mimo'] : 0;
+    $team2_data['total_udar'] = isset($team2_data['total_vstvor']) || isset($team2_data['total_mimo']) ? $team2_data['total_vstvor'] + $team2_data['total_mimo'] : 0;
 
-    $team1_data['vstvor_percentage_team'] = calculate_percentage($team1_data['total_vstvor'], $team2_data['total_vstvor']);
+    $team1_data['total_vstvor'] = isset($team1_data['total_vstvor']) ? $team1_data['total_vstvor'] : 0;
+    $team2_data['total_vstvor'] = isset($team2_data['total_vstvor']) ? $team2_data['total_vstvor'] : 0;
+
+    $team1_data['total_pasplus'] = isset($team1_data['total_pasplus']) ? $team1_data['total_pasplus'] : 0;
+    $team2_data['total_pasplus'] = isset($team2_data['total_pasplus']) ? $team2_data['total_pasplus'] : 0;
+
+    $team1_data['vstvor_percentage_team'] = isset($team1_data['total_vstvor']) ? calculate_percentage($team1_data['total_vstvor'], $team2_data['total_vstvor']) : 50;
     $team2_data['vstvor_percentage_team'] = 100 - $team1_data['vstvor_percentage_team'];
     
-    $team1_data['pasplus_percentage_team'] = calculate_percentage($team1_data['total_pasplus'], $team2_data['total_pasplus']);
+    $team1_data['pasplus_percentage_team'] = isset($team1_data['total_pasplus']) ? calculate_percentage($team1_data['total_pasplus'], $team2_data['total_pasplus']) : 50;
     $team2_data['pasplus_percentage_team'] = 100 - $team1_data['pasplus_percentage_team'];
     
-    $team1_data['udar_percentage_team'] = calculate_percentage($team1_data['total_udar'], $team2_data['total_udar']);
+    $team1_data['udar_percentage_team'] = isset($team1_data['total_udar']) ? calculate_percentage($team1_data['total_udar'], $team2_data['total_udar']) : 50;
     $team2_data['udar_percentage_team'] = 100 - $team1_data['udar_percentage_team'];
 
     // Возвращаем структурированный массив
@@ -1262,4 +1284,128 @@ function getTime($date)
 function calculate_percentage($value1, $value2) {
     $total = $value1 + $value2;
     return $total > 0 ? ($value1 / $total) * 100 : 50;
+}
+
+/**
+ * Получает число - колчичество раз лучший игрок а матч в турнире
+ * @param string|integer
+ * @param string|integer
+ * @return string
+ */
+function getBestPlayerCount($turnirId, $playerId)
+{
+    global $dbF;
+
+    $sql = "SELECT COUNT(*) AS count_best_player 
+        FROM `v9ky_match` 
+        WHERE `turnir`= :turnir_id 
+        AND `canseled` = 1 
+        AND `best_player` = :player_id";
+    
+    $bestPlayerCount = $dbF->query($sql, [":turnir_id" => $turnirId, ":player_id" => $playerId])->find();
+
+    return $bestPlayerCount['count_best_player'];
+}
+
+
+
+/**
+ * Получает лучшего игрока матча
+ * @param string|integer
+ * @return array
+ */
+function getBestPlayerOfMatch($matchId)
+{
+    global $dbF;
+
+    $sql = "SELECT 
+        m.name1 AS lastname,
+        m.name2 AS firstname,
+        mf.`pict` AS player_photo
+    FROM `v9ky_man` m
+    LEFT JOIN `v9ky_man_face` mf
+        ON mf.man = m.id
+        
+    WHERE m.`id`= (SELECT man FROM v9ky_player WHERE id = (SELECT best_player FROM v9ky_match WHERE id = :match_id AND `canseled` = 1))
+    ORDER BY mf.id DESC
+    LIMIT 1";
+    
+    $bestPlayer = $dbF->query($sql, [":match_id" => $matchId])->find();
+
+    return $bestPlayer;
+}
+
+
+/**
+ * Получает видео и фото итогов тура
+ * @param integer|string
+ * @param integer|string
+ * @return array 
+ */
+function getResultOfTur($turnirId, $turId)
+{
+    global $dbF;
+
+    $sql = "SELECT * FROM `v9ky_post_game` WHERE `turnir` = :turnir_id AND `tur` = :tur_id";
+
+    return $dbF->query($sql, [":turnir_id" => $turnirId, ":tur_id" => $turId])->find();
+}
+
+/**
+ * 
+ */
+function getRandomNews($limit = 20) 
+{
+    $limit = intval($limit);
+    global $dbF;
+    $sql = "SELECT * FROM `v9ky_news` ORDER BY `date1` DESC LIMIT $limit";
+    $fields = $dbF->query($sql)->findAll();
+
+    // Получаем случайный ключ массива
+    $randomKey = array_rand($fields);
+
+    // Получаем случайный элемент массива
+    return $fields[$randomKey];
+}
+
+/**
+ * 
+ */
+function getCountNews()
+{
+    global $dbF;
+    $sql = "SELECT COUNT(*) AS count FROM `v9ky_news` ORDER BY `date1` DESC";
+    $field = $dbF->query($sql)->find();
+    return $field['count'];
+
+}
+
+/**
+ * 
+ */
+function getNews($start = 0, $per_page = 10)
+{
+    global $dbF;
+    $sql = "SELECT * FROM `v9ky_news` ORDER BY `date1` DESC LIMIT $start, $per_page";
+    return $dbF->query($sql)->findAll();
+
+}
+
+/**
+ * 
+ */
+function getOneNews($newsId)
+{
+    global $dbF;
+    $newsId = intval($newsId);
+    $sql = "SELECT * FROM `v9ky_news` WHERE id = :news_id";
+    $fields = $dbF->query($sql, [":news_id" => $newsId])->find();
+    return $fields;
+}
+
+/**
+ * 
+ */
+function cleanString($str) {
+    return trim(preg_replace("/\s*\([^)]*\)/", "", $str));
 }

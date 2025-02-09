@@ -26,9 +26,9 @@ $topGolkiper = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'golkiper', $la
     <table id="top-golkiper" class="draggable-container">
       <caption>
         ТОП-Голкіпер
-        <button>
+        <a class="statistic__link-to-home" href="<?= $site_url?><?=$get_query_temp?>">
           <img src="/css/components/statistic/assets/images/button-exit.svg" alt="exit">
-        </button>
+        </a>
       </caption>
       <thead>
         <tr>
@@ -48,20 +48,27 @@ $topGolkiper = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'golkiper', $la
       <tbody>
         <?php $int = 0; ?>
         <?php foreach($topGolkiper as $player): ?>
-        <tr data-playerid="<?= $player['player_id'] ?>" data-matchid="<?= $player['match_ids'] ?>" data-serial-number="<?= $int ?>" >
-            <td><?= isset($player['rank']) ? $player['rank'] : "?" ?></td>
-            <td><img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo"></td>
-            <td><img src="<?=$team_logo_path?>/<?= $player['team_photo'] ?>" alt="team-logo"></td>
-            <td class="name-cell"><?= $player['last_name'] ?> <?= $player['first_name'] ?></td>
-            <td><?= $player['total_key'] ?></td>
-            <td><?= $player['match_count'] ?></td>
-            <td><?= $player['seyv'] ?></td>
-            <td><?= $player['seyvmin'] ?></td>
-            <?php for ($i = 1; $i <= 10; $i++): ?>
-            <?php $stub = $i > $lastTur ? '?' : '-' ?>
-            <td class="turs" <?= $i > $lastTur ? 'style="opacity:0.5"' : '' ?> ><?= isset($player["match_{$i}_key"]) ? $player["match_{$i}_key"] . "%"  : $stub  ?></td>
-            <?php endfor ?>
-        </tr>
+
+          
+          
+
+            <tr data-playerid="<?= $player['player_id'] ?>" data-matchid="<?= $player['match_ids'] ?>" data-serial-number="<?= $int ?>" >
+              <td><?= isset($player['rank']) ? $player['rank'] : "?" ?></td>
+              <td><img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo"></td>
+              <td><img src="<?=$team_logo_path?>/<?= $player['team_photo'] ?>" alt="team-logo"></td>
+              <td class="name-cell"><?= $player['last_name'] ?> <?= $player['first_name'] ?></td>
+              <td><?= $player['total_key'] ?></td>
+              <td><?= $player['match_count'] ?></td>
+              <td><?= $player['seyv'] ?></td>
+              <td><?= $player['seyvmin'] ?></td>
+              <?php for ($i = 1; $i <= 10; $i++): ?>
+              <?php $stub = $i > $lastTur ? '?' : '-' ?>
+              <td class="turs" <?= $i > $lastTur ? 'style="opacity:0.5"' : '' ?> ><?= isset($player["match_{$i}_key"]) ? $player["match_{$i}_key"] . "%"  : $stub  ?></td>
+              <?php endfor ?>
+          </tr>
+
+
+        
         <?php $int ++?>
         <?php endforeach ?>
       </tbody>

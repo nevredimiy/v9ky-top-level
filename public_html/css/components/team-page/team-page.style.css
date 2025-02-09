@@ -132,6 +132,9 @@
 
 .team-page__manager-photo {
   width: 100%;
+  position: absolute;
+  top: 0;
+  
 }
 
 .team-page__manager-logo {
@@ -205,7 +208,7 @@
 
 .team-page__calendar-table tr td span.team_name {
   position: relative;
-  top: -10px;
+  top: -7px;
 }
 
 .team-page__calendar-table tr:has(th) {
@@ -365,8 +368,6 @@
   .team-page__players {
     grid-template-columns: repeat(5, 1fr);
   }
-
-
   .truncate {
     min-width: 100px;
   }
@@ -375,6 +376,9 @@
 @media screen and (min-width:1024px) {
   .team-page__players {
     grid-template-columns: repeat(6, 1fr);
+  }
+  .team-page__calendar-table tr td span.team_name {
+    top: 0;
   }
 }
 
@@ -441,10 +445,11 @@
   }
 
   .team-page__manager {
-    height: 217px;
+    height: 260px;
     width: 217px;
     border-radius: var(--border-radius-l);
-    padding: 20px 20px 60px;
+    padding: 0px 0px 60px;
+    position: relative;
   }
 
   /* .team-page__manager-photo {

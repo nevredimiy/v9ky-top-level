@@ -1,0 +1,55 @@
+.swiper-leagues {
+  overflow: hidden;
+}
+
+.swiper-leagues .swiper-slide:first-child {
+  margin-left: 10px;
+}
+
+.swiper-leagues .swiper-wrapper {
+  display: flex;
+  transition: justify-content 0.3s ease;
+}
+
+.swiper-slide {
+  flex-shrink: 0;
+  margin-right: 10px;
+  /* Пример отступа между слайдами */
+}
+
+.swiper-leagues .swiper-slide:last-child {
+  margin-right: 10px;
+}
+
+@media screen and (min-width: 840px) {
+  .swiper-leagues .swiper-wrapper {
+    justify-content: center;
+  }
+
+}
+
+@media screen and (min-width: 1260px) {
+  .swiper-leagues {
+    max-width: 1440px;
+    margin: 0 50px;
+  }
+
+  .swiper-leagues .swiper-slide:first-child {
+    margin-left: 0px;
+  }
+
+  .swiper-leagues .swiper-slide:last-child {
+    margin-right: 0px;
+  }
+
+  section.leagues .swiper-scrollbar-leagues .swiper-scrollbar-drag {
+    height: 15px;
+    margin-top: 5px;
+  }
+}
+
+@media screen and (min-width: 1540px) {
+  .swiper-leagues {
+    margin: 0 auto;
+  }
+}

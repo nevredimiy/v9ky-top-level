@@ -1,0 +1,19 @@
+@import url(./youtube.style.css);
+
+.video-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: stretch;
+}
+
+.video-content__title {
+  margin-bottom: 10px;
+}
+
+@media screen and (min-width: 1260px) {
+  .video-content__title {
+    margin-bottom: 30px;
+  }
+}
+

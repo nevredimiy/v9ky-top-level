@@ -32,9 +32,9 @@ $topBombardi = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'count_goals', 
     <table id="top-bombardir" class="draggable-container">
       <caption>
         ТОП-Бомбардир
-        <button>
+        <a class="statistic__link-to-home" href="<?= $site_url?><?=$get_query_temp?>">
           <img src="/css/components/statistic/assets/images/button-exit.svg" alt="exit">
-        </button>
+        </a>
       </caption>
       <thead>
         <tr>

@@ -35,34 +35,48 @@
 
                     <li>
                         <img src="<?= $site_url ?>/css/components/stadiums/assets/images/wash-icon.svg" alt="wash">
+                        <?php if($field['shower'] > 0):?>
                         <img src="<?= $site_url ?>/css/components/stadiums/assets/images/true-icon.svg" alt="true">
+                        <?php else : ?>
+                        <img src="<?= $site_url ?>/css/components/stadiums/assets/images/false-icon.svg" alt="false">
+                        <?php endif ?>
                     </li>
 
                     <li>
                         <img src="<?= $site_url ?>/css/components/stadiums/assets/images/sound-icon.svg" alt="sound">
+                        <?php if($field['loudspeaker'] > 0):?>
                         <img src="<?= $site_url ?>/css/components/stadiums/assets/images/true-icon.svg" alt="true">
+                        <?php else : ?>
+                        <img src="<?= $site_url ?>/css/components/stadiums/assets/images/false-icon.svg" alt="false">
+                        <?php endif ?>
                     </li>
 
                     <li>
                         <img src="<?= $site_url ?>/css/components/stadiums/assets/images/dressing-icon.svg" alt="dressing">
-                        <p>3</p>
+                        <p><?= $field['cloakroom'] ?></p>
                     </li>
 
                     <li>
                         <img src="<?= $site_url ?>/css/components/stadiums/assets/images/wc-icon.svg" alt="wc">
+                        <?php if($field['toilet'] > 0):?>
+                        <img src="<?= $site_url ?>/css/components/stadiums/assets/images/true-icon.svg" alt="true">
+                        <?php else : ?>
                         <img src="<?= $site_url ?>/css/components/stadiums/assets/images/false-icon.svg" alt="false">
+                        <?php endif ?>
                     </li>
                     </ul>
 
                     <div class="stadium-card__contact">
-                    <a class="stadium-card__phone-button">
+                    <a href="tel:+380932755413" class="stadium-card__phone-button">
                         <img src="<?= $site_url ?>/css/components/stadiums/assets/images/phone-icon.svg" alt="phone">
                         <p>(093) 275 54 13  (АДМІНІСТРАЦІЯ)</p>
                     </a>
 
-                    <a class="stadium-card__map-button">
+                    <?php if($field['latitude'] != NULL || $field['longitude'] != NULL) : ?>
+                    <a href="https://www.google.com/maps?q=<?= $field['latitude'] ?>,<?= $field['longitude'] ?>&z=15" class="stadium-card__map-button" target="_blank">
                         <img src="<?= $site_url ?>/css/components/stadiums/assets/images/map-icon.svg" alt="map">
                     </a>
+                    <?php endif ?>
                     </div>
                 </div>
             </div>

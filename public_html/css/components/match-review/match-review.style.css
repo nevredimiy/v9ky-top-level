@@ -1,0 +1,46 @@
+.match-review {
+  padding: 3.167em;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  flex: 1 1;
+  gap: 2.500em;
+  background-color: #fff;
+}
+
+.match-review__image {
+  border-radius: 0.833em;
+  overflow: hidden;
+  width: 100%;
+  object-fit: cover;
+}
+
+.match-review__body {
+  height: 100%;
+  text-align: left;
+  color: #000;
+  font-family: Roboto Condensed;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.match-review__title {
+  text-transform: uppercase;
+  font-size: 1.333em;
+}
+
+.match-review__description {
+  color: rgba(0, 0, 0, 0.71);
+  font-size: 1.083em;
+}
+
+.text-block-three-rows {
+  display: -webkit-box; /* Используется для работы line-clamp */
+  -webkit-box-orient: vertical; /* Устанавливает направление блока */
+  overflow: hidden; /* Скрывает избыточный текст */
+  -webkit-line-clamp: 3; /* Устанавливает количество строк */
+  text-overflow: ellipsis; /* Добавляет многоточие в конце */
+  max-height: calc(1.2em * 3); /* Высота 3 строк (1.2em — высота строки) */
+  line-height: 1.2em; /* Высота строки */
+}

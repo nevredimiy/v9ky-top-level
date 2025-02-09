@@ -19,8 +19,9 @@ $(document).ready(function () {
                 type: "post",
                 url: "../freedman/actions/actions.php",
                 data: JSON.stringify({ tur: tur, turnir: turnir, lasttur: lastTur, action: 'calendar_of_matches' }),
+                dataType: 'json', // Ожидаем данные в формате JSON
                 success: function (response) {
-                    $(".calendar-of-matches__grid-container").html(response);
+                    $(".calendar-of-matches__grid-container").html(response.section1);
 
                     swipersLeagues = new Swiper(".swiper-month-controls", {
                         slidesPerView: 'auto',
@@ -41,6 +42,8 @@ $(document).ready(function () {
                             draggable: true,
                         },
                     });
+
+                    $("#controls").html(response.section2);
 
                 },
                 error: function (xhr, status, error) {
@@ -334,7 +337,7 @@ $(document).ready(function () {
         let tur = $(this).attr('data-switch-tur');
         let turnir = $(this).attr('data-turnir');
         let lastTur = $(this).attr('data-lasttur');
-        let originalUrl= $(this).attr('href');
+        let originalUrl = $(this).attr('href');
 
         if (tur) {
             $.ajax({
@@ -344,7 +347,7 @@ $(document).ready(function () {
                 success: function (response) {
                     $(".match-calendar").html(response);
 
-                    swipersLeagues = new Swiper(".swiper-month-controls", {
+                    swiperMonthControls = new Swiper(".swiper-month-controls", {
                         slidesPerView: 'auto',
                         spaceBetween: 20,
                         scrollbar: {
@@ -354,7 +357,18 @@ $(document).ready(function () {
                         },
                     });
 
-                    swipersLeagues = new Swiper(".swiper-matches", {
+                    // перемещаем слайдер на текущий тур (тот который красненький)
+                    const slideIndex = $('.swiper-slide').toArray().findIndex(slide =>
+                        $(slide).find('.month-controls__button--current').length > 0
+                    );
+                    if (slideIndex !== -1) {
+                        // Центрируем найденный слайд
+                        swiperMonthControls.slideTo(slideIndex);
+                    } else {
+                        console.warn('Слайд с указанным дочерним классом не найден.');
+                    }
+
+                    swipersMatches = new Swiper(".swiper-matches", {
                         slidesPerView: 'auto',
                         spaceBetween: 20,
                         scrollbar: {
@@ -371,6 +385,134 @@ $(document).ready(function () {
             });
         }
     });
+
+    $('#controls').on('click', '[data-turid]', function (e) {
+
+        e.preventDefault();
+
+
+
+        $('.card-of-matches__controls-link').css('background', '');
+        console.log($('.card-of-matches__controls-link'));
+
+
+        // Инициализация: записываем GET-параметр в data-атрибут
+        const turId = getUrlParameter('tur');
+        if (turId) {
+            $(this).attr('data-turid', turId);
+        }
+
+        let tur = $(this).attr('data-turid');
+        let turnir = $(this).attr('data-turnir');
+        let lastTur = $(this).attr('data-lasttur');
+
+        if (tur) {
+            $.ajax({
+                type: "post",
+                url: "../freedman/actions/actions.php",
+                data: JSON.stringify({ tur: tur, turnir: turnir, lasttur: lastTur, action: 'green_zone' }),
+                success: function (response) {
+                    $('.green-zone').html(response);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Ошибка AJAX:', error); // Логируем ошибку
+                    alert('Ошибка при загрузке данных. Попробуйте позже.');
+                }
+            });
+        }
+    });
+
+    $('#controls').on('click', '#after-play', function (e) {
+        e.preventDefault();
+
+        link = $(this).attr('href');
+        console.log(link);
+        $.ajax({
+            type: "post",
+            url: "../freedman/actions/actions.php",
+            data: JSON.stringify({ link: link, action: 'after-play' }),
+            success: function (response) {
+                $('.green-zone').html(response);
+            },
+            error: function (xhr, status, error) {
+                console.error('Ошибка AJAX:', error); // Логируем ошибку
+                alert('Ошибка при загрузке данных. Попробуйте позже.');
+            }
+        });
+
+    });
+
+    $('#controls').on('click', '#top-goals', function (e) {
+        e.preventDefault();
+
+        link = $(this).attr('href');
+        console.log(link);
+        $.ajax({
+            type: "post",
+            url: "../freedman/actions/actions.php",
+            data: JSON.stringify({ link: link, action: 'top-goals' }),
+            success: function (response) {
+                $('.green-zone').html(response);
+            },
+            error: function (xhr, status, error) {
+                console.error('Ошибка AJAX:', error); // Логируем ошибку
+                alert('Ошибка при загрузке данных. Попробуйте позже.');
+            }
+        });
+
+    });
+
+    $('#controls').on('click', '#top-save', function (e) {
+        e.preventDefault();
+
+        link = $(this).attr('href');
+        console.log(link);
+        $.ajax({
+            type: "post",
+            url: "../freedman/actions/actions.php",
+            data: JSON.stringify({ link: link, action: 'top-save' }),
+            success: function (response) {
+                $('.green-zone').html(response);
+            },
+            error: function (xhr, status, error) {
+                console.error('Ошибка AJAX:', error); // Логируем ошибку
+                alert('Ошибка при загрузке данных. Попробуйте позже.');
+            }
+        });
+
+    });
+
+
+    colorRedBtnCurrent();
+
+
 });
+
+
+function colorRedBtnCurrent() {
+    let tur = $('.month-controls__button--current').attr('data-turid');
+    let lastTur = $('.month-controls__button--current').attr('data-lasttur');
+    let dateLastTur = $('.month-controls__button--current').attr('data-datelasttur');// Дата в формате строки
+
+    // Получаем сегодняшнюю дату без времени (YYYY-MM-DD)
+    let currentDate = new Date();
+    currentDate.setHours(0, 0, 0, 0); // Убираем время
+
+    // Преобразуем строку в объект Date
+    let dateLastTurObject = new Date(dateLastTur.replace(" ", "T")); // Преобразуем в формат ISO
+
+    // Прибавляем 5 дней
+    dateLastTurObject.setDate(dateLastTurObject.getDate() + 4);
+
+    if (tur <= lastTur && dateLastTurObject > currentDate) {
+        $('#anons-1').css({ 'background': 'red' });
+    }
+}
+
+// Функция для получения значения GET-параметра
+function getUrlParameter(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
 
 

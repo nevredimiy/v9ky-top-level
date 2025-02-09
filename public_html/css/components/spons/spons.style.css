@@ -1,0 +1,14 @@
+.slider-spons .slide {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: auto;
+    border: 1px solid transparent;
+    margin-top: 16px;
+}
+
+.slider-spons img {
+    width: 100%;
+    max-height: 110px;
+    display: block;
+}

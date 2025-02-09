@@ -1,21 +1,21 @@
 ﻿<!DOCTYPE html>
 <?php
 
-if(isset($_GET['foo'])) {
-	// Увімкнення відображення помилок
-	ini_set('display_errors', 1);
-	ini_set('display_startup_errors', 1);
 
-	// Встановлення рівня звітності помилок
-	error_reporting(E_ALL);
-}
+// // Увімкнення відображення помилок
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+
+// // Встановлення рівня звітності помилок
+// error_reporting(E_ALL);
+
 
 session_start();
 
 $page=2;
 //ini_set('error_log', '/error_jeka.txt');
 // Define the rate limit settings
-$limit = 20; // Number of requests allowed
+$limit = 30; // Number of requests allowed
 $period = 60; // Time period (in seconds)
 
 // Get the current timestamp
@@ -66,10 +66,10 @@ $start = microtime(true);
 
 define('READFILE', true);
 
-if(!isset($_GET['foo'])){
 
-	require_once "config.php";
-}
+
+require_once "config.php";
+
 
 
 
@@ -91,12 +91,12 @@ $module = 'index';
 $action = 'calendar';
 
 
-if(!isset($_GET['foo'])){
-	//турнир поумолчанию
-	$recligi = $db->Execute("select name from v9ky_turnir where city=2 and active=1 ORDER BY priority ASC limit 1");
-	$tournament = $recligi->fields['name'];
 
-}
+//турнир поумолчанию
+$recligi = $db->Execute("select name from v9ky_turnir where city=2 and active=1 ORDER BY priority ASC limit 1");
+$tournament = $recligi->fields['name'];
+
+
 
 // Массив параметров из URI запроса.
 $params = array();
@@ -231,6 +231,11 @@ switch($tournament) {
 			case "match_calendar": $title="Календар матчів міста"; require_once(CONTROLLERS . "/match_calendar.php"); break;
 			case "transfers": $title="Календар матчів міста"; require_once(CONTROLLERS . "/transfers.php"); break;
 			case "contacts_championship": $title="Календар матчів міста"; require_once(CONTROLLERS . "/contacts_championship.php"); break;
+			case "live_broadcast": $title="Календар матчів міста"; require_once(CONTROLLERS . "/live_broadcast.php"); break;
+			case "online_video": $title="Календар матчів міста"; require_once(CONTROLLERS . "/online_video.php"); break;
+			case "news": $title="Експрес-підсумки"; require_once(CONTROLLERS . "/news/news.php"); break;
+			case "news_show": $title="Експрес-підсумки"; require_once(CONTROLLERS . "/news/news_show.php"); break;
+			case "developer_page": $title="Сторінка розробника"; require_once(CONTROLLERS . "/dev/developer_page.php"); break;
 			
 			case "violators": $title="Порушники ліги"; require_once("violators.php"); break;
             case "violators_new": $title="Порушники ліги"; require_once("violators_new.php"); break;

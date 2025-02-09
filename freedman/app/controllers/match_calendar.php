@@ -28,7 +28,7 @@ if(isset($_GET['tur'])){
     $currentTur = $_GET['tur'];
 }
 
-// Добавляем элемент link в массив
+// Добавляем элемент link в массив $dateTurs
 $dateTurs = addLinkItem($dateTurs);
 
 // Данные тура
@@ -49,6 +49,7 @@ foreach ($dataCurrentTur as $item) {
 
     $groupedData[$dateWithoutTime][] = $item;
 }
+
 
 $tshirtImages = [
     0 => IMAGES . "/t-shirt/azure-shirt.png",

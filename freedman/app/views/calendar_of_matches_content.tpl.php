@@ -13,6 +13,8 @@
                     <a 
                         data-turnir="<?= $turnir ?>" 
                         data-lasttur="<?= $lastTur?>"
+                        data-datelasttur="<?= $dateLastTurString ?>"
+                        data-turid="<?= $dateTur['tur'] ?>"
                         <?= $currentTur != $dateTur['tur'] ? "data-turid='" . $dateTur['tur'] ."'" : '' ?> 
                         class="
                             month-controls__button
@@ -39,7 +41,7 @@
         <div class="swiper-matches swiper swiper-initialized swiper-horizontal swiper-backface-hidden">
             <div class="swiper-wrapper" id="swiper-wrapper-1b58efbe70e5fba9" aria-live="polite"
                 style="transform: translate3d(0px, 0px, 0px);">
-
+                <?php $i =1 ?>
                 <?php foreach($dataCurrentTurWithDate as $match): ?>
 
                 <div class="swiper-slide swiper-slide-active" role="group" aria-label="1 / 5"
@@ -95,6 +97,8 @@
                                 class="card-of-matches__controls-link" 
                                 <?= $hrefAnons ?> 
                                 title="Анонс матчу"
+                                id="anons-<?= $i ?>"
+                                <?= ($currentTur <= $lastTur && $dateLastTur >= $currentDate && $i == 1) ? 'style="background:red"': '' ?>
                             >  
                                 <img src="/css/components/card-of-matches/assets/images/anons-icon.png" alt="Анонс матчу" title="Анонс матчу">
                             </a>
@@ -160,67 +164,73 @@
                             </a>
                         </div>
 
-                        <div class="card-of-matches__status">МАТЧ ЗАВЕРШЕНО</div>
+                        <div class="card-of-matches__status">
+                            <?php if($match['goals1'] == NULL || $match['goals2'] == NULL ) : ?>
+                                МАТЧ ОЧІКУЄТЬСЯ
+                            <?php else:?>
+                                МАТЧ ЗАВЕРШЕНО
+                            <?php endif?>
+                        </div>
 
                         <a class="card-of-matches__share-button" href="#">
                             <img src="/css/components/card-of-matches/assets/images/share-icon.svg" alt="share">
                         </a>
                     </div>
                 </div>
+                <?php $i++ ?>
                 <?php endforeach ?>
 
             </div>
-
-            <div class="swiper-bg-scroll"></div>
-            <div class="swiper-scrollbar swiper-scrollbar-horizontal swiper-scrollbar-lock">
-                <div class="swiper-scrollbar-drag" style="transform: translate3d(0px, 0px, 0px); width: 70px;">
-                </div>
-            </div>
-            <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
+            <div class="swiper-scrollbar-matches"></div>
         </div><!-- calendar-of-matches__aside -->
     </div><!-- calendar-of-matches__head-nav -->
 
         <div class="calendar-of-matches__dynamic-content">
-            <section class="green-zone">
-                <div class="green-zone__current">
+            <section id="team-of-the-tour" class="green-zone">
+                <?php if($currentTur <= $lastTur && $dateLastTur <= $currentDate) : ?>
+                <div id="capture" class="green-zone__current">
                     <h2 class="green-zone__title title">ЗБІРНА ТУРУ</h2>
+                    <div class="controls__share">
+                        <button class="controls__share-btn save-image" data-target="team-of-the-tour">
+                            <img src="css/components/match-stats/assets/images/button-share-icon.svg" alt="Зберегти зображення">
+                        </button>
+                    </div>
                     <div class=" <?= $currentTur <= $lastTur ? 'green-zone__players' : '' ?>">
 
-                        <?php if($currentTur <= $lastTur) : ?>
+                            <?php if(!empty($bestPlayersForTable)):?>
+                            <?php foreach($bestPlayersForTable as $player) : ?>
 
+                            <div class="player-card">
+                                <div class="player-card__photo-container">
+                                    <div class="player-card__left-icon">
+                                        <img src="/css/components/player-card/assets/images/<?= $labels[$player['best_player']]['icon'] ?>"
+                                            alt="star">
+                                        <span><?= $player['count_points'] ?></span>
+                                    </div>
 
-                        <?php foreach($bestPlayersForTable as $player) : ?>
+                                    <img class="player-card__right-icon" src="<?= $team_logo_path ?>/<?= $player['team_photo'] ?>"
+                                        alt="Логотип команды">
 
-                        <div class="player-card">
-                            <div class="player-card__photo-container">
-                                <div class="player-card__left-icon">
-                                    <img src="/css/components/player-card/assets/images/<?= $labels[$player['best_player']]['icon'] ?>"
-                                        alt="star">
-                                    <span><?= $player['count_points'] ?></span>
+                                    <img class="player-card__photo" src="<?= $player_face_path ?>/<?= $player['player_photo'] ?>" alt="yarmol">
                                 </div>
 
-                                <img class="player-card__right-icon" src="<?= $team_logo_path ?>/<?= $player['team_photo'] ?>"
-                                    alt="Логотип команды">
+                                <div class="player-card__role"><?= $labels[$player['best_player']]['role'] ?></div>
+                                <div class="player-card__club"><?= $player['team_name'] ?></div>
+                                <div class="player-card__name"><?= $player['first_name'] ?> <?= $player['last_name'] ?>
+                                </div>
 
-                                <img class="player-card__photo" src="<?= $player_face_path ?>/<?= $player['player_photo'] ?>" alt="yarmol">
+                                <a href="#" class="player-card__link">
+                                    <span>Таблиця</span>
+                                    <img src="/css/components/player-card/assets/images/arrow-icon.svg" alt="arrow">
+                                </a>
                             </div>
 
-                            <div class="player-card__role"><?= $labels[$player['best_player']]['role'] ?></div>
-                            <div class="player-card__club"><?= $player['team_name'] ?></div>
-                            <div class="player-card__name"><?= $player['first_name'] ?> <?= $player['last_name'] ?>
-                            </div>
-
-                            <a href="#" class="player-card__link">
-                                <span>Таблиця</span>
-                                <img src="/css/components/player-card/assets/images/arrow-icon.svg" alt="arrow">
-                            </a>
-                        </div>
-
-                        <?php endforeach ?>
-                        <?php else: ?>
-                        <h2 class="green-zone__title text-center">Цей турнір ще не відбувся, або дані турніру не внесені
-                            адміністратором </h2>
-                        <?php endif ?>
+                            <?php endforeach ?>
+                            <?php else : ?>
+                                <div class="green-zone__footer-title">
+                                    <h2 class="green-zone__title text-center">Дані туру ще не внесені адміністратором. Зайдіть пізніше</h2>
+                                </div>
+                            <?php endif ?>
 
                         <div class="green-zone__footer-title">
                             <img src="/css/components/green-zone/assets/images/v9ku-logo-on-white-back.png"
@@ -231,11 +241,23 @@
 
                             <img src="/css/components/green-zone/assets/images/v9ku-logo-on-white-back.png"
                                 alt="v9ku-logo">
+                                <div class="share-btn-item d-none">
+                                    <button class="share-telegram" id="share-telegram">
+                                        <svg xmlns="http://www.w3.org/2000/svg" height="40" width="60" viewBox="-36 -60 312 360"><defs><linearGradient gradientUnits="userSpaceOnUse" y2="51.9" y1="11.536" x2="28.836" x1="46.136" id="a"><stop offset="0" stop-color="#37aee2"/><stop offset="1" stop-color="#1e96c8"/></linearGradient></defs><g transform="scale(3.4682)"><circle fill="url(#a)" r="34.6" cx="34.6" cy="34.6"/><path fill="#fff" d="M14.4 34.3l23.3-9.6c2.3-1 10.1-4.2 10.1-4.2s3.6-1.4 3.3 2c-.1 1.4-.9 6.3-1.7 11.6l-2.5 15.7s-.2 2.3-1.9 2.7c-1.7.4-4.5-1.4-5-1.8-.4-.3-7.5-4.8-10.1-7-.7-.6-1.5-1.8.1-3.2 3.6-3.3 7.9-7.4 10.5-10 1.2-1.2 2.4-4-2.6-.6l-14.1 9.5s-1.6 1-4.6.1c-3-.9-6.5-2.1-6.5-2.1s-2.4-1.5 1.7-3.1z"/></g></svg>
+                                    </button>  
+                                    <div class="text-green-on-green loading-message"></div>
+                                </div>
                         </div>
 
                     </div>
 
                 </div>
+                
+                <?php else: ?>
+                            
+                    <?php require_once 'anons.tpl.php' ?>
+                <?php endif ?>
             </section>
+           
         </div> <!-- calendar-of-matches__dynamic-content -->
 </div>

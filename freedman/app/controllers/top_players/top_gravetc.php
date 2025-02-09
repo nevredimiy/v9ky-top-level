@@ -25,9 +25,9 @@ $topGravetc = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'topgravetc', $l
         <table id="top-gravetc" class="draggable-container">
         <caption>
             ТОП-Гравець
-            <button>
-            <img src="/css/components/statistic/assets/images/button-exit.svg" alt="exit">
-            </button>
+            <a class="statistic__link-to-home" href="<?= $site_url?><?=$get_query_temp?>">
+                <img src="/css/components/statistic/assets/images/button-exit.svg" alt="exit">
+            </a>
         </caption>
         <thead>
             <tr>

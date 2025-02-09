@@ -47,6 +47,13 @@ foreach ($leagues as $key => $league) {
 
     // Добавляем ссылку в массив лиг
     $leagues[$key]['link'] = $myLink;
+
+    if (preg_match('/^(.+?)\s*(\(.+\))$/u', $league['full_name'], $matches)) {
+        $leagues[$key]['name'] = trim($matches[1]); // "Суперліга"
+        $leagues[$key]['locale_name'] = str_replace(["(", ")"], "", trim($matches[2])); // "(Футзал)"
+    }
+
+    
 }
 
 

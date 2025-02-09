@@ -6,7 +6,7 @@ $(document).ready(function () {
         var targetId = $(this).data("target");
         var content = $("#" + targetId); // Находим блок по ID
         console.log('targetId - ' + targetId);
-        
+
 
         // Сохраняем блок в изображение
         html2canvas(content[0]).then(function (canvas) {
@@ -35,7 +35,149 @@ $(document).ready(function () {
     });
 
 
+    // $('#share-telegram').on('click', function () {
+    //     html2canvas($('#capture')[0]).then(function (canvas) {
+    //         canvas.toBlob(function (blob) {
+    //             var formData = new FormData();
+    //             formData.append('image', blob, 'screenshot.png');
+
+    //             // Отправляем на сервер  
+    //             $.ajax({
+    //                 url: '../freedman/actions/upload.php',
+    //                 type: 'POST',
+    //                 data: formData,
+    //                 processData: false,
+    //                 contentType: false,
+    //                 success: function (data) {
+    //                     var response = JSON.parse(data);
+    //                     if (response.success) {
+    //                         // Отправляем ссылку в Telegram  
+    //                         sendToTelegram(response.link);
+    //                     }
+    //                 }, // Привязываем контекст к функции 
+    //                 error: function (xhr, status, error) {
+    //                     console.error('Ошибка AJAX:', error); // Логируем ошибку
+    //                     alert('Ошибка при загрузке данных. Попробуйте позже.');
+    //                 }
+    //             });
+    //         });
+    //     });
+    // });
 });
+
+
+// function sendToTelegram(link) {
+//     var message = 'Скриншот: ' + link;
+
+//     $.ajax({
+//         url: '../freedman/actions/sendToTelegram.php', // Путь к вашему PHP-прокси
+//         type: 'POST',
+//         contentType: 'application/json',
+//         data: JSON.stringify({ message: message }),
+//         success: function (response) {
+//             console.log('Сообщение отправлено в Telegram:', response);
+//         },
+//         error: function (err) {
+//             console.error('Ошибка отправки сообщения в Telegram:', err);
+//         }
+//     });
+// }
+
+document.addEventListener("DOMContentLoaded", function() {
+    let postTitle = document.title;
+    let postUrl = window.location.href;
+    let telegramButton = document.querySelector(".share-telegram");
+    let loadingMessage = document.querySelector(".loading-message");
+
+    function openShare(url) {
+        window.open(url, "_blank");
+    }
+
+    function setButtonState(isLoading) {
+        if (isLoading) {
+            telegramButton.disabled = true; // Блокируем кнопку
+            loadingMessage.innerText = "Створення скриншота..."; // Меняем текст
+            telegramButton.classList.add("loading"); // Добавляем класс для стилизации
+        } else {
+            telegramButton.disabled = false; // Разблокируем кнопку
+            loadingMessage.innerText = ""; // Возвращаем текст
+            telegramButton.classList.remove("loading"); // Убираем класс загрузки
+        }
+    }
+
+    function captureAndSendToServer(callback) {
+        let captureElement = document.querySelector("#capture"); // Элемент, который будет скриншотиться
+        if (!captureElement) {
+            alert("Ошибка: элемент для скриншота не найден!");
+            return;
+        }
+
+        setButtonState(true); // Блокируем кнопку во время обработки
+
+        html2canvas(captureElement).then(canvas => {
+            canvas.toBlob(blob => {
+                let formData = new FormData();
+                formData.append("image", blob, "screenshot.png");
+
+                // Отправка скриншота на сервер
+                fetch("../freedman/actions/upload.php", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+
+                    setButtonState(false); // Разблокируем кнопку после загрузки
+
+                    if (data.success) {
+                        callback(data.link); // Передаем ссылку на изображение в Telegram
+                    } else {
+                        console.error("Ошибка загрузки:", data.error);
+                        alert("Ошибка загрузки изображения!");
+                    }
+                })
+                .catch(error => {
+                    setButtonState(false); // Разблокируем кнопку после загрузки
+
+                    console.error("Ошибка AJAX:", error);
+                    alert("Ошибка при загрузке данных!");
+                });
+            });
+        });
+    }
+
+    // Делимся ссылкой в соцсетях
+    // document.querySelector(".share-linkedin").addEventListener("click", function(e) {
+    //     e.preventDefault();
+    //     openShare(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`);
+    // });
+
+    // document.querySelector(".share-facebook").addEventListener("click", function(e) {
+    //     e.preventDefault();
+    //     openShare(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`);
+    // });
+
+    // document.querySelector(".share-twitter").addEventListener("click", function(e) {
+    //     e.preventDefault();
+    //     openShare(`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(postTitle)}`);
+    // });
+
+    // document.querySelector(".share-email").addEventListener("click", function(e) {
+    //     e.preventDefault();
+    //     window.location.href = `mailto:?subject=${encodeURIComponent(postTitle)}&body=${encodeURIComponent(postUrl)}`;
+    // });
+
+    // Создание скриншота и отправка в Telegram
+    document.querySelector(".share-telegram").addEventListener("click", function(e) {
+        e.preventDefault();
+        captureAndSendToServer(function(imageUrl) {
+            openShare(`https://t.me/share/url?url=${encodeURIComponent(imageUrl)}&text=${encodeURIComponent(postTitle)}`);
+        });
+    });
+});
+
+
+
 
 // Делаем Имя и Фамилию короче. Имя сокращаем до заглавной буквы
 function shortenNames() {
@@ -97,4 +239,76 @@ container?.addEventListener('mouseup', () => {
 // Событие выхода мыши за пределы контейнера
 container?.addEventListener('mouseleave', () => {
     isDragging = false; // Деактивируем режим перетаскивания
+});
+
+
+// Эксперимент отправка в телеграм сгенерированного фото из части страницы сайта через imgur
+/**
+ * Пример разметки 
+ * <div> 
+ * <button id="shareToTelegram">Отправить в Telegram</button>
+ * </div>
+ */
+// document.getElementById('shareToTelegram').addEventListener('click', async function () {
+//     const element = document.getElementById('captureArea');
+//     const clientId = "3c17e1858f79b5e"; // Замените на свой ID
+//     html2canvas(element).then(async (canvas) => {
+//         const imageData = canvas.toDataURL("image/png"); // Создаем Data URL
+
+//         // Загружаем изображение в imgur (можно использовать свой сервер)
+//         const formData = new FormData();
+//         formData.append('image', imageData.split(',')[1]); // Убираем "data:image/png;base64,"
+
+//         const response = await fetch('https://api.imgur.com/3/image', {
+//             method: 'POST',
+//             headers: { Authorization: 'Client-ID ' + clientId, }, // Получите CLIENT_ID на     
+//             body: formData
+//         });
+
+//         const result = await response.json();
+//         if (result.success) {
+//             const imageUrl = result.data.link; // Получаем URL загруженного изображения
+
+//             // Формируем ссылку для Telegram
+//             const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(imageUrl)}&text=${encodeURIComponent('Посмотри это фото!')}`;
+//             window.open(telegramUrl, '_blank');
+//         } else {
+//             console.error('Ошибка загрузки:', result);
+//         }
+//     });
+// });
+
+// Код от Юры по расшариванию контента по соц сетям. 
+document.addEventListener("DOMContentLoaded", function () {
+    let postTitle = document.title;
+    let postUrl = window.location.href;
+
+    function openShare(url) {
+        window.open(url, "_blank");
+    }
+
+    // document.querySelector(".share-linkedin").addEventListener("click", function(e) {
+    //     e.preventDefault();
+    //     openShare(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`);
+    // });
+
+    // document.querySelector(".share-facebook").addEventListener("click", function(e) {
+    //     e.preventDefault();
+    //     openShare(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`);
+    // });
+
+    // document.querySelector(".share-twitter").addEventListener("click", function(e) {
+    //     e.preventDefault();
+    //     openShare(`https://twitter.com/intent/tweet?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(postTitle)}`);
+    // });
+
+    // document.querySelector(".share-email").addEventListener("click", function(e) {
+    //     e.preventDefault();
+    //     window.location.href = `mailto:?subject=${encodeURIComponent(postTitle)}&body=${encodeURIComponent(postUrl)}`;
+    // });
+
+    // document.querySelector("#share-telegram").addEventListener("click", function (e) {
+    //     e.preventDefault();
+    //     openShare(`https://t.me/share/url?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(postTitle)}`);
+    // });
 });

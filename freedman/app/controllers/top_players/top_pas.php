@@ -24,9 +24,9 @@ $topPas = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'pas', $lastTur);
         <table id="top-pas" class="draggable-container">
         <caption>
             ТОП-Пас
-            <button>
-            <img src="/css/components/statistic/assets/images/button-exit.svg" alt="exit">
-            </button>
+            <a class="statistic__link-to-home" href="<?= $site_url?><?=$get_query_temp?>">
+          <img src="/css/components/statistic/assets/images/button-exit.svg" alt="exit">
+        </a>
         </caption>
 
         <thead>
@@ -37,7 +37,7 @@ $topPas = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'pas', $lastTur);
             <th class="th_s" data-label="Г">ГРАВЕЦЬ</th>
             <th class="th_s" data-label="Т">Тотал</th>
             <th class="th_s" data-label="М">Матчів</th>
-            <th class="th_s" data-label="ЗП">Заг (+5)</th>
+            
             <th class="th_s" data-label="П+">Пас+ (+1)</th>
             <th class="th_s" data-label="П-">Пас- (-1)</th>
             <?php for($i = 1; $i <= 10; $i++): ?>
@@ -55,7 +55,7 @@ $topPas = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'pas', $lastTur);
                 <td  class="name-cell"><?= $player['last_name'] ?> <?= $player['first_name'] ?></td>
                 <td><?= $player['total_key'] ?></td>
                 <td><?= $player['match_count'] ?></td>
-                <td><?= $player['zagostrennia']*5 ?></td>
+                
                 <td><?= $player['pasplus'] ?></td>
                 <td><?= $player['pasminus']*3 ?></td>
                 <?php for ($i = 1; $i <= 10; $i++): ?>

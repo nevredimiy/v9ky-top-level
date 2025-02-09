@@ -1,0 +1,144 @@
+@import url(./swiper-league.style.css);
+
+.leagues {
+  background-color: transparent;
+  width: 100%;
+}
+
+.leagues__container {
+  max-width: 1440px;
+  margin: 0 auto;
+  /* overflow-x: scroll; */
+}
+
+/* .leagues__container::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.leagues__container::-webkit-scrollbar-thumb {
+  background-color: gray;
+  border-radius: 6px;
+}
+
+.leagues__container::-webkit-scrollbar-track {
+  background: transparent;
+} */
+
+/* .leagues__wrap {
+  margin: 10px 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 5px;
+  justify-content: flex-start;
+} */
+
+
+
+.leagues__item {
+  display: flex;
+  user-select: none;
+  min-width: 103px;
+  margin-bottom: 5px;
+}
+
+.leagues__item a {
+  display: block;
+  width: 100%;
+  border-radius: var(--border-radius-m);
+  color: #0B0B0B;
+  background: #FFFFFF;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-decoration: none;
+  box-shadow: 0px 4px 23px rgba(8, 20, 33, 0.04);
+  transition: all 0.3s ease;
+}
+
+.leagues__item a:hover,
+.leagues__item a:active,
+.leagues__item-active a {
+  background-color: #0B0B0B;
+  color: #fff;
+}
+
+
+
+.leagues__item-title {
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-size: var(--font-size-);
+  line-height: 12px;
+  text-transform: uppercase;
+}
+
+.leagues__item-location {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-size: var(--font-size-m);
+  line-height: 9px;
+}
+
+.leagues__item-location>img {
+  height: 8.75px;
+}
+
+.leagues__item-location>span {
+  opacity: 0.5;
+}
+
+
+
+@media screen and (min-width: 680px) {
+  .leagues__wrap {
+    justify-content: center;
+  }
+
+}
+
+@media screen and (min-width: 1260px) {
+  .leagues__item {
+    margin-bottom: 0;
+  }
+}
+
+@media screen and (min-width: 1260px) {
+  .leagues__item {
+    min-width: 130px;
+  }
+  
+  .leagues__item a {
+    box-shadow: 0px 4px 23px rgba(8, 20, 33, 0.04);
+    gap: 13px;
+    padding: 20px 10px;
+  }
+
+  .leagues__item-active a {
+    background-color: #0B0B0B;
+    color: #fff;
+  }
+
+  .leagues__item-title {
+    font-family: 'Roboto Condensed';
+    font-style: normal;
+    font-weight: 700;
+    font-size: var(--font-size-xxl);
+    line-height: 21px;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .leagues__item-location {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 500;
+    font-size: var(--font-size-xl);
+    line-height: 19px;
+  }
+}

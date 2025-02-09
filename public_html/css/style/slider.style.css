@@ -1,0 +1,73 @@
+.swiper {
+}
+
+.swiper-table {
+  overflow: hidden;
+}
+
+.swiper-wrapper {
+  padding: 0;
+  box-sizing: border-box;
+  background-color: transparent;
+}
+.swiper-slide {
+  width: auto;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.swiper-slide--table {
+  min-width: 100%;
+} 
+
+.swiper-pagination {
+}
+.swiper-button-prev {
+}
+.swiper-button-next {
+}
+
+.swiper-bg-scroll {
+  height: 13px;
+  background-color: #FAFAFA;
+}
+
+.swiper-scrollbar {
+  padding: 0;
+  box-sizing: border-box;
+  max-height: 3px;
+  background-color: transparent;
+}
+
+.swiper-scrollbar-table {
+  margin: 0 6px;
+  padding: 0;
+  box-sizing: border-box;
+  max-height: 3px;
+}
+
+.swiper-scrollbar.swiper-scrollbar-horizontal {
+}
+
+.swiper-scrollbar-drag {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  height: 10px;
+  background-color: #c5c7c6;
+}
+
+@media screen and (min-width: 1260px) {
+  .swiper-wrapper {
+    /* justify-content: space-between;
+    gap: 10px; */
+  }
+
+  .swiper-horizontal {
+  }
+
+  .swiper-scrollbar,
+  .swiper-bg-scroll {
+    /* display: none; */
+  }
+}

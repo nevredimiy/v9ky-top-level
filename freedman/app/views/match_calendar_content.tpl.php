@@ -23,11 +23,16 @@
 
 </div>
 <div class="match-zone__current-date">
+    <?php $i = 1 ?>
     <?php foreach($groupedData as $key => $value) : ?>
     <h2 class="match-zone__title title"><?= getFormateDate($key) ?></h2>
+    <?php $j = 1 ?>
     <?php foreach($value as $k => $v) : ?>
     <div class="match-zone__matches">
-        <div class="card-of-matches card-of-matches--match-zone card-of-matches--status-before">
+        <div id="matchCalendar<?= $i.$j ?>" class="card-of-matches card-of-matches--match-zone">
+            <a data-target="matchCalendar<?= $i.$j ?>" title="Зберегти матч" class="card-of-matches__share-button save-image" href="#">
+                <img src="<?= $site_url?>/freedman/assets/images/button-share-icon.svg" alt="share">
+            </a>
             <div class="card-of-matches__title-match">
                 <img data-shirt="<?= $v['color_tshirt1'] ?>" class=" card-of-matches__shirt
                         card-of-matches__shirt--left" src="<?= $tshirtImages[$v['color_tshirt1']] ?>" alt="yellow">
@@ -72,25 +77,19 @@
             </div>
 
             <div class="card-of-matches__controls">
-                <div class="card-of-matches__controls">
-                    <a href="#"><img src="./components/card-of-matches/assets/images/edit-icon.svg" alt=""></a>
-                    <a href="#"><img src="./components/card-of-matches/assets/images/scale-icon.svg" alt=""></a>
-                    <a href="#"><img src="./components/card-of-matches/assets/images/cut-icon.svg" alt=""></a>
-                    <a href="#"><img src="./components/card-of-matches/assets/images/hd-icon.svg" alt=""></a>
-                    <a href="#"><img src="./components/card-of-matches/assets/images/red-icon.svg" alt=""></a>
-                    <a href="#"><img src="./components/card-of-matches/assets/images/photo-icon.svg" alt=""></a>
-                </div>
-
-                <div class="card-of-matches__status">МАТЧ ОЧІКУЄТЬСЯ</div>
-
-                <a class="card-of-matches__share-button" href="#">
-                    <img src="./components/card-of-matches/assets/images/share-icon.svg" alt="share">
-                </a>
+                <?php if($v['canseled'] == 1):?>
+                <div class="card-of-matches__status card-of-matches--completed">МАТЧ ЗАВЕРШЕНО</div>     
+                <?php elseif($v['canseled'] == 0) :?>          
+                <div class="card-of-matches__status card-of-matches--expected">МАТЧ ОЧІКУЄТЬСЯ</div>     
+                <?php elseif($v['canseled'] == 2) :?>          
+                <div class="card-of-matches__status card-of-matches--in-progress">МАТЧ ТРИВАЄ</div>     
+                <?php endif?>          
             </div>
 
         </div>
     </div>
-
+    <?php $j++ ?>
     <?php endforeach ?>
+    <?php $i++ ?>
     <?php endforeach ?>
 </div>

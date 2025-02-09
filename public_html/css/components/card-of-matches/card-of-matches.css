@@ -1,12 +1,11 @@
 .card-of-matches {
   min-width: 260px;
-  max-width: 300px;
+  max-width: 310px;
   background: #FFFFFF;
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: var(--border-radius-l);
-  padding: 12.35;
   box-sizing: border-box;
-  padding: 15px;
+  padding: 10px;
   position: relative;
 }
 
@@ -14,7 +13,8 @@
   border: none;
   width: 100%;
   max-width: 790px;
-  padding: 10px;
+  padding: 15px;
+  position: relative;
 }
 
 .card-of-matches--status-before {}
@@ -34,9 +34,9 @@
 }
 
 .card-of-matches--match-zone .card-of-matches__title-match {
-  grid-template-columns: auto auto 1fr auto auto;
+  grid-template-columns: 1fr 3fr 4fr 3fr 1fr;
   justify-content: space-between;
-  grid-template-rows: repeat(3, auto);
+  grid-template-rows: repeat(4, auto);
   margin-bottom: 8.5px;
 
   box-sizing: border-box;
@@ -218,7 +218,7 @@
 }
 
 .card-of-matches__marks {
-  padding: 10px;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,7 +247,7 @@
   font-weight: 500;
   font-size: var(--font-size-s);
   line-height: 150%;
-  padding: 2.35px 8.1px;
+  padding: 2px 5px;
   white-space: nowrap;
 }
 
@@ -278,10 +278,6 @@
 .card-of-matches__controls .active {
   background-color: #FF3B3B;
   border-color: #f33838;
-}
-
-.card-of-matches--match-zone .card-of-matches__controls {
-  display: none;
 }
 
 .card-of-matches__controls-link {
@@ -317,41 +313,39 @@
   text-transform: uppercase;
   box-shadow: 0px 1.13924px 3.03797px rgba(255, 208, 24, 0.2);
   border-radius: var(--border-radius-s);
-  display: none;
+  width: 100%;
 }
 
 .card-of-matches--match-zone .card-of-matches__status {
   display: block;
 }
 
-.card-of-matches--status-before .card-of-matches__status {
+.card-of-matches--expected {
   color: #0B0B0B;
   background: #FFD018;
 }
 
-.card-of-matches--status-online .card-of-matches__status {
+.card-of-matches--in-progress {
   color: #fff;
   background: #FF3B3B;
 }
 
-
-
-.card-of-matches--status-finished .card-of-matches__status {
+.card-of-matches--completed {
   color: #fff;
   background: #59C65D;
 }
 
 .card-of-matches__share-button {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  padding: 0;
+  top: 5px;
+  right: 5px;
+  padding: 0 0 10px 10px;
   background-color: transparent;
   border: none;
-  width: none;
+  width: 16px;
   height: fit-content;
   font-size: 1px;
-  display: none;
+  color: #000000;
 }
 
 .card-of-matches--match-zone .card-of-matches__share-button {
@@ -359,8 +353,8 @@
 }
 
 .card-of-matches__share-button img {
-  width: 7px;
-  height: 7px;
+  width: 16px;
+  height: 16px;
 }
 
 
@@ -712,8 +706,42 @@
     font-size: 18px;
   }
 
-  /* .anons__history-meet .table-title {
-    width: 80%;
-    margin: 0 auto 20px;
-  } */
+}
+
+.swiper-scrollbar-matches {
+  margin-top: 8px;
+}
+
+.text-green-on-green {
+  color: #9ef5a1;
+}
+
+.share-telegram.loading {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.share-telegram:disabled {
+  pointer-events: none;
+  /* Запрещаем клики */
+}
+
+.share-btn-item {
+  position: relative;
+}
+
+.share-btn-item button {
+  width: 30px;
+}
+
+.share-btn-item button svg{
+  width: 100%;
+}
+
+.loading-message {
+  position: absolute;
+  width: 100px;
+  height: 20px;
+  top: 3px;
+  left: 32px;
 }

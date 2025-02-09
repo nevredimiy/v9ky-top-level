@@ -1,12 +1,13 @@
 <section class="ratings">
     <h2 class="title">Рейтинги гравців ліги</h2>
-
+    <div class="d-none"><?php var_dump($player['total_key']) ?></div>
     <div class="swiper-ratings ratings__container">
 
         <div class="swiper-wrapper ratings__wrap containers">
             <?php foreach($topPlayers as $key => $player) : ?>
+                <?php if( !empty($player) && intval($player['total_key']) !== 0 ): ?>
             <div class="swiper-slide ratings__player player-card">
-                <div class="player-card">
+                <div data-player="<?= $player['player_id']?>"  data-total="<?= $player['total_key']?>" class="player-card">
                     <div class="player-card__photo-container">
                         <div class="player-card__left-icon">
                             <img src="/css/components/player-card/assets/images/<?= $topPlayersData[$key]['icon'] ?>" alt="">
@@ -14,9 +15,9 @@
                         </div>
 
                         <img class=" player-card__right-icon"
-                            src="<?= $team_logo_path; ?>/<?= $player['team_photo']; ?>" alt="Логотип команди">
+                            src="<?= $team_logo_path; ?><?= $player['team_photo']; ?>" alt="Логотип команди">
 
-                        <img class="player-card__photo" src="<?= $player_face_path; ?>/<?= $player['player_photo']; ?>"
+                        <img class="player-card__photo" src="<?= $player_face_path; ?><?= $player['player_photo']; ?>"
                             alt="yarmol">
                     </div>
 
@@ -32,6 +33,7 @@
                     </a>
                 </div>
             </div>
+            <?php endif ?>
             <?php endforeach ?>
 
         </div><!-- containers -->

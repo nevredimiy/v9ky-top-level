@@ -1,0 +1,136 @@
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  /* display: grid; */
+  gap: 0.500em;
+  justify-content: space-between;
+  container-type: inline-size;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.controls__button {
+  text-align: center;
+  display: block;
+  width: calc((100% - 20px - 2 * 0.500em) / 3);
+}
+
+.controls__button * {
+  pointer-events: none;
+}
+
+.controls__title {
+  font-size: 0.85em;
+  color: #292929;
+  font-family: Roboto Condensed;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  margin-bottom: 0.833em;
+  overflow: hidden;
+}
+
+.controls__image {
+  font-size: 0.4cqmin;
+  border-radius: 4px;
+  overflow: hidden;
+  aspect-ratio: 1 / auto;
+}
+
+.controls a,
+.controls button {
+  transition: opacity 0.3s ease-in-out;
+}
+
+.controls a:hover,
+.controls button:hover {
+  opacity: 0.8;
+}
+
+.controls .swiper-wrapper {
+  display: flex;
+}
+
+@media screen and (min-width: 560px) {
+  .controls {
+    /* margin: 0 50px;
+    gap: 23px; */
+  }
+
+  .controls__button {
+
+    /* width: calc((100% - 100px) / 5); */
+  }
+
+  .controls__title {
+    /* font-size: 1.667em;  */
+  }
+
+  .controls__image {
+    /* font-size: 0.3em; */
+    font-size: 0.5cqmin;
+  }
+}
+
+@media screen and (min-width: 760px) {
+  .controls {
+    /* margin: 0 50px;
+    gap: 23px; */
+  }
+
+  .controls__button {
+
+    /* width: calc((100% - 100px) / 5); */
+  }
+
+  .controls__title {
+    font-size: 1.667em;
+  }
+
+  .controls__image {
+    /* font-size: 0.3em; */
+    font-size: 0.5cqmin;
+  }
+}
+
+@media screen and (min-width: 1260px) {
+  .controls {
+    margin: 0 50px;
+    gap: 23px;
+  }
+
+  .controls__button {
+    width: 240px;
+  }
+
+  .controls__title {
+    font-size: 1.5em;
+  }
+
+  .controls__image {
+    font-size: 0.3cqmin;
+  }
+}
+
+@media screen and (min-width: 1540px) {
+  .controls {
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .controls__button {}
+
+  .controls__title {}
+
+  .controls__image {}
+}
+
+.player-card__for-button .player-card__left-icon {
+  background: none;
+
+}
+
+.player-card__for-button span {
+  font-size: 4px;
+}

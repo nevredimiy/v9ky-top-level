@@ -1,5 +1,4 @@
 <?php
-
 // SQL-запрос для получения данных
 $sql = "SELECT 
     t1.id AS team1_id,
@@ -9,13 +8,18 @@ $sql = "SELECT
     t2.name AS team2_name,
     t2.pict AS team2_logo,
     m.gols1 AS team1_goals,
-    m.gols2 AS team2_goals
+    m.gols2 AS team2_goals,
+    t1.grupa AS team1_group,
+    t2.grupa AS team2_group,
+    t.ru AS turnir_name
 FROM 
     v9ky_match m
 JOIN 
     v9ky_team t1 ON m.team1 = t1.id
 JOIN 
     v9ky_team t2 ON m.team2 = t2.id
+LEFT JOIN 
+    v9ky_turnir t ON t.id = m.turnir
 WHERE 
     m.turnir = :turnir AND canseled = 1
 ORDER BY 
@@ -24,32 +28,46 @@ ORDER BY
 $result = $dbF->query($sql, [":turnir" => $turnir])->findAll();
 
 if (!$result) {
-    die('Ошибка выполнения запроса: ' . $mysqli->error);
+    die('Ошибка выполнения запроса.');
 }
 
-$matches = [];
-$teams = [];
+// Проверяем есть ли группы в турнире
+$groups = []; // массив для название групп (['A', 'B' ...])
+if($result[0]['team1_group']) {
+    foreach($result as $row) {
+        if(!in_array($row['team1_group'], $groups)) {
+            $groups[] = $row['team1_group'];
+        }
+    }
+}
 
 // Преобразуем результат запроса в массив
 $rows = $result;
 
-// Обработка результата через foreach
-foreach ($rows as $row) {
-    $matches[$row['team1_id']][$row['team2_id']] = $row['team1_goals'] . ':' . $row['team2_goals'];
-    $matches[$row['team2_id']][$row['team1_id']] = $row['team2_goals'] . ':' . $row['team1_goals'];
+$matches = [];
+$teams = [];
 
+foreach ($result as $row) {
+    // Заполняем данные о матчах
+    $matches[$row['team1_id']][$row['team2_id']] = "{$row['team1_goals']}:{$row['team2_goals']}";
+    $matches[$row['team2_id']][$row['team1_id']] = "{$row['team2_goals']}:{$row['team1_goals']}";
+
+    // Заполняем данные о командах
     $teams[$row['team1_id']] = [
-        'name' => $row['team1_name'],
-        'logo' => $row['team1_logo'],
+        'name' => $row['team1_name'], 
+        'logo' => $row['team1_logo'], 
+        'group' => $row['team1_group']
     ];
     $teams[$row['team2_id']] = [
-        'name' => $row['team2_name'],
-        'logo' => $row['team2_logo'],
+        'name' => $row['team2_name'], 
+        'logo' => $row['team2_logo'], 
+        'group' => $row['team2_group']
     ];
 }
 
 // Инициализация турнирной таблицы
 $stats = [];
+
 foreach ($teams as $team_id => $team_data) {
     $stats[$team_id] = [
         'name' => $team_data['name'],
@@ -59,12 +77,14 @@ foreach ($teams as $team_id => $team_data) {
         'draws' => 0,
         'losses' => 0,
         'points' => 0,
+        'group' => $team_data['group']
     ];
 }
 
 // Подсчет статистики
 foreach ($matches as $team1_id => $opponents) {
     foreach ($opponents as $team2_id => $score) {
+       
         // Проверяем, чтобы не было двойного подсчета
         if (!isset($processed_matches["$team1_id-$team2_id"]) && !isset($processed_matches["$team2_id-$team1_id"])) {
             list($goals1, $goals2) = explode(':', $score);

@@ -60,11 +60,7 @@ src="https://www.facebook.com/tr?id=346520639956675&ev=PageView&noscript=1"
 
 <meta property="og:url" content="http://<?=$_SERVER['SERVER_NAME']?><?=$_SERVER['REQUEST_URI']?>" />
 <?}?>
-
-  <!-- ////////// Note 28.11.2024 ////////// -->
-<?php if (!isset($_GET['foo'])): ?>
-  
-  
+ 
 	<link rel="stylesheet" href="/css/reset.css" />
 	<link rel="stylesheet" href="/libs/bootstrap/bootstrap-grid-3.3.1.min.css" />
 	<link rel="stylesheet" href="/libs/font-awesome-4.2.0/css/font-awesome.min.css" />
@@ -83,24 +79,10 @@ src="https://www.facebook.com/tr?id=346520639956675&ev=PageView&noscript=1"
     <?}?>
     <link rel="stylesheet" href="/css/glavnaya.css" />
     <link rel="stylesheet" href="/css/v9ky-cards.css" />
-    
-<?php else : ?>
-      
-<link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-
-<link rel="stylesheet" href="/css/style.css" />
+ 
 
 
 
-<?php endif ?>
-
-
-
-<!-- //////// Note 28.11.2024 /////// -->
-<?php if (!isset($_GET['foo'])): ?>
 
 <style type="text/css">
 .carousel1 {
@@ -153,7 +135,6 @@ pre {
 }
 </style>
 
-<?php endif ?>
 
 <!-- Facebook Pixel Code -->
 <script>
@@ -179,7 +160,7 @@ pre {
 
 <body class="body">
 
-<?php if(!isset($_GET['foo'])): ?>
+
 <header>
 	<div class="top-line-header">
 		<div class="column-head-1">
@@ -213,96 +194,3 @@ pre {
 	</div>
   </header>
 
-  <?php else: ?>
-
-  <header class="header">
-    <div class="container">
-      <nav class="nav">
-        <div class="nav__block">
-          <div class="nav__item nav__title-block">
-            <a href="<?=$site_url?>"><strong>V9KY.INUA</strong></a>
-            &nbsp;|&nbsp;&nbsp;<?=$gorod_en->fields[name_en]?>&nbsp;&nbsp;|&nbsp;&nbsp;<?=$season_name->fields[season]?>
-          </div>
-  
-          <div class="nav__item">
-            <div>
-              <a class="button-nav button--choose-city" href="<?=$url;?>/addmyteam/">
-                <img
-                  src="/css/components/header/assets/images/ukraine-logo.svg"
-                  alt="ukraine-logo"
-                >
-                <span>Обери місто</span>
-              </a>
-            </div>
-          </div>
-        </div>
-  
-        <div class="nav__block">
-          <a class="button-nav button-with-arrow button--order-team" href="<?=$site_url?>">
-            <p class="button-with-arrow__title">Заявити команду</p>
-            <p class="button-with-arrow__description">на найближчі турніри</p>
-            <img
-              src="/css/components/header/assets/images/arrow.svg"
-              alt="arrow" 
-              class="button-with-arrow__icon"
-            >
-          </a>
-  
-          <a class="button-nav button--v9ku-logo" href="<?=$site_url?>">
-            <img
-              src="/css/components/header/assets/images/v9ku-logo.png" 
-              alt="v9ku-logo"
-              class="button--img-v9ku-logo"
-            >
-          </a>
-  
-          <a class="button-nav button-with-arrow button--find-team" href="<?=$url;?>/addme1/">
-            <p class="button-with-arrow__title">Подати заявку</p>
-            <p class="button-with-arrow__description">на пошук команди</p>
-            <img
-              src="/css/components/header/assets/images/arrow.svg"
-              alt="arrow"
-              class="button-with-arrow__icon"
-            >
-          </a>
-        </div>
-  
-        <div class="nav__block">
-          <div class="nav__item">
-            <div>
-              <a class="button-nav button--choose-city" href="#">
-                <img
-                  src="/css/components/header/assets/images/ukraine-logo.svg"
-                  alt="ukraine-logo"
-                >
-                <span>Обери місто</span>
-              </a>
-            </div>
-          </div>
-  
-          <div class="nav__item">
-            <a class="button-nav button--call-to" href="tel:+380934319492">
-              <img src="/css/components/header/assets/images/phone-icon.svg" alt="phone-icon">
-              <span>(093)431-94-92</span>
-            </a>
-          </div>
-  
-          <div class="nav__item nav__item--social-link">
-            <a class="button-nav button--social-link" href="https://www.facebook.com/v9ky.ukraine/" target="_blank">
-              <img src="/css/components/header/assets/images/facebook-icon.svg" alt="facebook-icon">
-            </a>
-  
-            <a class="button-nav button--social-link" href="https://www.youtube.com/c/V9kyInUa?sub_confirmation=1" target="_blank">
-              <img src="/css/components/header/assets/images/youtube-icon.svg" alt="youtube-icon">
-            </a>
-  
-            <a class="button-nav button--social-link" href="https://www.instagram.com/v9ky.ukraine/?igshid=YmMyMTA2M2Y%3D" target="_blank">
-              <img src="/css/components/header/assets/images/instagram-icon.svg" alt="instagram-icon">
-            </a>
-          </div>  
-        </div>
-      </nav>
-    </div>
-  </header>
-  <main class="main"> 
-  <?php endif ?>

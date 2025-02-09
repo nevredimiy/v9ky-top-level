@@ -1,0 +1,310 @@
+.statistic {
+  overflow: hidden;
+}
+
+.statistic caption{
+  position: relative;
+}
+
+.statistic__link-to-home {
+  transition: opacity 0.3s ease-in-out;
+  position: absolute;
+  right: 10px;
+  top: 5px;
+}
+
+.statistic__link-to-home:hover,
+.statistic__link-to-home:active {
+  opacity: 0.8;
+}
+
+.statistic table {
+  box-shadow: 0px 4px 23px rgba(8, 20, 33, 0.04);
+  border-radius: var(--border-radius-s) var(--border-radius-s) 0px 0px;
+  margin: 0 0 40px 0;
+  width: 100%;
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-size: var(--font-size-s);
+  line-height: 100%;
+  border-spacing: 0 0;
+  border-collapse: collapse;
+  white-space: nowrap;
+  text-align: center;
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+  border-collapse: collapse;
+  cursor: grab;
+}
+
+.statistic table:active {
+  cursor: grabbing;
+}
+
+@media screen and (min-width: 580px) {
+  .statistic table {
+    font-size: var(--font-size-l);
+  }
+}
+
+.statistic table caption {
+  background: linear-gradient(90.21deg, #292929 15.28%, #000000 94.83%);
+  color: #fff;
+  position: relative;
+  font-family: 'Roboto Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-size: var(--font-size-l);
+  line-height: 150%;
+  text-transform: uppercase;
+  border-radius: 6px 6px 0 0;
+}
+
+.statistic table caption button {
+  padding: 0;
+  margin: 0;
+  border: none;
+  position: absolute;
+  right: 4px;
+  top: calc(50% - 8px);
+  background-color: transparent;
+  height: fit-content;
+  width: auto;
+  display: block;
+  line-height: 1px;
+  cursor: pointer;
+}
+
+.statistic table caption img {
+  width: 16px;
+  height: 16px;
+}
+
+.statistic table tr th {
+  background-color: #BFBFBF;
+  color: #fff;
+}
+
+.statistic table tr:nth-child(odd) {
+  background-color: #fff;
+}
+
+.statistic table tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.statistic table tr th,
+.statistic table tr td {
+  padding: 2px;
+}
+
+.statistic table tr th:nth-child(4),
+.statistic table tr td:nth-child(4) {
+  text-align: right;
+}
+
+.statistic table tr td:nth-child(5) {
+  background-color: #F9E813;
+}
+
+.statistic table tr td:has(img) {
+  text-align: center;
+}
+
+.statistic table tr td img {
+  height: 100%;
+  text-align: center;
+  vertical-align: middle;
+  width: 100%;
+  max-width: 40px;
+}
+
+.statistic table tr td img:nth-child(3) {
+  aspect-ratio: 1 / 1;
+}
+
+.statistic table .ind-match {
+  display: none;
+}
+
+
+/* ------------------ ---------------*/
+
+.statistic th.th_s {
+  text-align: center;
+  padding: 10px;
+  /* writing-mode: vertical-rl;  */
+}
+
+.statistic td,
+.statistic th {
+  border: 1px solid #ccc;
+  padding: 5px;
+}
+
+.statistic th,
+.statistic td {
+  min-width: 32px;
+}
+
+@media screen and (min-width: 500px) {
+
+  .statistic th,
+  .statistic td {
+    min-width: 20px;
+  }
+
+  .statistic table tr td img {
+    max-width: 20px;
+    aspect-ratio: 3/4;
+    max-height: 28px;
+  }
+
+  .statistic table tr td:nth-child(3) img {
+    aspect-ratio: 1/1;
+    max-height: 20px;
+  }
+}
+
+
+@media screen and (min-width: 640px) {
+
+  .statistic th,
+  .statistic td {
+    min-width: auto;
+  }
+
+  .statistic td.turs {
+    min-width: 50px;
+  }
+
+  .statistic table tr td img {
+    max-width: 60px;
+    object-fit: contain;
+  }
+}
+
+@media screen and (min-width: 1060px) {
+
+  .statistic table {
+    display: table;
+  }
+}
+
+@media screen and (min-width: 1260px) {
+
+  .statistic table {
+    box-shadow: 0px 4px 23px rgba(8, 20, 33, 0.04);
+    border-radius: var(--border-radius-l) var(--border-radius-l) 0px 0px;
+    font-size: var(--font-size-xl);
+    line-height: 32px;
+  }
+
+  .statistic table caption {
+    font-size: 32px;
+  }
+
+  .statistic table caption button {
+    right: 20px;
+    top: 20px;
+  }
+
+  .statistic table caption img {
+    width: 35px;
+    height: 35px;
+  }
+
+  .statistic table tr th,
+  .statistic table tr td {
+    padding: 0 5px;
+  }
+
+  .statistic table tr td:has(img) {
+    min-height: 32px;
+  }
+
+  .statistic table tr td img {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .statistic th.th_s {
+    writing-mode: horizontal-tb;
+    transform: rotate(0deg);
+  }
+}
+
+#top-gravetc th:nth-child(5),
+#top-gravetc td:nth-child(5),
+#top-bombardir th:nth-child(5),
+#top-bombardir td:nth-child(5),
+#top-asistent th:nth-child(5),
+#top-asistent td:nth-child(5),
+#top-zahustnuk th:nth-child(5),
+#top-zahustnuk td:nth-child(5),
+#top-udar th:nth-child(5),
+#top-udar td:nth-child(5),
+#top-dribling th:nth-child(5),
+#top-dribling td:nth-child(5),
+#top-golkiper th:nth-child(5),
+#top-golkiper td:nth-child(5),
+#top-pas th:nth-child(5),
+#top-pas td:nth-child(5) {
+  background-color: #d89c19;
+}
+
+#top-gravetc th:nth-child(6),
+#top-gravetc td:nth-child(6),
+#top-gravetc th:nth-child(7),
+#top-gravetc td:nth-child(7),
+#top-bombardir th:nth-child(6),
+#top-bombardir td:nth-child(6),
+#top-bombardir th:nth-child(7),
+#top-bombardir td:nth-child(7),
+#top-asistent th:nth-child(6),
+#top-asistent td:nth-child(6),
+#top-asistent th:nth-child(7),
+#top-asistent td:nth-child(7),
+#top-zahustnuk th:nth-child(6),
+#top-zahustnuk td:nth-child(6),
+#top-zahustnuk th:nth-child(7),
+#top-zahustnuk td:nth-child(7),
+#top-udar th:nth-child(6),
+#top-udar td:nth-child(6),
+#top-dribling th:nth-child(6),
+#top-dribling td:nth-child(6),
+#top-golkiper th:nth-child(6),
+#top-golkiper td:nth-child(6),
+#top-pas th:nth-child(6),
+#top-pas td:nth-child(6) {
+  background-color: yellow;
+  color: #0B0B0B;
+}
+
+#top-udar th:nth-child(7),
+#top-udar td:nth-child(7),
+#top-dribling th:nth-child(7),
+#top-dribling td:nth-child(7),
+#top-golkiper th:nth-child(7),
+#top-golkiper td:nth-child(7),
+#top-pas th:nth-child(7),
+#top-pas td:nth-child(7),
+#top-pas th:nth-child(8),
+#top-pas td:nth-child(8) {
+  color: green;
+}
+
+#top-udar th:nth-child(8),
+#top-udar td:nth-child(8),
+#top-dribling th:nth-child(8),
+#top-dribling td:nth-child(8),
+#top-golkiper th:nth-child(8),
+#top-golkiper td:nth-child(8),
+#top-pas th:nth-child(9),
+#top-pas td:nth-child(9) {
+  color: red;
+}

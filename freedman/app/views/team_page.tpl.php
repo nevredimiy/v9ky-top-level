@@ -222,17 +222,21 @@
 
     <div class="team-page__players">
     <?php $idx = 0 ?>
-    <div style="display: none;"><?php  dump($players) ?></div>
+    
+    <div style="display: none;"><?php dump_arr($allStaticPlayers) ?></div>
     <?php foreach ($players as $player): ?>
 
       <?php          
           // Получение индивидуальной статистики. Player Card.
-          if (isset($allStaticPlayers)) { $indStaticPlayer = getIndStaticPlayer($allStaticPlayers, $player['id']); }            
+          if (isset($allStaticPlayers)) { $indStaticPlayer = getIndStaticPlayer($allStaticPlayers, $player['id']); }      
+
+         
       ?>
+      <div style="display: none"><?php dump($indStaticPlayer); ?></div>
       <!-- Если тренер или менеджер, то не показываем карточку игрока -->
       <?php if ( $player['amplua'] != 4 && $player['amplua'] != 5 && isset( $dataAllPlayers[$player['id']] ) )  :?>      
-
-      <div id="playerCard<?= $idx ?>" class="card-player-full content-image">
+        
+      <div data-player-id="<?=$player['id']?>" id="playerCard<?= $idx ?>" class="card-player-full content-image">
           <?php 
             // Место в рейтинге
             $bestGravetc   = getBestPlayer($topGravetc, $player['id'], 'player_id');
@@ -295,14 +299,15 @@
               <img src="/css/components/card-player-full/assets/images/football-icon.png" alt="Кількість забитих м'ячів">
               <p><?= $indStaticPlayer['count_goals'] ?></p>
             </li>
-
+            
             <li>
-              <img src="/css/components/card-player-full/assets/images/golden-star-icon.png" alt="Кількість гольових пасів">
+              <img src="/css/components/card-player-full/assets/images/golden-star-icon.png" alt="Кількість отриманих номінацій гравець матчу">
               <p><?= $indStaticPlayer['count_best_player_of_match'] ?></p>
+              
             </li>   
             
             <li>
-              <img src="/css/components/card-player-full/assets/images/yellow-shirt.png" alt="Кількість раів учасник збірна туру">
+              <img src="/css/components/card-player-full/assets/images/yellow-shirt.png" alt="Кількість разів учасник збірна туру">
               <p><?= getCountInTur($playersOfAllTurs, $player['id']) ?> </p>
             </li>
           
@@ -349,10 +354,10 @@
             <p><?= $indStaticPlayer['accuracy_of_dribbles'] ?>%</p>
           </li>
 
-          <li>
+          <!-- <li>
             <p>Загострень за матч</p>
             <p><?= $indStaticPlayer['count_of_aggravations'] ?></p>
-          </li>
+          </li> -->
 
           <li>
             <p>Відборів за матч</p>

@@ -1,0 +1,193 @@
+/*
+Uploadify
+Copyright (c) 2012 Reactive Apps, Ronnie Garcia
+Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
+*/
+
+.uploadify {
+	position: relative;
+	margin-bottom: 1em;
+}
+
+.uploadify-button {
+	background-color: #505050;
+	background-image: linear-gradient(bottom, #505050 0%, #707070 100%);
+	background-image: -o-linear-gradient(bottom, #505050 0%, #707070 100%);
+	background-image: -moz-linear-gradient(bottom, #505050 0%, #707070 100%);
+	background-image: -webkit-linear-gradient(bottom, #505050 0%, #707070 100%);
+	background-image: -ms-linear-gradient(bottom, #505050 0%, #707070 100%);
+	background-image: -webkit-gradient(linear,
+			left bottom,
+			left top,
+			color-stop(0, #505050),
+			color-stop(1, #707070));
+	background-position: center top;
+	background-repeat: no-repeat;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	border: 2px solid #808080;
+	color: #FFF;
+	font: bold 10px Arial, Helvetica, sans-serif;
+	text-align: center;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+	width: 100%;
+}
+
+.uploadify:hover .uploadify-button {
+	background-color: #606060;
+	background-image: linear-gradient(top, #606060 0%, #808080 100%);
+	background-image: -o-linear-gradient(top, #606060 0%, #808080 100%);
+	background-image: -moz-linear-gradient(top, #606060 0%, #808080 100%);
+	background-image: -webkit-linear-gradient(top, #606060 0%, #808080 100%);
+	background-image: -ms-linear-gradient(top, #606060 0%, #808080 100%);
+	background-image: -webkit-gradient(linear,
+			left bottom,
+			left top,
+			color-stop(0, #606060),
+			color-stop(1, #808080));
+	background-position: center bottom;
+}
+
+.uploadify-button.disabled {
+	background-color: #D0D0D0;
+	color: #808080;
+}
+
+.uploadify-queue {
+	margin-bottom: 1em;
+}
+
+.uploadify-queue-item {
+	background-color: #F5F5F5;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	font: 11px Verdana, Geneva, sans-serif;
+	margin-top: 5px;
+	max-width: 350px;
+	padding: 10px;
+}
+
+.uploadify-error {
+	background-color: #FDE5DD !important;
+}
+
+.uploadify-queue-item .cancel a {
+	background: url('../img/uploadify-cancel.png') 0 0 no-repeat;
+	float: right;
+	height: 16px;
+	text-indent: -9999px;
+	width: 16px;
+}
+
+.uploadify-queue-item.completed {
+	background-color: #E5E5E5;
+}
+
+.uploadify-progress {
+	background-color: #E5E5E5;
+	margin-top: 10px;
+	width: 100%;
+}
+
+.uploadify-progress-bar {
+	background-color: #0099FF;
+	height: 3px;
+	width: 1px;
+}
+
+.btn {
+	display: inline-block;
+	padding: 5px 10px;
+	text-decoration: none;
+	color: #000;
+	background-color: #333333;
+	margin: 10px 3px;
+	border-radius: 2px;
+	color: #fff;
+	font-family: sans-serif;
+	font-size: 13px;
+	transition: opacity 0.3s ease-in-out;
+	cursor: pointer;
+}
+
+.btn:hover {
+	opacity: 0.8;
+}
+
+.btn-main {
+	background-color: #1795e9;
+	border-color: #2995dd;
+}
+
+p.description {
+	margin-top: .25rem;
+	font-size: 11px;
+	color: #777777;
+}
+
+.bootstrap .mb-3 {
+	margin-bottom: 1rem;
+}
+
+.bootstrap .mx-auto {
+	margin-right: auto !important;
+	margin-left: auto !important;
+}
+
+.bootstrap .title {
+	text-align: center;
+}
+
+.bootstrap .w-m-content {
+	width: max-content;
+}
+
+.bootstrap label {
+	display: inline-block;
+	margin-bottom: .5rem;
+}
+
+.bootstrap .form-control {
+	display: block;
+	width: 100%;
+	padding: .375rem .75rem;
+	font-size: 1rem;
+	font-weight: 400;
+	line-height: 1.5;
+	color: #000;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-color: #fff;
+	background-clip: padding-box;
+	border: 1px solid #dee2e6;
+	border-radius: 0.375rem;
+	transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+
+}
+
+.bootstrap .d-grid {
+	display: grid;
+
+}
+
+.bootstrap .d-flex {
+	display: flex;
+}
+
+.bootstrap .flex-wrap {
+	flex-wrap: wrap;
+}
+
+.bootstrap .items- center {
+	align-items: center;
+}
+
+@media (min-width: 840px) {
+	.md-col-2 {
+		grid-template-columns: 1fr 1fr;
+		column-gap: 25px;
+	}
+}
