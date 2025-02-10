@@ -20,7 +20,7 @@
                             month-controls__button
                             <?= $dateTur['tur'] <= $lastTur ? 'month-controls__button--past ' : '' ?>
                             <?= $currentTur ==  $dateTur['tur'] ? 'month-controls__button--current' : '' ?>"
-                        <?= $currentTur != $dateTur['tur'] ? "href={$site_url}/{$tournament}?tur={$dateTur['tur']}&foo=foo" : '' ?>
+                        <?= $currentTur != $dateTur['tur'] ? "href={$site_url}/{$tournament}?tur={$dateTur['tur']}" : '' ?>
                     >
                         <p><?= date_translate($dateTur['month_min_name']) ?></p>
                         <p><?= $dateTur['day_min']?></p>
@@ -103,7 +103,7 @@
                                 <img src="/css/components/card-of-matches/assets/images/anons-icon.png" alt="Анонс матчу" title="Анонс матчу">
                             </a>
                             
-                        <?php $href = $currentTur > $lastTur || $match['goals1'] == NULL ? '' : "href='{$site_url}/{$tournament}/?tur={$currentTur}&foo=foo'" ?>
+                        <?php $href = $currentTur > $lastTur || $match['goals1'] == NULL ? '' : "href='{$site_url}/{$tournament}/?tur={$currentTur}'" ?>
                             <a 
                                 data-match-stats="<?= $match['id'] ?>" 
                                 data-tur="<?= $currentTur ?>" 
@@ -186,13 +186,13 @@
     </div><!-- calendar-of-matches__head-nav -->
 
         <div class="calendar-of-matches__dynamic-content">
-            <section id="team-of-the-tour" class="green-zone">
+            <section class="green-zone content-to-capture">
                 <?php if($currentTur <= $lastTur && $dateLastTur <= $currentDate) : ?>
                 <div id="capture" class="green-zone__current">
                     <h2 class="green-zone__title title">ЗБІРНА ТУРУ</h2>
                     <div class="controls__share">
-                        <button class="controls__share-btn save-image" data-target="team-of-the-tour">
-                            <img src="css/components/match-stats/assets/images/button-share-icon.svg" alt="Зберегти зображення">
+                        <button id="captureAndShare" class="controls__share-btn capture-btn">
+                            <img src="<?= $site_url ?>/css/components/match-stats/assets/images/button-share-icon.svg" alt="Зберегти зображення">
                         </button>
                     </div>
                     <div class=" <?= $currentTur <= $lastTur ? 'green-zone__players' : '' ?>">
@@ -260,4 +260,15 @@
             </section>
            
         </div> <!-- calendar-of-matches__dynamic-content -->
+
+    <!-- Модальное окно с ссылками -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <p>Виберіть месенджер для надсилання скріншоту:</p>
+            <a id="shareViber" href="#" class="share-btn viber"><img src="<?= IMAGES . '/viber-logo-icon.svg' ?>" alt="Відправити у Viber"> Відправити у Viber</a>
+            <a id="shareTelegram" href="#" class="share-btn telegram"><img src="<?= IMAGES . '/telegram-logo-icon.svg' ?>" alt="Відправити у Telegram"> Відправити у Telegram</a>
+            <button id="closeModal" class="close-btn">Закрити</button>
+        </div>
+    </div>
+
 </div>

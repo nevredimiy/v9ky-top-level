@@ -35,6 +35,9 @@ $(document).ready(function () {
     });
 
 
+    
+
+
     // $('#share-telegram').on('click', function () {
     //     html2canvas($('#capture')[0]).then(function (canvas) {
     //         canvas.toBlob(function (blob) {
@@ -64,6 +67,9 @@ $(document).ready(function () {
     //     });
     // });
 });
+
+
+
 
 
 // function sendToTelegram(link) {
@@ -311,4 +317,86 @@ document.addEventListener("DOMContentLoaded", function () {
     //     e.preventDefault();
     //     openShare(`https://t.me/share/url?url=${encodeURIComponent(postUrl)}&text=${encodeURIComponent(postTitle)}`);
     // });
+});
+
+
+
+
+
+
+
+$(document).ready(function () {
+    let captureBtn = $("#captureAndShare");
+    let modal = $("#shareModal");
+    let closeModalBtn = $("#closeModal");
+    let shareViber = $("#shareViber");
+    let shareTelegram = $("#shareTelegram");
+
+    captureBtn.on("click", function () {
+        let captureElement = $(".content-to-capture");
+        
+        if (captureElement.length === 0) {
+            alert("Помилка: елемент для скріншоту не знайдено!");
+            return;
+        }
+
+        // Отключаем кнопку, чтобы предотвратить двойные клики
+        captureBtn.prop("disabled", true).text("Створення скриншоту...");
+
+        // Создание скриншота
+        html2canvas(captureElement[0]).then(canvas => {
+            canvas.toBlob(blob => {
+                let formData = new FormData();
+                formData.append("image", blob, "screenshot.png");
+
+                // Отправка скриншота на сервер
+                $.ajax({
+                    url: "../freedman/actions/uploads1.php",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        captureBtn.prop("disabled", false).html("<img src='https://v9ky.in.ua/css/components/match-stats/assets/images/button-share-icon.svg' alt='Зберегти зображення'>");
+
+                        try {
+                            let data = JSON.parse(response);
+                            if (data.success) {
+                                let imageUrl = encodeURIComponent(data.link);
+
+                                // Устанавливаем ссылки на Viber и Telegram
+                                shareViber.attr("href", `viber://forward?text=${imageUrl}`);
+                                shareTelegram.attr("href", `https://t.me/share/url?url=${imageUrl}`);
+
+                                // Показываем модальное окно
+                                modal.show();
+                            } else {
+                                alert("Помилка завантаження зображення!");
+                            }
+                        } catch (e) {
+                            alert("Помилка обробки даних!");
+                            console.error("Помилка:", e);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        captureBtn.prop("disabled", false).html("<img src='https://v9ky.in.ua/css/components/match-stats/assets/images/button-share-icon.svg' alt='Зберегти зображення'>");
+                        console.error("Помилка:", error);
+                        alert("Помилка завантаження даних!");
+                    }
+                });
+            });
+        });
+    });
+
+    // Закрытие модального окна
+    closeModalBtn.on("click", function () {
+        modal.hide();
+    });
+
+    // Закрытие при клике вне окна
+    $(window).on("click", function (event) {
+        if ($(event.target).is(modal)) {
+            modal.hide();
+        }
+    });
 });

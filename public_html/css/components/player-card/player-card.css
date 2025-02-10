@@ -6,9 +6,7 @@
   padding: 0 0.44em;
   box-sizing: border-box;
   filter: drop-shadow(1px 8px 10px rgba(8, 20, 33, 0.04));
-
   width: 13.167em;
-  /* height: 22.167em; */
 }
 
 .player-card__photo-container {

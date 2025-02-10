@@ -108,6 +108,8 @@ if(!empty($dataAllPlayers)){
     'top_pas' => ['icon' => 'ball-icon.png', 'label' => 'Топ-Пас' ]
   ];
 
+  $isEmtyTopPlayer = true;
+
   require_once VIEWS . '/rating_players.tpl.php';
 }
 

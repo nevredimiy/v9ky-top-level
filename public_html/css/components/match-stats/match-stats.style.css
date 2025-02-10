@@ -266,7 +266,7 @@ table.three-row td:nth-child(1) img{
     .green-zone__current .controls__share-btn {
         position: absolute;
         z-index: 10;
-        right: 250px;
+        right: 10px;
         top: -80px;
         padding: 10px;
     }
@@ -328,4 +328,11 @@ table.three-row td:nth-child(1) img{
         margin-bottom: 8px;
         font-size: 14px;
     }
+}
+
+
+@media screen and (min-width: 1026px) {
+    .green-zone__current .controls__share-btn {
+        right: -15px;
+      }
 }

@@ -21,15 +21,3 @@ swiperMonthControls = new Swiper('.swiper-month-controls', {
     }
   }
 });
-
-// перемещаем слайдер на текущий тур (тот который красненький)
-const slideIndex = $('.swiper-slide').toArray().findIndex(slide => 
-  $(slide).find('.month-controls__button--current').length > 0
-);
-
-if (slideIndex !== -1) {
-  // Центрируем найденный слайд
-  swiperMonthControls.slideTo(slideIndex);
-} else {
-  console.warn('Слайд с указанным дочерним классом не найден.');
-}

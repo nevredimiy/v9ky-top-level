@@ -23,25 +23,49 @@ $(document).ready(function () {
                 success: function (response) {
                     $(".calendar-of-matches__grid-container").html(response.section1);
 
-                    swipersLeagues = new Swiper(".swiper-month-controls", {
+                    swiperMonthControls = new Swiper('.swiper-month-controls', {
+                        enabled: true,
                         slidesPerView: 'auto',
-                        spaceBetween: 20,
+                        spaceBetween: 10,
+                        speed: 400,
                         scrollbar: {
-                            el: '.swiper-scrollbar',
-                            hide: false,
-                            draggable: true,
+                          el: '.swiper-scrollbar',
+                          dragSize: 70,
+                          hide: false
                         },
-                    });
+                        breakpoint: {
+                          860: {
+                            scrollbar: {
+                              hide: true
+                            }
+                          },
+                          1260: {
+                            scrollbar: {
+                              hide: false
+                            }
+                          }
+                        }
+                      });
 
-                    swipersLeagues = new Swiper(".swiper-matches", {
+                      swipersControls = new Swiper(".swiper-matches", {
                         slidesPerView: 'auto',
                         spaceBetween: 20,
                         scrollbar: {
-                            el: '.swiper-scrollbar',
-                            hide: false,
-                            draggable: true,
+                          el: '.swiper-scrollbar-matches',
+                          hide: false,
+                          draggable: true,
                         },
-                    });
+                        breakpoints: {
+                          // when window width is >= 820px
+                          1259: {
+                            scrollbar: false,
+                            allowTouchMove: false, // Отключает свайпы
+                            noSwiping: true, // Запрещает смахивание
+                            noSwipingClass: 'swiper-container',
+                          }
+                        }
+                      });
+                      
 
                     $("#controls").html(response.section2);
 
