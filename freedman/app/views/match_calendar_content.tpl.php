@@ -3,6 +3,7 @@
     <div class="swiper swiper-month-controls swiper-initialized swiper-horizontal">
         <div class="swiper-wrapper swiper-wrapper-month-controls" id="swiper-wrapper-2894150f39673565"
             aria-live="polite" style="transition-duration: 0ms; transform: translate3d(0px, 0px, 0px);">
+            
             <?php foreach($dateTurs as $dateTur): ?>
             <div class="swiper-slide swiper-slide-month-controls swiper-slide-active" role="group" aria-label="1 / 15"
                 style="margin-right: 5px;">

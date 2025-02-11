@@ -11,7 +11,7 @@
  include_once CONTROLLERS . "/leagues.php";
  include_once CONTROLLERS . "/rating_players.php";
  include_once CONTROLLERS . "/table.php";
- include_once CONTROLLERS . "/calendar_of_matches.php";
+ 
  include_once CONTROLLERS . "/controls.php";
  include_once CONTROLLERS . "/disqualification.php";
  include_once CONTROLLERS . "/footer.php";

@@ -226,11 +226,9 @@ pre {
     cursor: pointer;
     font-size: 16px;
     border-radius: 5px;
-    transition: background 0.3s;
 }
 
 .capture-btn:disabled {
-    background-color: gray;
     cursor: not-allowed;
 }
 
