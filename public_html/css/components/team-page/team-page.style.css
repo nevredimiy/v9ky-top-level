@@ -134,7 +134,7 @@
   width: 100%;
   position: absolute;
   top: 0;
-  
+
 }
 
 .team-page__manager-logo {
@@ -142,6 +142,7 @@
   top: 7px;
   left: 8px;
   width: 20px;
+  filter: drop-shadow(0px 0px 5px #ffffff);
 }
 
 .team-page__manager-team-logo {
@@ -368,6 +369,7 @@
   .team-page__players {
     grid-template-columns: repeat(5, 1fr);
   }
+
   .truncate {
     min-width: 100px;
   }
@@ -377,6 +379,7 @@
   .team-page__players {
     grid-template-columns: repeat(6, 1fr);
   }
+
   .team-page__calendar-table tr td span.team_name {
     top: 0;
   }
@@ -565,3 +568,33 @@
 .team-page__calendar-table .team2{
   padding: 1px;
 } */
+
+
+.capitan-table {
+  width: 100%;
+  border: 1px solid #000;
+  border-collapse: collapse;
+}
+
+.capitan-table th {
+  background-color: #c5c5c5;
+}
+
+.capitan-table th,
+.capitan-table td {
+  border: 1px solid #000;
+}
+
+.capitan-block {
+  padding: 10px 5px;
+}
+
+.capitan-block label,
+.capitan-block input {
+  font-size: 10px;
+}
+
+.capitan-block input {
+  width: 100%;
+  line-height: 1.5;
+}

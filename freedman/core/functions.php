@@ -282,6 +282,63 @@ function getDataCurrentTur($turnir, $currentTur)
 
 /**
  * @param integer - идентификатора турнира
+ * @param integer - текущий выбранная дата
+ * @return array 
+ */
+function getDataMatchesOfDay($turnir, $selectedDate)
+{
+    global $dbF;
+
+    $sql = 
+        "SELECT 
+        m.id,
+        m.anons,
+        t.season,
+        m.date,
+        m.tur, 
+        m.team1,
+        m.tcolor1 as color_tshirt1,
+        t1.id AS team1_id,
+        t1.name AS team1_name,
+        t1.pict AS team1_photo,
+        m.team2,    
+        m.tcolor2 as color_tshirt2,
+        t2.id AS team2_id,
+        t2.name AS team2_name,
+        t2.pict AS team2_photo,
+        m.field,
+        f.name AS field_name,
+        m.canseled,
+        m.gols1 AS goals1,
+        m.gols2 AS goals2,
+        t.ru AS turnir_name,
+        m.videohiden AS video_hd,
+        m.video AS video,
+        m.videobest AS videobest,
+        m.video_intervu AS video_intervu,
+        m.video_intervu2 AS video_intervu2
+    FROM 
+        v9ky_match m
+    LEFT JOIN 
+        `v9ky_team` t1 ON t1.id = m.team1
+    LEFT JOIN
+        `v9ky_team` t2 ON t2.id = m.team2
+    LEFT JOIN
+        `v9ky_turnir` t ON t.id = m.turnir
+    LEFT JOIN
+        `v9ky_fields` f ON f.id = m.field
+    WHERE m.`turnir` = :turnir AND DATE(m.`date`) = :selectedDate 
+    ORDER BY 
+        m.id";
+
+    // Делаем запрос в БД на игроков которые "вибули"
+    $fields = $dbF->query($sql, [":turnir" => $turnir, ":selectedDate" => $selectedDate])->findAll();
+    
+    return $fields;
+}
+
+/**
+ * @param integer - идентификатора турнира
  * @return array 
  */
 function getDateTurs($turnir)
@@ -814,18 +871,27 @@ function getTeamData($teamId)
 /**
  * Получение данных игроков по идентификатору команды
  */
-function getPlayersOfTeam($teamId)
+function getPlayersOfTeam($teamId, $kep=0)
 {
+
     global $dbF;
 
-    $sql = "SELECT * 
+    if($kep){
+        $active = "";
+    } else {
+        $active = "AND `active` = '1'";
+    }
+
+    $sql = "SELECT p.`id`,p.`team`,p.`nomer`,p.`name1`,p.`name2`,p.`name3`,p.`age`,p.`face`,p.`active`,p.`man`,p.`amplua`,p.`v9ky`,p.`dubler`,p.`vibuv`,m.`tel` 
         FROM `v9ky_player` p 
-        WHERE `team` = :team_id 
-        AND `active` = '1' 
+        LEFT JOIN
+        	`v9ky_man` m ON m.id = p.man
+        WHERE p.`team` = :team_id 
+        ". $active ." 
         ORDER BY 
             `active` desc, 
             `vibuv`, 
-            `id` = (
+            p.`id` = (
                 SELECT `capitan` FROM `v9ky_team` WHERE `id` = :team_id) DESC, 
             (SELECT count(*) AS kol FROM `v9ky_gol` WHERE `player` = p.id 
                 AND `team` = :team_id) DESC, 
@@ -840,41 +906,49 @@ function getPlayersOfTeam($teamId)
 /**
  * Получаем капитана, менеджера, тренера.
  */
-function getTeamHeads($teamId)
-{
+function getTeamHeads($teamId){
     global $dbF;
 
-    $sql = "SELECT p.id as player_id,
-                p.name1 as player_lastname, 
-                p.name2 as player_firstname, 
-                p.name3 as player_middlename,
-                mf.pict as player_photo, 
-                t.pict as team_photo,
-                p.amplua as amplua
-          FROM v9ky_team t 
-          LEFT JOIN 
-            v9ky_player p ON p.id IN (t.capitan, t.manager, t.trainer)
-          LEFT JOIN
-            v9ky_man_face mf ON p.man = mf.man
-            WHERE t.id = :team_id
-            GROUP BY p.id
-            ORDER BY p.amplua DESC";
-
-    $fields = $dbF->query($sql, [":team_id" => $teamId])->findAll();
+    $fields = $dbF->query("SELECT `capitan`, `trainer`, `manager` FROM `v9ky_team` WHERE  `id` = :team_id",[":team_id" => $teamId])->findAll();
 
     $teamHeads = [];
-    $iconHeads = [ 0 => 'manager-icon.svg', 4 => 'coach-icon.svg', 5 => 'cap-icon.svg'];
-
-    foreach ($fields as $field) {
-        $amplua = $field['amplua'];
-        $teamHeads[$amplua] = $field;  
-        $teamHeads[$amplua]['icon'] = $iconHeads[$amplua];
+    foreach($fields as $field) {
+        if($field['capitan'] != 0){
+            $teamHeads['capitan'] = getPlayerData($field['capitan']);
+        }
+        if($field['manager'] != 0){
+            $teamHeads['manager'] = getPlayerData($field['manager']);
+        }
+        if($field['trainer'] != 0){
+            $teamHeads['trainer'] = getPlayerData($field['trainer']);
+        }
     }
 
-
-     return $teamHeads;
+    return $teamHeads;
 }
 
+function getPlayerData($playerId){
+    global $dbF;
+
+    $sql = "SELECT 
+        m.`name1` AS player_lastname, 
+        m.`name2` AS player_firstname, 
+        mf.`pict` AS player_photo,
+        t.`pict` AS team_logo
+        FROM `v9ky_man` m 
+        LEFT JOIN 
+            `v9ky_man_face` mf ON mf.man = m.id  
+        LEFT JOIN 
+            `v9ky_team` t ON t.id = (SELECT `team` FROM `v9ky_player` WHERE `id`=:player_id LIMIT 1)
+        WHERE m.`id` = (SELECT `man` FROM `v9ky_player` WHERE `id`=:player_id LIMIT 1)
+        ORDER BY mf.`id` DESC
+        LIMIT 1";
+    $fields = $dbF->query($sql,[":player_id" => $playerId])->findAll();
+    if (empty($fields)) {
+        return "";
+    }
+    return $fields[0];
+}
 /**
  * 
  */
@@ -1219,6 +1293,10 @@ function getTime($date)
         SUM(s.`mimo`) AS total_mimo,
         SUM(s.`pasplus`) AS total_pasplus,
         SUM(s.`pasminus`) AS total_pasminus,
+        SUM(s.`seyv`) AS total_seyv,
+        SUM(s.`otbor`) AS total_otbor,
+        SUM(s.`obvodkaplus`) AS total_obvodkaplus,
+        SUM(s.`obvodkaminus`) AS total_obvodkaminus,
         p.`team`,
         m.date AS match_date
     FROM `v9ky_sostav` s
@@ -1248,23 +1326,175 @@ function getTime($date)
     }
 
     // получаем количество ударов команды за матч
+    
     $team1_data['total_udar'] = isset($team1_data['total_vstvor']) || isset($team1_data['total_mimo']) ? $team1_data['total_vstvor'] + $team1_data['total_mimo'] : 0;
     $team2_data['total_udar'] = isset($team2_data['total_vstvor']) || isset($team2_data['total_mimo']) ? $team2_data['total_vstvor'] + $team2_data['total_mimo'] : 0;
 
     $team1_data['total_vstvor'] = isset($team1_data['total_vstvor']) ? $team1_data['total_vstvor'] : 0;
     $team2_data['total_vstvor'] = isset($team2_data['total_vstvor']) ? $team2_data['total_vstvor'] : 0;
 
+    $team1_data['total_mimo'] = isset($team1_data['total_mimo']) ? $team1_data['total_mimo'] : 0;
+    $team2_data['total_mimo'] = isset($team2_data['total_mimo']) ? $team2_data['total_mimo'] : 0;
+    
     $team1_data['total_pasplus'] = isset($team1_data['total_pasplus']) ? $team1_data['total_pasplus'] : 0;
     $team2_data['total_pasplus'] = isset($team2_data['total_pasplus']) ? $team2_data['total_pasplus'] : 0;
 
+    $team1_data['total_pasminus'] = isset($team1_data['total_pasminus']) ? $team1_data['total_pasminus'] : 0;
+    $team2_data['total_pasminus'] = isset($team2_data['total_pasminus']) ? $team2_data['total_pasminus'] : 0;
+
+    $team1_data['total_otbor'] = isset($team1_data['total_otbor']) ? $team1_data['total_otbor'] : 0;
+    $team2_data['total_otbor'] = isset($team2_data['total_otbor']) ? $team2_data['total_otbor'] : 0;
+
+    $team1_data['total_obvodkaplus'] = isset($team1_data['total_obvodkaplus']) ? $team1_data['total_obvodkaplus'] : 0;
+    $team2_data['total_obvodkaplus'] = isset($team2_data['total_obvodkaplus']) ? $team2_data['total_obvodkaplus'] : 0;
+
+    $team1_data['total_obvodkaminus'] = isset($team1_data['total_obvodkaminus']) ? $team1_data['total_obvodkaminus'] : 0;
+    $team2_data['total_obvodkaminus'] = isset($team2_data['total_obvodkaminus']) ? $team2_data['total_obvodkaminus'] : 0;
+
+    $team1_data['total_seyv'] = isset($team1_data['total_seyv']) ? $team1_data['total_seyv'] : 0;
+    $team2_data['total_seyv'] = isset($team2_data['total_seyv']) ? $team2_data['total_seyv'] : 0;
+
+
+    $team1_data['udar_percentage_team'] = isset($team1_data['total_udar']) ? calculate_percentage($team1_data['total_udar'], $team2_data['total_udar']) : 50;
+    $team2_data['udar_percentage_team'] = 100 - $team1_data['udar_percentage_team'];
+
     $team1_data['vstvor_percentage_team'] = isset($team1_data['total_vstvor']) ? calculate_percentage($team1_data['total_vstvor'], $team2_data['total_vstvor']) : 50;
     $team2_data['vstvor_percentage_team'] = 100 - $team1_data['vstvor_percentage_team'];
+
+    $team1_data['mimo_percentage_team'] = isset($team1_data['total_mimo']) ? calculate_percentage($team1_data['total_mimo'], $team2_data['total_mimo']) : 50;
+    $team2_data['mimo_percentage_team'] = 100 - $team1_data['mimo_percentage_team'];
     
     $team1_data['pasplus_percentage_team'] = isset($team1_data['total_pasplus']) ? calculate_percentage($team1_data['total_pasplus'], $team2_data['total_pasplus']) : 50;
     $team2_data['pasplus_percentage_team'] = 100 - $team1_data['pasplus_percentage_team'];
+
+    $team1_data['pasminus_percentage_team'] = isset($team1_data['total_pasminus']) ? calculate_percentage($team1_data['total_pasminus'], $team2_data['total_pasminus']) : 50;
+    $team2_data['pasminus_percentage_team'] = 100 - $team1_data['pasminus_percentage_team'];
+
+    $team1_data['otbor_percentage_team'] = isset($team1_data['total_otbor']) ? calculate_percentage($team1_data['total_otbor'], $team2_data['total_otbor']) : 50;
+    $team2_data['otbor_percentage_team'] = 100 - $team1_data['otbor_percentage_team'];
+
+    $team1_data['obvodkaplus_percentage_team'] = isset($team1_data['total_obvodkaplus']) ? calculate_percentage($team1_data['total_obvodkaplus'], $team2_data['total_obvodkaplus']) : 50;
+    $team2_data['obvodkaplus_percentage_team'] = 100 - $team1_data['obvodkaplus_percentage_team'];
+
+    $team1_data['obvodkaminus_percentage_team'] = isset($team1_data['total_obvodkaminus']) ? calculate_percentage($team1_data['total_obvodkaminus'], $team2_data['total_obvodkaminus']) : 50;
+    $team2_data['obvodkaminus_percentage_team'] = 100 - $team1_data['obvodkaminus_percentage_team'];
+
+    $team1_data['seyv_percentage_team'] = isset($team1_data['total_seyv']) ? calculate_percentage($team1_data['total_seyv'], $team2_data['total_seyv']) : 50;
+    $team2_data['seyv_percentage_team'] = 100 - $team1_data['seyv_percentage_team'];
     
+
+    // Возвращаем структурированный массив
+    return [
+        'team1' => [
+            'id' => $team1_id,
+            'data' => $team1_data
+        ],
+        'team2' => [
+            'id' => $team2_id,
+            'data' => $team2_data
+        ]
+    ];
+    
+  }
+
+  function getStaticMatch1($matchId, $team1_id, $team2_id)
+  {
+    global $dbF;
+
+    $sql = "SELECT 
+        SUM(s.`vstvor`) AS total_vstvor,
+        SUM(s.`mimo`) AS total_mimo,
+        SUM(s.`pasplus`) AS total_pasplus,
+        SUM(s.`pasminus`) AS total_pasminus,
+        SUM(s.`seyv`) AS total_seyv,
+        SUM(s.`otbor`) AS total_otbor,
+        SUM(s.`obvodkaplus`) AS total_obvodkaplus,
+        SUM(s.`obvodkaminus`) AS total_obvodkaminus,
+        p.`team`,
+        m.date AS match_date
+    FROM `v9ky_sostav` s
+    LEFT JOIN `v9ky_player` p
+        ON p.`id` = s.`player`
+    LEFT JOIN `v9ky_match` m
+        ON m.`id` = :match_id
+    WHERE s.`matc` = :match_id
+    AND p.`team` IN (:team1_id, :team2_id)
+    GROUP BY p.`team`";
+
+    $results = $dbF->query($sql, [
+        ":match_id" => $matchId,
+        ":team1_id" => $team1_id,
+        ":team2_id" => $team2_id
+    ])->findAll();
+
+    $team1_data = [];
+    $team2_data = [];
+
+    foreach ($results as $row) {
+        if ($row['team'] == $team1_id) {
+            $team1_data = $row;
+        } elseif ($row['team'] == $team2_id) {
+            $team2_data = $row;
+        }
+    }
+
+    // получаем количество ударов команды за матч
+    
+    $team1_data['total_udar'] = isset($team1_data['total_vstvor']) || isset($team1_data['total_mimo']) ? $team1_data['total_vstvor'] + $team1_data['total_mimo'] : 0;
+    $team2_data['total_udar'] = isset($team2_data['total_vstvor']) || isset($team2_data['total_mimo']) ? $team2_data['total_vstvor'] + $team2_data['total_mimo'] : 0;
+
+    $team1_data['total_vstvor'] = isset($team1_data['total_vstvor']) ? $team1_data['total_vstvor'] : 0;
+    $team2_data['total_vstvor'] = isset($team2_data['total_vstvor']) ? $team2_data['total_vstvor'] : 0;
+
+    $team1_data['total_mimo'] = isset($team1_data['total_mimo']) ? $team1_data['total_mimo'] : 0;
+    $team2_data['total_mimo'] = isset($team2_data['total_mimo']) ? $team2_data['total_mimo'] : 0;
+    
+    $team1_data['total_pasplus'] = isset($team1_data['total_pasplus']) ? $team1_data['total_pasplus'] : 0;
+    $team2_data['total_pasplus'] = isset($team2_data['total_pasplus']) ? $team2_data['total_pasplus'] : 0;
+
+    $team1_data['total_pasminus'] = isset($team1_data['total_pasminus']) ? $team1_data['total_pasminus'] : 0;
+    $team2_data['total_pasminus'] = isset($team2_data['total_pasminus']) ? $team2_data['total_pasminus'] : 0;
+
+    $team1_data['total_otbor'] = isset($team1_data['total_otbor']) ? $team1_data['total_otbor'] : 0;
+    $team2_data['total_otbor'] = isset($team2_data['total_otbor']) ? $team2_data['total_otbor'] : 0;
+
+    $team1_data['total_obvodkaplus'] = isset($team1_data['total_obvodkaplus']) ? $team1_data['total_obvodkaplus'] : 0;
+    $team2_data['total_obvodkaplus'] = isset($team2_data['total_obvodkaplus']) ? $team2_data['total_obvodkaplus'] : 0;
+
+    $team1_data['total_obvodkaminus'] = isset($team1_data['total_obvodkaminus']) ? $team1_data['total_obvodkaminus'] : 0;
+    $team2_data['total_obvodkaminus'] = isset($team2_data['total_obvodkaminus']) ? $team2_data['total_obvodkaminus'] : 0;
+
+    $team1_data['total_seyv'] = isset($team1_data['total_seyv']) ? $team1_data['total_seyv'] : 0;
+    $team2_data['total_seyv'] = isset($team2_data['total_seyv']) ? $team2_data['total_seyv'] : 0;
+
+
     $team1_data['udar_percentage_team'] = isset($team1_data['total_udar']) ? calculate_percentage($team1_data['total_udar'], $team2_data['total_udar']) : 50;
     $team2_data['udar_percentage_team'] = 100 - $team1_data['udar_percentage_team'];
+
+    $team1_data['vstvor_percentage_team'] = isset($team1_data['total_vstvor']) ? calculate_percentage($team1_data['total_vstvor'], $team2_data['total_vstvor']) : 50;
+    $team2_data['vstvor_percentage_team'] = 100 - $team1_data['vstvor_percentage_team'];
+
+    $team1_data['mimo_percentage_team'] = isset($team1_data['total_mimo']) ? calculate_percentage($team1_data['total_mimo'], $team2_data['total_mimo']) : 50;
+    $team2_data['mimo_percentage_team'] = 100 - $team1_data['mimo_percentage_team'];
+    
+    $team1_data['pasplus_percentage_team'] = isset($team1_data['total_pasplus']) ? calculate_percentage($team1_data['total_pasplus'], $team2_data['total_pasplus']) : 50;
+    $team2_data['pasplus_percentage_team'] = 100 - $team1_data['pasplus_percentage_team'];
+
+    $team1_data['pasminus_percentage_team'] = isset($team1_data['total_pasminus']) ? calculate_percentage($team1_data['total_pasminus'], $team2_data['total_pasminus']) : 50;
+    $team2_data['pasminus_percentage_team'] = 100 - $team1_data['pasminus_percentage_team'];
+
+    $team1_data['otbor_percentage_team'] = isset($team1_data['total_otbor']) ? calculate_percentage($team1_data['total_otbor'], $team2_data['total_otbor']) : 50;
+    $team2_data['otbor_percentage_team'] = 100 - $team1_data['otbor_percentage_team'];
+
+    $team1_data['obvodkaplus_percentage_team'] = isset($team1_data['total_obvodkaplus']) ? calculate_percentage($team1_data['total_obvodkaplus'], $team2_data['total_obvodkaplus']) : 50;
+    $team2_data['obvodkaplus_percentage_team'] = 100 - $team1_data['obvodkaplus_percentage_team'];
+
+    $team1_data['obvodkaminus_percentage_team'] = isset($team1_data['total_obvodkaminus']) ? calculate_percentage($team1_data['total_obvodkaminus'], $team2_data['total_obvodkaminus']) : 50;
+    $team2_data['obvodkaminus_percentage_team'] = 100 - $team1_data['obvodkaminus_percentage_team'];
+
+    $team1_data['seyv_percentage_team'] = isset($team1_data['total_seyv']) ? calculate_percentage($team1_data['total_seyv'], $team2_data['total_seyv']) : 50;
+    $team2_data['seyv_percentage_team'] = 100 - $team1_data['seyv_percentage_team'];
+    
 
     // Возвращаем структурированный массив
     return [

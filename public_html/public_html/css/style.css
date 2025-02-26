@@ -214,88 +214,73 @@ pre {
 	display: none;
 }
 
-.border {
-	border: 1px solid #000;
-}
-
-.p-2 {
-	padding: 0.5rem;
-}
-
 /* ---------------------------- */
 /*  для сохранения в соц сетях  */
 /* ---------------------------- */
 
 /* Стили кнопки */
 .capture-btn {
-	color: white;
-	padding: 10px 20px;
-	border: none;
-	cursor: pointer;
-	font-size: 16px;
-	border-radius: 5px;
-	transition: background 0.3s;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
 }
 
 .capture-btn:disabled {
-	background-color: gray;
-	cursor: not-allowed;
+    cursor: not-allowed;
 }
 
 /* Модальное окно */
 .modal {
-	display: none;
-	position: fixed;
-	z-index: 1000;
-	left: 0;
-	top: 0;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
 .modal-content {
-	background-color: white;
-	margin: 15% auto;
-	padding: 20px;
-	border-radius: 10px;
-	text-align: center;
-	width: 300px;
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 300px;
 }
 
 /* Стили ссылок на мессенджеры */
 .modal-content .share-btn {
-	/* display: block; */
-	padding: 10px;
-	margin: 10px 0;
-	border-radius: 5px;
-	text-decoration: none;
-	font-size: 16px;
-	color: white;
+    /* display: block; */
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+    color: white;
 	display: flex;
 	justify-content: center;
 	gap: 10px;
 }
 
-.viber {
-	background-color: #7360f2;
-}
-
-.telegram {
-	background-color: #0088cc;
-}
+.viber { background-color: #7360f2; }
+.telegram { background-color: #0088cc; }
 
 /* Кнопка закрытия */
 .modal-content .close-btn {
-	background-color: red;
-	color: white;
-	padding: 8px 15px;
-	border: none;
-	cursor: pointer;
-	margin-top: 10px;
+    background-color: red;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
 }
 
-.modal-content .share-btn img {
+.modal-content .share-btn img{
 	width: 18px;
 }
 

@@ -1,6 +1,7 @@
 
 $(document).ready(function () {
 
+    // ВЕРХНИЙ СЛАЙДЕР С ДАТАМИ МАТЧЕЙ
     $('.calendar-of-matches__grid-container').on('click', '[data-turid]', function (e) {
 
         e.preventDefault();
@@ -13,12 +14,13 @@ $(document).ready(function () {
         let tur = $(this).attr('data-turid');
         let turnir = $(this).attr('data-turnir');
         let lastTur = $(this).attr('data-lasttur');
+        let selectedDate = $(this).attr('data-selecteddate');
 
         if (tur) {
             $.ajax({
                 type: "post",
                 url: "../freedman/actions/actions.php",
-                data: JSON.stringify({ tur: tur, turnir: turnir, lasttur: lastTur, action: 'calendar_of_matches' }),
+                data: JSON.stringify({ tur: tur, turnir: turnir, lasttur: lastTur, action: 'calendar_of_matches', selected_date: selectedDate }),
                 dataType: 'json', // Ожидаем данные в формате JSON
                 success: function (response) {
                     $(".calendar-of-matches__grid-container").html(response.section1);
@@ -29,43 +31,43 @@ $(document).ready(function () {
                         spaceBetween: 10,
                         speed: 400,
                         scrollbar: {
-                          el: '.swiper-scrollbar',
-                          dragSize: 70,
-                          hide: false
+                            el: '.swiper-scrollbar',
+                            dragSize: 70,
+                            hide: false
                         },
                         breakpoint: {
-                          860: {
-                            scrollbar: {
-                              hide: true
+                            860: {
+                                scrollbar: {
+                                    hide: true
+                                }
+                            },
+                            1260: {
+                                scrollbar: {
+                                    hide: false
+                                }
                             }
-                          },
-                          1260: {
-                            scrollbar: {
-                              hide: false
-                            }
-                          }
                         }
-                      });
+                    });
 
-                      swipersControls = new Swiper(".swiper-matches", {
+                    swipersControls = new Swiper(".swiper-matches", {
                         slidesPerView: 'auto',
                         spaceBetween: 20,
                         scrollbar: {
-                          el: '.swiper-scrollbar-matches',
-                          hide: false,
-                          draggable: true,
+                            el: '.swiper-scrollbar-matches',
+                            hide: false,
+                            draggable: true,
                         },
                         breakpoints: {
-                          // when window width is >= 820px
-                          1259: {
-                            scrollbar: false,
-                            allowTouchMove: false, // Отключает свайпы
-                            noSwiping: true, // Запрещает смахивание
-                            noSwipingClass: 'swiper-container',
-                          }
+                            // when window width is >= 820px
+                            1259: {
+                                scrollbar: false,
+                                allowTouchMove: false, // Отключает свайпы
+                                noSwiping: true, // Запрещает смахивание
+                                noSwipingClass: 'swiper-container',
+                            }
                         }
-                      });
-                      
+                    });
+
 
                     $("#controls").html(response.section2);
 
@@ -79,7 +81,7 @@ $(document).ready(function () {
     });
 
 
-    // Регистрация обработчика события один раз для контейнера
+    // КНОПКА АНОНС. Регистрация обработчика события один раз для контейнера
     $('.calendar-of-matches__grid-container').on('click', '[data-anons]', function (e) {
 
         $('[data-turnir]').css({ 'background': '' });
@@ -125,7 +127,7 @@ $(document).ready(function () {
     });
 
 
-    // Регистрация обработчика события один раз для контейнера
+    // КНОПКА СТАТИСТИКА МАТЧА. Регистрация обработчика события один раз для контейнера
     $('.calendar-of-matches__grid-container').on('click', '[data-match-stats]', function (e) {
 
         $('[data-turnir]').css({ 'background': '' });
@@ -172,6 +174,7 @@ $(document).ready(function () {
         }
     });
 
+    // КНОПКА ККД ГРАВЦЯ
     $('.calendar-of-matches__grid-container').on('click', '[data-kkd]', function (e) {
 
         $('[data-turnir]').css({ 'background': '' });
@@ -216,6 +219,7 @@ $(document).ready(function () {
         }
     });
 
+    // КНОПКА ПРЕВЬЮ (короткие видео)
     $('.calendar-of-matches__grid-container').on('click', '[data-preview]', function (e) {
 
         $('[data-turnir]').css({ 'background': '' });
@@ -260,6 +264,7 @@ $(document).ready(function () {
         }
     });
 
+    // КНОПКА ВИДЕО
     $('.calendar-of-matches__grid-container').on('click', '[data-video]', function (e) {
 
         $('[data-turnir]').css({ 'background': '' });
@@ -304,6 +309,7 @@ $(document).ready(function () {
         }
     });
 
+    // КНОПКА ФОТО
     $('.calendar-of-matches__grid-container').on('click', '[data-photo]', function (e) {
 
         $('[data-turnir]').css({ 'background': '' });
@@ -348,6 +354,7 @@ $(document).ready(function () {
         }
     });
 
+    // КНОПКА
     $('.match-calendar').on('click', '[data-switch-tur]', function (e) {
 
 

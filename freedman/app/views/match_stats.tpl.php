@@ -197,43 +197,23 @@
                 </div>
                 <div class="tabs__block">
                     <?php if($matchDate <= $currentDate ) :?>
-                    <div class="tabs__block-stats stats ball__procession">
-                        <div class="stats__title">Кількість ударів</div>
-                        <div class="stats__view">
-                            <div class="stats__view-blue" data-value="<?= $staticMatch['team1']['data']['udar_percentage_team']?>">
-                                <?= $staticMatch['team1']['data']['total_udar']?>
+                        <?php foreach ($statsList as $key => $stat) : ?>
+                            <div class="tabs__block-stats stats">
+                                <div class="stats__title"><?= $stat['title'] ?></div>
+                                <div class="stats__view">
+                                    <div class="stats__view-blue" data-value="<?= $staticMatch['team1']['data'][$stat['percentage_key']] ?>">
+                                        <?= $staticMatch['team1']['data'][$key] ?>
+                                    </div>
+                                    <div class="stats__view-red" data-value="<?= $staticMatch['team2']['data'][$stat['percentage_key']] ?>">
+                                        <?= $staticMatch['team2']['data'][$key] ?>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="stats__view-red" data-value="<?= $staticMatch['team2']['data']['udar_percentage_team']?>">
-                                <?= $staticMatch['team2']['data']['total_udar']?>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tabs__block-stats stats goal__area">
-                        <div class="stats__title">Удари в площину воріт</div>
-                        <div class="stats__view">
-                            <div class="stats__view-blue" data-value="<?= $staticMatch['team1']['data']['vstvor_percentage_team']?>">
-                                <?= $staticMatch['team1']['data']['total_vstvor']?>
-                            </div>
-                            <div class="stats__view-red" data-value="<?= $staticMatch['team2']['data']['vstvor_percentage_team']?>">
-                                <?= $staticMatch['team2']['data']['total_vstvor']?>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tabs__block-stats stats passes">
-                        <div class="stats__title">Вдалі паси</div>
-                        <div class="stats__view">
-                            <div class="stats__view-blue" data-value="<?= $staticMatch['team1']['data']['pasplus_percentage_team']?>">
-                                <?= $staticMatch['team1']['data']['total_pasplus']?>
-                            </div>
-                            <div class="stats__view-red" data-value="<?= $staticMatch['team2']['data']['pasplus_percentage_team']?>">
-                                <?= $staticMatch['team2']['data']['total_pasplus']?>
-                            </div>
-                        </div>
-                    </div>
+                        <?php endforeach; ?>
                     <?php else :?>
-                    <div class="tabs__block-stats stats ball__procession">
-                    <div class="stats__title">Дані статистики ще не готові</div>
-                    </div>
+                        <div class="tabs__block-stats stats ball__procession">
+                            <div class="stats__title">Дані статистики ще не готові</div>
+                        </div>
                     <?php endif ?>
                 </div>
             </div>

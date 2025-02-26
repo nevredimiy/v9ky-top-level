@@ -82,6 +82,7 @@
   .calendar-of-matches__head-nav {
     /* gap: 10px; */
     margin-bottom: 0;
+    overflow: auto;
   }
 
   .calendar-of-matches__dynamic-content {

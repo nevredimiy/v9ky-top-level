@@ -3,9 +3,8 @@
     require_once CONTROLLERS . '/menu.php';
 ?>
 
-
 <section class="team-page">
-  <div class="container">
+ <div class="container">
     <div class="team-page__header">
       <div id="teamCard" class="team-page__team-card">
         <p class="team-page__title"><?= isset($teamData['name']) ? $teamData['name'] : 'Команда не знайдена' ?></p>
@@ -110,7 +109,11 @@
       </div>
 
       <div class="team-page__photo">
-        <img src="/css/components/team-page/assets/images/team-photo.jpg" alt="">
+      <?php  if(isset($teamData['photo']) && !empty($teamData['photo'])) :?>
+          <img src="<?= $teamData['photo'] ?>" alt="Фото команди">
+      <?php else :?>
+          <img src="/css/components/team-page/assets/images/team-photo.jpg" alt="Фото команди">
+      <?php endif ?>
       </div>
     </div>
 
@@ -118,7 +121,7 @@
       <div class="team-page__manager">
         <img
           class="team-page__manager-photo"
-          src="<?=  isset($teamHeads[5]['player_photo']) ? $player_face_path . $teamHeads[5]['player_photo'] : $player_face_path . 'avatar.jpg' ?>" 
+          src="<?=  isset($teamHeads['manager']['player_photo']) ? $player_face_path . $teamHeads['manager']['player_photo'] : $player_face_path . 'avatar.jpg' ?>" 
           alt="manager-photo"
         >
         <img 
@@ -128,19 +131,19 @@
         >
         <img
           class="team-page__manager-team-logo"
-          src="<?= isset($teamHeads[5]) ? $team_logo_path . $teamHeads[5]['team_photo'] : $player_face_path . 'avatar.jpg'  ?>"
+          src="<?= isset($teamHeads['manager']) ? $team_logo_path . $teamHeads['manager']['team_logo'] : $player_face_path . 'avatar.jpg'  ?>"
           alt="manager"
         >
         <div class="team-page__manager-label">
-          <p><span> <?=  isset($teamHeads[5]['player_lastname'] ) ? $teamHeads[5]['player_lastname'] : 'менеджер' ?></span></p>
-          <p><?=  isset($teamHeads[5]) ? $teamHeads[5]['player_firstname'] .' '.  $teamHeads[5]['player_middlename'] : '' ?></p>
+          <p><span> <?=  isset($teamHeads['manager']['player_lastname'] ) ? $teamHeads['manager']['player_lastname'] : 'менеджер' ?></span></p>
+          <p><?=  isset($teamHeads['manager']) ? $teamHeads['manager']['player_firstname'] .' '.  $teamHeads['manager']['player_middlename'] : '' ?></p>
         </div>
       </div>
 
       <div class="team-page__manager">
         <img
           class="team-page__manager-photo"
-          src="<?=  isset($teamHeads[4]['player_photo']) ? $player_face_path . $teamHeads[4]['player_photo'] : $player_face_path . 'avatar.jpg' ?>" 
+          src="<?=  isset($teamHeads['trainer']['player_photo']) ? $player_face_path . $teamHeads['trainer']['player_photo'] : $player_face_path . 'avatar.jpg' ?>" 
           alt="trainer-photo"
         >
         <img 
@@ -150,33 +153,34 @@
         >
         <img
           class="team-page__manager-team-logo"
-          src="<?= isset($teamHeads[4]) ? $team_logo_path . $teamHeads[4]['team_photo'] : $player_face_path . 'avatar.jpg'  ?>"
+          src="<?= isset($teamHeads['trainer']) ? $team_logo_path . $teamHeads['trainer']['team_logo'] : $player_face_path . 'avatar.jpg'  ?>"
           alt="manager"
         >
         <div class="team-page__manager-label">
-          <p><span> <?=  isset($teamHeads[4]['player_lastname'] ) ? $teamHeads[4]['player_lastname'] : 'тренер' ?></span></p>
-          <p><?=  isset($teamHeads[4]) ? $teamHeads[4]['player_firstname'] .' '.  $teamHeads[4]['player_middlename'] : '' ?></p>
+          <p><span> <?=  isset($teamHeads['trainer']['player_lastname'] ) ? $teamHeads['trainer']['player_lastname'] : 'тренер' ?></span></p>
+          <p><?=  isset($teamHeads['trainer']) ? $teamHeads['trainer']['player_firstname'] .' '.  $teamHeads['trainer']['player_middlename'] : '' ?></p>
         </div>
       </div>
       <div class="team-page__manager">
         <img
           class="team-page__manager-photo"
-          src="<?=  isset($teamHeads[0]['player_photo']) ? $player_face_path . $teamHeads[0]['player_photo'] : $player_face_path . 'avatar.jpg' ?>" 
-          alt="capitan-photo"
+          src="<?=  isset($teamHeads['capitan']['player_photo']) ? $player_face_path . $teamHeads['capitan']['player_photo'] : $player_face_path . 'avatar.jpg' ?>" 
+          alt="Фото капітана"
         >
         <img 
           class="team-page__manager-logo"  
           src="/css/components/team-page/assets/images/cap-icon.svg"
-          alt="manager"
-        >
+          alt="Іконка капітана"
+          onclick="sms();"
+        ><span id="msg"></span>
         <img
           class="team-page__manager-team-logo"
-          src="<?= isset($teamHeads[0]) ? $team_logo_path . $teamHeads[0]['team_photo'] : $player_face_path . 'avatar.jpg'  ?>"
-          alt="manager"
+          src="<?= isset($teamHeads['capitan']) ? $team_logo_path . $teamHeads['capitan']['team_logo'] : $player_face_path . 'avatar.jpg'  ?>"
+          alt="Лого команди"
         >
         <div class="team-page__manager-label">
-          <p><span> <?=  isset($teamHeads[0]['player_lastname'] ) ? $teamHeads[0]['player_lastname'] : 'місце для капітана' ?></span></p>
-          <p><?=  isset($teamHeads[0]) ? $teamHeads[0]['player_firstname'] .' '.  $teamHeads[0]['player_middlename'] : '' ?></p>
+          <p><span> <?=  isset($teamHeads['capitan']['player_lastname'] ) ? $teamHeads['capitan']['player_lastname'] : 'місце для капітана' ?></span></p>
+          <p><?=  isset($teamHeads['capitan']) ? $teamHeads['capitan']['player_firstname'] .' '.  $teamHeads['capitan']['player_middlename'] : '' ?></p>
         </div>
       </div>
       
@@ -220,21 +224,75 @@
       </tbody>
     </table>
 
-    <div class="team-page__players">
+
+<?php if ($kep){ ?>
+
+<div class="jeka_content">
+  <p></p>
+  <br>
+  <br>
+  <table class="capitan-table" id="msgzaya">
+      <?php echo $myClass->sel_all($teamId); ?>			
+  </table>
+</div>
+
+<p></p>
+<br>
+<br>
+<table class="capitan-table">
+  <tr>
+      <th colspan='5'>Заявити нового гравця (українською мовою)</th>
+  </tr>
+  <tr>
+    <th>Прізвище</th>
+    <th>Ім'я</th>
+    <th>По батькові</th>
+    <th>Дата народження</th>
+    <th>Дія</th>
+  </tr>
+  <tr>
+    <td align="center"><input type='text' id='name1' value='' style="color:blue"></td>
+    <td align="center"><input type='text' id='name2' size='20' value='' style="color:blue"></td>
+    <td align="center"><input type='text' id='name3' size='20' value='' style="color:blue"></td>
+    <td align="center"><input type='date' id='age' size='60' value='<?=date_format($age, 'Y-m-d')?>' style="color:blue"></td>
+    <td align="center"><input type='button' value='Заявити нового' onclick='newplay(<?=$teamId?>);' style="color:green"></td>
+  </tr>
+</table>
+
+<br>
+<center><h2 style="color: #dfdfdf; background-color: #575757;">Напишіть нижче щотижневі новини або цікаві факти команди які можуть бути використані в наших публікаціях і відеоматеріалах</h2>
+  <textarea type="text" id="cap_story" rows="3" cols="100">Текст новини</textarea><br>
+  <input type='button' value='Зберегти новину команди' onclick='newstory(<?=$teamId?>);' style="color:green">
+
+  <div id="msgstory">
+    <?php
+    $recordSet = $dbF->query("SELECT * FROM `v9ky_cap_story` WHERE `team` = :id ORDER BY `date`", [":id" => $teamId])->findAll();
+    $i=0;
+    foreach($recordSet as $item) {
+        $i ++;
+          echo $item[date];
+          echo "<br><pre>";
+          echo $item[text];
+          echo "</pre>";
+          echo "<input type='button' value='Видалити новину' onclick='delstory(".$item[id].", ".$teamId.");' style='color:green'>";
+          echo "<br><br>";
+    }
+    ?>
+  </div>
+</center>
+<br>
+<?php } ?>
+<div class="team-page__players">
     <?php $idx = 0 ?>
-    
-    <div style="display: none;"><?php dump_arr($allStaticPlayers) ?></div>
+    <div style="display: none"><?php dump_arr_first($players) ?></div>
     <?php foreach ($players as $player): ?>
 
       <?php          
           // Получение индивидуальной статистики. Player Card.
-          if (isset($allStaticPlayers)) { $indStaticPlayer = getIndStaticPlayer($allStaticPlayers, $player['id']); }      
-
-         
+          if (isset($allStaticPlayers)) { $indStaticPlayer = getIndStaticPlayer($allStaticPlayers, $player['id']); }  
       ?>
-      <div style="display: none"><?php dump($indStaticPlayer); ?></div>
       <!-- Если тренер или менеджер, то не показываем карточку игрока -->
-      <?php if ( $player['amplua'] != 4 && $player['amplua'] != 5 && isset( $dataAllPlayers[$player['id']] ) )  :?>      
+      <?php if ( $player['amplua'] != 4 && $player['amplua'] != 5 )  :?>      
         
       <div data-player-id="<?=$player['id']?>" id="playerCard<?= $idx ?>" class="card-player-full content-image">
           <?php 
@@ -266,31 +324,139 @@
             $categoryBestPlayers = $arrayCategoryPlayers[$indexCPB];
           ?>        
         
-        <div class="card-player-full__photo">
-          <img src="<?=$player_face_path?><?= $dataAllPlayers[$player['id']]['player_photo'] ?>" alt="photo_player">
-          
+        <?php if( isset( $dataAllPlayers[$player['id']] ) ): ?>
+            <div class="card-player-full__photo">
+                <img src="<?=$player_face_path?><?= $dataAllPlayers[$player['id']]['player_photo'] ?>" alt="Фото гравця">
 
-          <img width="24" height="24" class="card-player-full__best-icon" src="/css/components/card-player-full/assets/images/<?= $categoryBestPlayers ?>" alt="icon">
+                <img width="24" height="24" class="card-player-full__best-icon" src="/css/components/card-player-full/assets/images/<?= $categoryBestPlayers ?>" alt="icon">
 
-          <img src="<?=$team_logo_path?><?= $dataAllPlayers[$player['id']]['team_photo'] ?>" alt="Team Logo">
-          
-          <?php if ($player['v9ky']):?>
-            <img src="/css/components/team-page/assets/images/player-v9ku.png" alt="В9КУ">
-            <?php elseif ($player['dubler']): ?>
-            <img src="/css/components/team-page/assets/images/dubler-icon.png" alt="Дублер">
-            <?php elseif ($player['vibuv']): ?>
-            <img class="vibuv" src="/css/components/team-page/assets/images/vibuv.png" alt="Вибув">
-          <?php endif ?>
-            
-          
-        </div>
+                <img src="<?=$team_logo_path?><?= $dataAllPlayers[$player['id']]['team_photo'] ?>" alt="Логотип команди">
+                
+                <?php if ($player['v9ky']):?>
+                  <img src="/css/components/team-page/assets/images/player-v9ku.png" alt="В9КУ">
+                  <?php elseif ($player['dubler']): ?>
+                  <img src="/css/components/team-page/assets/images/dubler-icon.png" alt="Дублер">
+                  <?php elseif ($player['vibuv']): ?>
+                  <img class="vibuv" src="/css/components/team-page/assets/images/vibuv.png" alt="Вибув">
+                <?php endif ?>
+                                  
+              </div>
+              <!-- Информация для капитанов -->
+              <div class="">
+                <div class="">
+                  <?php  if($kep) faceupload($player['man'], $teamId, $tournament); ?>
+                </div>                
+                <div class="">
+                  <?php if($kep){ ?>
+                      <span>Тел.
+                        <input type='text' id='mantel<?=$player['id'];?>' value='<?=$player['tel'];?>' style='color:blue' placeholder='38068XXXXXXX'>
+                        <input type='button' value='Зберегти' onclick="mantel(<?=$player['id'];?>, <?=$player['man'];?>);">
+                      </span>
+                      <span>Амплуа
+                        <select class='form-control' id="amplua_<?=$player['id'];?>" size=1 onchange="amplua(<?=$player['id'];?>, <?=$player['man'];?>);">
+                          <option value='0' <?php if($player['amplua']==0) echo "selected";?>>-</option>
+                          <option value='1' <?php if($player['amplua']==1) echo "selected";?>>Нападник</option>
+                          <option value='2' <?php if($player['amplua']==2) echo "selected";?>>Захисник</option>
+                          <option value='3' <?php if($player['amplua']==3) echo "selected";?>>Воротар</option>
+                        </select>
+                      </span> 
+                      <div class="">
+                      <?php 
+                        if($kep)
+                        {
+                          if ($player['active'] == 1) {
+                            echo"<font color='green'>Заявлений</font></td><td>";
+                            echo'<input type="button" value="Відкликати" onclick="out('.$teamId.', '.$player["id"].', 0);">';
+                          }else {
+                            echo'<font color="red">Відкликаний</font></td><td>';
+                            echo'<input type="button" value="Заявити" onclick="out('.$teamId.', '.$player["id"].', 1);">';
+                          }
+                        } 
+                        ?>
+                      </td>
+                      </div>
+                  <?php } ?>
+                </div>                
+              </div>
+              <!-- КОНЕЦ Информация для капитанов -->
+
+              <div class="card-player-full__name">
+                <p><span><?= $dataAllPlayers[$player['id']]['last_name'] ?> </span></p>
+                <p><?= $dataAllPlayers[$player['id']]['first_name'] ?></p>                
+              </div>
+
+        <?php else: ?>
+            <?php $dataPlayer = getPlayerData($player['id']) ?>
+            <div class="card-player-full__photo">
+              <img src="<?=$player_face_path?><?= empty($dataPlayer['player_photo']) ? 'avatar.jpg' : $dataPlayer['player_photo'] ?>" alt="Фото гравця">
+                
+
+                <img width="24" height="24" class="card-player-full__best-icon" src="/css/components/card-player-full/assets/images/<?= $categoryBestPlayers ?>" alt="icon">
+
+                <img src="<?=$team_logo_path?><?= $dataPlayer['team_logo'] ?>" alt="Логотип команди">
+                
+                <?php if ($player['v9ky']):?>
+                  <img src="/css/components/team-page/assets/images/player-v9ku.png" alt="В9КУ">
+                  <?php elseif ($player['dubler']): ?>
+                  <img src="/css/components/team-page/assets/images/dubler-icon.png" alt="Дублер">
+                  <?php elseif ($player['vibuv']): ?>
+                  <img class="vibuv" src="/css/components/team-page/assets/images/vibuv.png" alt="Вибув">
+                <?php endif ?>
+
+              </div>
+
+              <!-- Информация для капитанов -->
+              <div class="capitan-block">
+                <div class="border p-2">
+                  <?php  if($kep) faceupload($player['man'], $teamId, $tournament); ?>
+                </div>                
+                <div class="mb-2">
+                  <?php if($kep){ ?>
+                    <div class="mt-2 mb-2 border p-2">
+                      <label>Тел.</label>
+                      <input type='text' id='mantel<?=$player['id'];?>' value='<?=$player['tel'];?>' style='color:blue; width: 100px' placeholder='38068XXXXXXX'>
+                      <input type='button' value='Зберегти' onclick="mantel(<?=$player['id'];?>, <?=$player['man'];?>);">
+                    </div>
+                    <div class="mb-2 border p-2">
+                      <lable>Амплуа</label>
+                      <select class='form-control' id="amplua_<?=$player['id'];?>" size=1 onchange="amplua(<?=$player['id'];?>, <?=$player['man'];?>);">
+                        <option value='0' <?php if($player['amplua']==0) echo "selected";?>>-</option>
+                        <option value='1' <?php if($player['amplua']==1) echo "selected";?>>Нападник</option>
+                        <option value='2' <?php if($player['amplua']==2) echo "selected";?>>Захисник</option>
+                        <option value='3' <?php if($player['amplua']==3) echo "selected";?>>Воротар</option>
+                      </select>
+                      </div> 
+                    <div class="mb-2 border p-2">
+                    <?php 
+                      if($kep)
+                      {
+                        if ($player['active'] == 1) {
+                          echo '<div class="mt-2 mb-2">';
+                          echo"<font color='green'>Заявлений</font>";
+                          echo'<input type="button" value="Відкликати" onclick="out('.$teamId.', '.$player["id"].', 0);">';
+                          echo '</div>';
+                        }else {
+                          echo '<div class="mt-2 mb-2">';
+                          echo'<font color="red">Відкликаний</font>';
+                          echo'<input type="button" value="Заявити" onclick="out('.$teamId.', '.$player["id"].', 1);">';
+                          echo '</div>';
+                        }
+                      } 
+                      ?>
+                    
+                    </div>
+                  <?php } ?>
+                </div>                
+              </div>
+              <!-- КОНЕЦ Информация для капитанов -->
+
+              <div class="card-player-full__name">
+                <p><span><?= $dataPlayer['player_lastname'] ?> </span></p>
+                <p><?= $dataPlayer['player_firstname'] ?></p>                  
+              </div>
+        <?php endif ?>
         
 
-        <div class="card-player-full__name">
-          <p><span><?= $dataAllPlayers[$player['id']]['last_name'] ?> </span></p>
-          <p><?= $dataAllPlayers[$player['id']]['first_name'] ?></p>
-          
-        </div>
 
           <!--  иконки первого ряда: мяч, звездочка, футболка ... -->
         <ul class="card-player-full__top-statistic">
@@ -364,58 +530,95 @@
             <p><?= $indStaticPlayer['accuracy_of_tackles'] ?></p>
           </li>
         </ul>
+        
+        <?php if( isset( $dataAllPlayers[$player['id']] ) ): ?>       
+          <h4>Місце в рейтингу ліги</h4>
 
-        <h4>Місце в рейтингу ліги</h4>
-
-
-        <ul class="card-player-full__skills">
-          <!-- Если не вратарь, то не показываем -->
-          <?php if($dataAllPlayers[$player['id']]['amplua'] != 1): ?>  
+          <ul class="card-player-full__skills">
+            <!-- Если не вратарь, то не показываем -->
+            <?php if($dataAllPlayers[$player['id']]['amplua'] != 1): ?>  
+              <li>
+                <img src="/css/components/card-player-full/assets/images/star-icon.png" alt="skills-icon" title="Топ-Гравець">
+                <span><?= $bestGravetc ?></span>
+              </li>
+            <?php endif ?>
+            
+            <!-- Если вратарь, то показываем -->
+            <?php if($dataAllPlayers[$player['id']]['amplua'] == 1): ?>
+              <li>
+                <img src="/css/components/card-player-full/assets/images/gloves-icon.png" alt="skills-icon" title="Топ-Голкіпер">
+                <span><?= $bestGolkiper ?></span>
+              </li>
+            <?php endif ?>            
+            
             <li>
-              <img src="/css/components/card-player-full/assets/images/star-icon.png" alt="skills-icon" title="Топ-Гравець">
-              <span><?= $bestGravetc ?></span>
+              <img src="/css/components/card-player-full/assets/images/football-icon.png" alt="skills-icon" title="Топ-Бомбардир">              
+              <span><?= $bestBombardi ?></span>
             </li>
-          <?php endif ?>
-          
-          <!-- Если вратарь, то показываем -->
-          <?php if($dataAllPlayers[$player['id']]['amplua'] == 1): ?>
+
             <li>
-              <img src="/css/components/card-player-full/assets/images/gloves-icon.png" alt="skills-icon" title="Топ-Голкіпер">
-              <span><?= $bestGolkiper ?></span>
+              <img src="/css/components/card-player-full/assets/images/boots-icon.png" alt="skills-icon" title="Топ-Асист">
+              <span><?= $bestAsists ?></span>
             </li>
-          <?php endif ?>            
-          
-          <li>
-            <img src="/css/components/card-player-full/assets/images/football-icon.png" alt="skills-icon" title="Топ-Бомбардир">              
-            <span><?= $bestBombardi ?></span>
-          </li>
 
-          <li>
-            <img src="/css/components/card-player-full/assets/images/boots-icon.png" alt="skills-icon" title="Топ-Асист">
-            <span><?= $bestAsists ?></span>
-          </li>
+            <li>
+              <img src="/css/components/card-player-full/assets/images/pitt-icon.png" alt="skills-icon" title="Топ-Захист">
+              <span><?= $bestZhusnuk ?></span>
+            </li>
 
-          <li>
-            <img src="/css/components/card-player-full/assets/images/pitt-icon.png" alt="skills-icon" title="Топ-Захист">
-            <span><?= $bestZhusnuk ?></span>
-          </li>
+            <li>
+              <img src="/css/components/card-player-full/assets/images/player-icon.png" alt="skills-icon" title="Топ-Дріблінг">
+              <span><?= $bestDribling ?></span>
+            </li>
 
-          <li>
-            <img src="/css/components/card-player-full/assets/images/player-icon.png" alt="skills-icon" title="Топ-Дріблінг">
-            <span><?= $bestDribling ?></span>
-          </li>
+            <li>
+              <img src="/css/components/card-player-full/assets/images/rocket-ball-icon.png" alt="skills-icon" title="Топ-Удар">
+              <span><?= $bestUdar ?></span>
+            </li>
 
-          <li>
-            <img src="/css/components/card-player-full/assets/images/rocket-ball-icon.png" alt="skills-icon" title="Топ-Удар">
-            <span><?= $bestUdar ?></span>
-          </li>
+            <li>
+              <img src="/css/components/card-player-full/assets/images/ball-icon.png" alt="skills-icon" title="Топ-Пас">
+              <span><?= $bestPas ?></span>
+            </li>
+          </ul>
+          <?php else : ?>
+          <h4>Місце в рейтингу ліги</h4>
+          <ul class="card-player-full__skills"> 
+              <li>
+                  <img src="/css/components/card-player-full/assets/images/star-icon.png" alt="skills-icon" title="Топ-Гравець">
+                  <span>-</span>
+                </li>
+                <li>
+                    <img src="/css/components/card-player-full/assets/images/football-icon.png" alt="skills-icon" title="Топ-Бомбардир">              
+                    <span>-</span>
+                  </li>
 
-          <li>
-            <img src="/css/components/card-player-full/assets/images/ball-icon.png" alt="skills-icon" title="Топ-Пас">
-            <span><?= $bestPas ?></span>
-          </li>
-        </ul>
+                  <li>
+                    <img src="/css/components/card-player-full/assets/images/boots-icon.png" alt="skills-icon" title="Топ-Асист">
+                    <span>-</span>
+                  </li>
 
+                  <li>
+                    <img src="/css/components/card-player-full/assets/images/pitt-icon.png" alt="skills-icon" title="Топ-Захист">
+                    <span>-</span>
+                  </li>
+
+                  <li>
+                    <img src="/css/components/card-player-full/assets/images/player-icon.png" alt="skills-icon" title="Топ-Дріблінг">
+                    <span>-</span>
+                  </li>
+
+                  <li>
+                    <img src="/css/components/card-player-full/assets/images/rocket-ball-icon.png" alt="skills-icon" title="Топ-Удар">
+                    <span>-</span>
+                  </li>
+
+                  <li>
+                    <img src="/css/components/card-player-full/assets/images/ball-icon.png" alt="skills-icon" title="Топ-Пас">
+                    <span>-</span>
+                  </li>
+            </ul>
+        <?php endif ?>
         <div class="card-player-full__footer">
           <img src="/css/components/card-player-full/assets/images/v9ku-logo-on-white-back.png" alt="">
           
@@ -596,6 +799,109 @@
     </div> <!-- team-page__reference -->
   </div><!-- container --> 
 </section><!-- team-page --> 
+
+
+<script type="text/javascript">
+
+  function sms(){
+    myClass.sms(<?=$teamId?>,  {
+        "onFinish": function(response){
+            var msg = document.getElementById("msg");
+            msg.innerHTML = response;
+        }
+    });
+  }
+  function validate(id, code){
+    id = id * 1;
+    code = code * 1;
+    myClass.validation(id, code,  {
+        "onFinish": function(response){
+            var msg = document.getElementById("msg");
+            msg.innerHTML = response;
+        }
+    });
+  }
+  function out(team, player, type){
+    myClass._out(team, player, type,  {
+        "onFinish": function(response){
+            var msgzaya = document.getElementById("msgzaya");
+            msgzaya.innerHTML = response;
+        }
+    });
+  }
+  function mantel(player, man){
+    val1 = document.getElementById("mantel" + player).value;
+    val2 = parseInt(val1);
+    if (val2<99999999999) alert("Повний формат телефону будь-ласка!"); else
+    myClass.mantel(man, val2,  {
+        "onFinish": function(response){
+            var msgzaya = document.getElementById("msgzaya");
+            msgzaya.innerHTML = response;
+        }
+    });
+  }
+
+  function amplua(player, man){
+    val1 = document.getElementById("amplua_" + player).value;
+    myClass.amplua(man, val1,  {
+        "onFinish": function(response){
+            var msgzaya = document.getElementById("msgzaya");
+            msgzaya.innerHTML = response;
+        }
+    });
+  }
+
+  function delout(id, team){
+
+    myClass.delout(id, team,  {
+
+        "onFinish": function(response){
+            var msgzaya = document.getElementById("msgzaya");
+            msgzaya.innerHTML = response;
+        }
+    });
+  }
+  function delstory(id, team){
+
+    myClass.delstory(id, team,  {
+
+        "onFinish": function(response){
+            var msgstory = document.getElementById("msgstory");
+            msgstory.innerHTML = response;
+        }
+    });
+  }
+  function newplay(team){
+    val1 = document.getElementById("name1").value;
+    val2 = document.getElementById("name2").value;
+    val3 = document.getElementById("name3").value;
+    val4 = document.getElementById("age").value;
+    if ((val1=='')||(val2=='')||(val3=='')||(val4=='')) alert("Заповніть всі поля"); else
+    myClass.newplay(team, val1, val2, val3, val4, 2, {
+
+        "onFinish": function(response){
+            var msgzaya = document.getElementById("msgzaya");
+            msgzaya.innerHTML = response;
+
+        }
+    });
+  }
+
+  function newstory(team){
+    val1 = document.getElementById("cap_story").value;
+
+    if (val1=='Текст новини') alert("Заповніть поле тексту новин команди"); else
+      myClass.newstory(team, val1, {
+
+          "onFinish": function(response){
+              var msgstory = document.getElementById("msgstory");
+              msgstory.innerHTML = response;
+
+          }
+      });
+  }
+</script>
+
 
 <?php 
     require_once CONTROLLERS . '/footer.php';

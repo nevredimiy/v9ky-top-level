@@ -38,23 +38,86 @@ if(isset($data['action']) && $data['action'] == 'calendar_of_matches' ) {
         $lastTur = $data['lasttur'];
         $currentTur = $data['tur'];
         $turnir = $data['turnir'];
+        $selectedDate = $data['selected_date'];
         
         $allStaticPlayers = getAllStaticPlayers($turnir);
         $dataAllPlayers = getDataPlayers($allStaticPlayers);
-        // Получаем массив с датами каждого тура
-        $dateTurs = getDateTurs($turnir);
-        // Добавляем элемент link в массив
-        $dateTurs = addLinkItem($dateTurs);
 
-        
-        // Находим дату выбранного турнира
-        $dateLastTurString = '';
-        foreach($dateTurs as $dateT){
-            if($dateT['tur'] == $currentTur) {
-                $dateLastTurString = $dateT['min_date'];
-            }
+        // ------ START 1  ------ //
+        // Получаем все даты 
+        function getDateMatchesOfLeague($turnir){
+
+            global $dbF;
+
+            $sql = "SELECT `id`,`date`,`field`,`team1`,`team2`,`turnir`,`canseled`,`tur` FROM `v9ky_match` WHERE `turnir`= :turnir ORDER by `date`";
+
+            $fields = $dbF->query($sql, [":turnir" => $turnir])->findAll();
+
+            return($fields);
         }
 
+        function getLastActiveDate($turnir){
+            global $dbF;
+
+            $sql = "SELECT `date` FROM `v9ky_match` WHERE `turnir`= :turnir AND `canseled` = 1 ORDER by `date` DESC LIMIT 1";
+
+            $fields = $dbF->query($sql, [":turnir" => $turnir])->find();
+
+            return($fields['date']);
+
+        }
+
+        // Данные всех матчей выбранной лиги
+        $matches = getDateMatchesOfLeague($turnir);
+
+        function getUniqueDates($matches) {
+            // Список названий месяцев на украинском языке
+            $months_ua = [
+                "01" => "Січень", "02" => "Лютий", "03" => "Березень", "04" => "Квітень",
+                "05" => "Травень", "06" => "Червень", "07" => "Липень", "08" => "Серпень",
+                "09" => "Вересень", "10" => "Жовтень", "11" => "Листопад", "12" => "Грудень"
+            ];
+
+            $unique_dates = [];
+
+            foreach ($matches as $match) {
+                $date = date("Y-m-d", strtotime($match['date'])); // Получаем день и месяц в формате "dd.mm"
+                $day = date("d", strtotime($match['date'])); // День
+                $month = date("m", strtotime($match['date'])); // Месяц
+                $monthNum = date("m", strtotime($match['date'])); // Месяц
+                $year = date("Y", strtotime($match['date'])); // год
+                $tur = $match['tur'];
+                $canseled = $match['canseled'];
+
+                // Проверяем, есть ли уже такая дата в массиве
+                if (!isset($unique_dates[$date])) {
+                    $unique_dates[$date] = [
+                        "date" => $date,
+                        "year" => $year,
+                        "month" => $months_ua[$month], // Название месяца на украинском
+                        "month_num" => $monthNum, // Название месяца на украинском
+                        "day" => $day,
+                        "tur" => $tur,
+                        "canseled" => $canseled,
+                    ];
+                }
+
+            }
+
+            return array_values($unique_dates); // Возвращаем массив без ключей
+        }
+
+        // данные матчей в выбранный день
+        $dateMatches = getUniqueDates($matches);
+
+        // ------ END 1 ------ //
+
+
+
+
+        $dateLastTurString = $selectedDate;
+
+    
         // Преобразуем строку в объект даты
         $dateLastTur = new DateTime($dateLastTurString);
 
@@ -62,7 +125,8 @@ if(isset($data['action']) && $data['action'] == 'calendar_of_matches' ) {
         $dateLastTur->modify('+5 days');
 
         // Текущая дата и время
-        $currentDate = new DateTime();
+        $currentDate = new DateTime();  // DELETE
+        $dateNow = new DateTime();
 
 
 
@@ -86,19 +150,45 @@ if(isset($data['action']) && $data['action'] == 'calendar_of_matches' ) {
             ];
         }
 
-        $dataCurrentTur = getDataCurrentTur($turnir, $currentTur);
-
-        // Добавляем два элемента в массивы - форматированная дата и время матча.
-        $dataCurrentTurWithDate = getArrayWithFormattedDate($dataCurrentTur);   
-
 
         //-----------------------------------//
 
-        // Данные тура
-        $dataCurrentTur = getDataCurrentTur( $turnir, $currentTur);
+        // Данные матчей выбранного тура и выбранного дня
+$dataCurrentTur = getDataCurrentTur( $turnir, $currentTur);
+$dataCurrentDay = getDataMatchesOfDay( $turnir, $selectedDate);
+
+// Объединяет два массива данных матчей
+function mergeUniqueById($array1, $array2) {
+    $merged = [];
+
+    // Добавляем элементы из первого массива
+    foreach ($array1 as $item) {
+        $merged[$item['id']] = $item;
+    }
+
+    // Добавляем элементы из второго массива (если id нет в массиве)
+    foreach ($array2 as $item) {
+        if (!isset($merged[$item['id']])) {
+            $merged[$item['id']] = $item;
+        }
+    }
+
+    // Преобразуем обратно в индексированный массив
+    $result = array_values($merged);
+
+    // Сортируем по дате (от меньшей к большей)
+    usort($result, function ($a, $b) {
+        return strtotime($a['date']) - strtotime($b['date']);
+    });
+
+    return $result;
+}
+
+// Итоговый массив данных матчей, которые выбраны по дате и по туру  
+$matchesOfTurAndDate = mergeUniqueById($dataCurrentTur, $dataCurrentDay);
             
         // Добавляем два элемента в массивы - форматированная дата и время матча.
-        $dataCurrentTurWithDate = getArrayWithFormattedDate($dataCurrentTur);
+        $dataCurrentTurWithDate = getArrayWithFormattedDate($matchesOfTurAndDate);
 
         $dataMatch = [];
         
@@ -227,7 +317,7 @@ if(isset($data['action']) && $data['action'] == 'calendar_of_matches' ) {
         
         try {
             ob_start();
-            require_once VIEWS . '/calendar_of_matches.tpl.php';
+            require_once VIEWS . '/calendar_of_matches_content.tpl.php';
             $section1Content = ob_get_clean();
         } catch (Exception $e) {
             $section1Content = '<p>Ошибка загрузки данных</p>';
@@ -361,7 +451,7 @@ if(isset($data['action']) && $data['action'] == 'anons' ) {
 
 if(isset($data['action']) && $data['action'] == 'match_stats' ) {
 
-    if($data['match_id'] && $data['tur'] && $data['turnir'] ) { 
+    if($data['match_id'] && $data['tur'] && $data['turnir'] && $data['team1_id'] && $data['team2_id'] ) { 
         
         // Данные тура
         $dataCurrentTur = getDataCurrentTur($data['turnir'], $data['tur']);
@@ -385,7 +475,9 @@ if(isset($data['action']) && $data['action'] == 'match_stats' ) {
                 $dataMatch['match_day'] = $match['match_day'];
                 $dataMatch['match_time'] = $match['match_time'];
                 $dataMatch['team1_id'] = $match['team1_id'];
+                // $dataMatch['team1_id'] = isset($match['team1_id']) ? $match['team1_id'] : '5331';
                 $dataMatch['team2_id'] = $match['team2_id'];
+                // $dataMatch['team2_id'] = isset($match['team2_id']) ? $match['team2_id'] : '5332';
                 break;
             }
         }
@@ -413,7 +505,17 @@ if(isset($data['action']) && $data['action'] == 'match_stats' ) {
             if($report['event_type'] == 'penalty' && $report['status_penalty'] === '0' ){
                 $report['event_type'] = 'penalty_fail';
             }
-        }        
+        } 
+        
+        
+        
+if(!isset($match['team1_id'])) {
+    $match['team1_id'] = '5331';
+}
+
+if(!isset($match['team2_id'])) {
+    $match['team2_id'] = '5332';
+}
 
         // Состав команды
         $team1Composition = getTeamComposition($data['match_id'], $dataMatch['team1_id']);
@@ -445,6 +547,19 @@ if(isset($data['action']) && $data['action'] == 'match_stats' ) {
                 $trainerAndManager2['trainer'] = $trainerName2[0];
             }
         }
+
+        // Определяем массив параметров статистики
+        $statsList = [
+            'total_udar' => ['title' => 'Кількість ударів', 'percentage_key' => 'udar_percentage_team'],
+            'total_vstvor' => ['title' => 'Удари в площину воріт', 'percentage_key' => 'vstvor_percentage_team'],
+            'total_mimo' => ['title' => 'Удари повз ворота', 'percentage_key' => 'mimo_percentage_team'],
+            'total_pasplus' => ['title' => 'Вдалі паси', 'percentage_key' => 'pasplus_percentage_team'],
+            'total_pasminus' => ['title' => 'Невдалі паси', 'percentage_key' => 'pasminus_percentage_team'],
+            'total_otbor' => ['title' => 'Відбір м\'яча', 'percentage_key' => 'otbor_percentage_team'],
+            'total_obvodkaplus' => ['title' => 'Вдалий дриблінг', 'percentage_key' => 'obvodkaplus_percentage_team'],
+            'total_obvodkaminus' => ['title' => 'Невдалий дриблінг', 'percentage_key' => 'obvodkaminus_percentage_team'],
+            'total_seyv' => ['title' => 'Кількість сейвів', 'percentage_key' => 'seyv_percentage_team']
+        ];
 
         // Стастистика матча
         $staticMatch = getStaticMatch($data['match_id'], $dataMatch['team1_id'], $dataMatch['team2_id']);

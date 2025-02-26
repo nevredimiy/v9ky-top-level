@@ -33,6 +33,7 @@
                                 <th><span class="cell cell--win">В</span></th>
                                 <th><span class="cell cell--draw">Н</span></th>
                                 <th><span class="cell cell--defeat">П</span></th>
+                                <th class="td-scored"><span class="cell cell--scored">Г</span></th>
                                 <th><span class="cell cell--total">О</span></th>
                             </tr>
 
@@ -47,7 +48,7 @@
                                         <?php if ($key === $team_id): ?>  
                                             <td><span class="cell--score cell--own"></span></td> 
                                         <?php else: ?>                                    
-                                            <td><span class="cell--score"><?= isset($matches[$team_id][$key]) ? $matches[$team_id][$key] : '-' ?></span></td>
+                                            <td><span class="cell--score"><?= isset($stat['matches_home'][$key]) ? $stat['matches_home'][$key] : '-' ?></span></td>
                                         <?php endif ?>
                                     <?php endforeach ?>
 
@@ -55,6 +56,7 @@
                                     <td><span class="cell cell--win"><?= $stat['wins']?></span></td>
                                     <td><span class="cell cell--draw"><?= $stat['draws']?></span></td>
                                     <td><span class="cell cell--defeat"><?= $stat['losses']?></span></td>
+                                    <td class="td-scored"><span class="cell cell--scored"><?= $stat['goals_scored']?> - <?= $stat['goals_conceded']?> </span></td>
                                     <td><span class="cell cell--total"><?= $stat['points']?></span></td>
                                 </tr>
                                 <?php $position++; ?>

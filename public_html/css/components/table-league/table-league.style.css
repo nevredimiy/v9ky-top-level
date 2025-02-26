@@ -56,6 +56,17 @@
   color: #0B0B0B;
 }
 
+
+.table-league__table tr td.td-scored,
+.table-league__table tr th.td-scored{
+  width: 66px;
+}
+
+.table-league__table tr th .cell--scored,
+.table-league__table tr td .cell--scored{
+  width: 66px;
+}
+
 .table-league__table tr th:nth-child(3),
 .table-league__table tr td:nth-child(3) {
   min-width: 160px;
@@ -133,8 +144,6 @@ td .cell--team-logo {
   border: 1px solid #C9C9C9;
   padding: 3px;
 }
-
-.cell--games {}
 
 .cell--win {
   color: #59C65D;
@@ -245,22 +254,29 @@ td .cell--team-logo {
     width: 115px;
   }
 
-
-
   .cell--own {
     height: 26px;
     width: 26px;
     border-radius: var(--border-radius-m);
   }
 
-  .cell--games {
+  .cell--games,
+  .cell--scored {
     background: rgba(11, 11, 11, 0.05);
     border: 0.583333px solid rgba(89, 198, 93, 0.2);
   }
 
-  .cell--games {
+  .cell--games,
+  .cell--scored {
     background: rgba(11, 11, 11, 0.05);
     border: 1px solid rgba(32, 32, 32, 0.2);
+  }
+
+  .td-scored{
+    width: 66px;
+  }
+  .cell--scored{
+    width: 66px;
   }
 }
 
@@ -375,7 +391,8 @@ td .cell--team-logo {
 .block-multiline {
   width: 60px;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Максимум 2 строки */
+  -webkit-line-clamp: 2;
+  /* Максимум 2 строки */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -393,6 +410,7 @@ td .cell--team-logo {
   .live {
     font-size: 14px !important;
   }
+
   .block-multiline {
     width: auto;
   }

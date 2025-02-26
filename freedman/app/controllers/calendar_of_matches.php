@@ -1,5 +1,12 @@
 <?php
 
+// // Увімкнення відображення помилок
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+
+// // Встановлення рівня звітності помилок
+// error_reporting(E_ALL);
+
 if(!isset($turnir)){
     $turnir = getTurnir();
 }
@@ -7,53 +14,138 @@ if(!isset($turnir)){
 // Последний тур в турнире (в лиге).
 $lastTur = intval(getLastTur($turnir));
 
-// Дата последнего тура
-$lastTurDate = getLastTurDate($turnir);
 
-$lastTurDateD = new DateTime($lastTurDate);
+// Получаем все даты 
+function getDateMatchesOfLeague($turnir){
 
-if (!isset($allStaticPlayers)) {
-    
+    global $dbF;
+
+    $sql = "SELECT `id`,`date`,`field`,`team1`,`team2`,`turnir`,`canseled`,`tur` FROM `v9ky_match` WHERE `turnir`= :turnir ORDER by `date`";
+
+    $fields = $dbF->query($sql, [":turnir" => $turnir])->findAll();
+
+    return($fields);
+}
+
+function getLastActiveDate($turnir){
+    global $dbF;
+
+    $sql = "SELECT `date` FROM `v9ky_match` WHERE `turnir`= :turnir AND `canseled` = 1 ORDER by `date` DESC LIMIT 1";
+
+    $fields = $dbF->query($sql, [":turnir" => $turnir])->find();
+
+    return($fields['date']);
+
+}
+
+// Данные всех матчей выбранной лиги
+$matches = getDateMatchesOfLeague($turnir);
+
+function getUniqueDates($matches) {
+    // Список названий месяцев на украинском языке
+    $months_ua = [
+        "01" => "Січень", "02" => "Лютий", "03" => "Березень", "04" => "Квітень",
+        "05" => "Травень", "06" => "Червень", "07" => "Липень", "08" => "Серпень",
+        "09" => "Вересень", "10" => "Жовтень", "11" => "Листопад", "12" => "Грудень"
+    ];
+
+    $unique_dates = [];
+
+    foreach ($matches as $match) {
+        $date = date("Y-m-d", strtotime($match['date'])); // Получаем день и месяц в формате "dd.mm"
+        $day = date("d", strtotime($match['date'])); // День
+        $month = date("m", strtotime($match['date'])); // Месяц
+        $monthNum = date("m", strtotime($match['date'])); // Месяц
+        $year = date("Y", strtotime($match['date'])); // год
+        $tur = $match['tur'];
+        $canseled = $match['canseled'];
+
+        // Проверяем, есть ли уже такая дата в массиве
+        if (!isset($unique_dates[$date])) {
+            $unique_dates[$date] = [
+                "date" => $date,
+                "year" => $year,
+                "month" => $months_ua[$month], // Название месяца на украинском
+                "month_num" => $monthNum, // Название месяца на украинском
+                "day" => $day,
+                "tur" => $tur,
+                "canseled" => $canseled,
+            ];
+        }
+
+    }
+
+    return array_values($unique_dates); // Возвращаем массив без ключей
+}
+
+// данные матчей в выбранный день
+$dateMatches = getUniqueDates($matches);
+
+
+
+if (!isset($allStaticPlayers)) {    
     $allStaticPlayers = getAllStaticPlayers($turnir);
-
 }
 
 // Получаем данные всех игроков - ФИО, фото и т.д.
 if(!isset($dataAllPlayers)) {  
   $dataAllPlayers = getDataPlayers($allStaticPlayers); 
 }
-  
 
-// Получаем массив с датами каждого тура
-$dateTurs = getDateTurs($turnir);
+// // --------------- под снос -----------------//
+// // Получаем массив с датами каждого тура
+// $dateTurs = getDateTurs($turnir);
 
 
-// Добавляем элемент link в массив
-$dateTurs = addLinkItem($dateTurs);
+// // Добавляем элемент link в массив
+// $dateTurs = addLinkItem($dateTurs);
+// // --------------- Конец под снос -----------------//
+
+
+if(isset($_GET['date'])) {
+    $selectedDate = $_GET['date'];
+} else {
+    $selectedDate = date("Y-m-d", strtotime(getLastActiveDate($turnir)));
+}
+
 
 // Выбранный тур
-$currentTur = $lastTur != '' ? $lastTur : 1;
 if(isset($_GET['tur'])){
     // Берем тур из адресной строки
     $currentTur = $_GET['tur'];
-}
-
-// Находим дату выбранного турнира
-$dateLastTurString = '';
-foreach($dateTurs as $dateT){
-    if($dateT['tur'] == $currentTur) {
-        $dateLastTurString = $dateT['min_date'];
+} else {
+    foreach($dateMatches as $dateMatch){
+        if($dateMatch['date'] == $selectedDate){
+            $currentTur = $dateMatch['tur'];
+        }
     }
 }
+
+
+//-------- Здесь обр вни-------//
+// Находим дату выбранного турнира. Это нужно для сравнения с текущей датой, что бы правильно отображать данные.
+// $dateLastTurString = '';
+// foreach($dateTurs as $dateT){
+//     if($dateT['tur'] == $currentTur) {
+//         $dateLastTurString = $dateT['min_date'];
+//     }
+// }
+
+$dateLastTurString = $selectedDate;
+//-------- Конец Здесь обр вни-------//
 
 // Преобразуем строку в объект даты
 $dateLastTur = new DateTime($dateLastTurString);
 
+
 // Добавляем 5 дней - это количество дней, когда админы должны внести все данные по последнему туру
 $dateLastTur->modify('+5 days');
 
-// Текущая дата и время
+//-------- Здесь удалить 1 стр-------//
+// Текущая дата и время. Эту дату сравниваем с $dateLastTur для правильного отображения данных
 $currentDate = new DateTime();
+$dateNow = new DateTime();
+//-------- Здесь удалить 1 стр-------//
 
 if($currentTur <= $lastTur && !empty($dataAllPlayers)) {
     // Все игроки из выбранного тура
@@ -78,20 +170,45 @@ if($currentTur <= $lastTur && !empty($dataAllPlayers)) {
 
 
 
-$dataCurrentTur = getDataCurrentTur($turnir, $currentTur);
-
-// Добавляем два элемента в массивы - форматированная дата и время матча.
-$dataCurrentTurWithDate = getArrayWithFormattedDate($dataCurrentTur);
-
-
 
 //-----------------------------------//
 
-  // Данные тура
-  $dataCurrentTur = getDataCurrentTur( $turnir, $currentTur);
+  // Данные матчей выбранного тура и выбранного дня
+$dataCurrentTur = getDataCurrentTur( $turnir, $currentTur);
+$dataCurrentDay = getDataMatchesOfDay( $turnir, $selectedDate);
+
+// Объединяет два массива данных матчей
+function mergeUniqueById($array1, $array2) {
+    $merged = [];
+
+    // Добавляем элементы из первого массива
+    foreach ($array1 as $item) {
+        $merged[$item['id']] = $item;
+    }
+
+    // Добавляем элементы из второго массива (если id нет в массиве)
+    foreach ($array2 as $item) {
+        if (!isset($merged[$item['id']])) {
+            $merged[$item['id']] = $item;
+        }
+    }
+
+    // Преобразуем обратно в индексированный массив
+    $result = array_values($merged);
+
+    // Сортируем по дате (от меньшей к большей)
+    usort($result, function ($a, $b) {
+        return strtotime($a['date']) - strtotime($b['date']);
+    });
+
+    return $result;
+}
+
+// Итоговый массив данных матчей, которые выбраны по дате и по туру  
+$matchesOfTurAndDate = mergeUniqueById($dataCurrentTur, $dataCurrentDay);
     
   // Добавляем два элемента в массивы - форматированная дата и время матча.
-  $dataCurrentTurWithDate = getArrayWithFormattedDate($dataCurrentTur);
+  $dataCurrentTurWithDate = getArrayWithFormattedDate($matchesOfTurAndDate);
 
   $dataMatch = [];
   
