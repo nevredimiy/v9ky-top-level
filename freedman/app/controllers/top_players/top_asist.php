@@ -49,7 +49,7 @@ $topAsists = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'count_asists', $
       <tbody>
         <?php $int = 0; ?>
         <?php foreach($topAsists as $player): ?>
-        <tr data-playerid="<?= $player['player_id'] ?>" data-matchid="<?= $player['match_ids'] ?>" data-serial-number="<?= $int ?>" >
+        <tr class="<?= $player['total_key'] > 0 ? 'top-player' : 'out-of-contest' ?>" data-playerid="<?= $player['player_id'] ?>" data-matchid="<?= $player['match_ids'] ?>" data-serial-number="<?= $int ?>" >
             <td><?= isset($player['rank']) ? $player['rank'] : "?" ?></td>
             <td><img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo"></td>
             <td><img src="<?=$team_logo_path?>/<?= $player['team_photo'] ?>" alt="team-logo"></td>

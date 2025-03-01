@@ -108,6 +108,7 @@ function getAllStaticPlayers($turnir)
     $sql = 
         "SELECT 
             m.tur, 
+            m.date AS match_date,
             p.team,
             s.player, 
             s.matc, 
@@ -1639,3 +1640,4 @@ function getOneNews($newsId)
 function cleanString($str) {
     return trim(preg_replace("/\s*\([^)]*\)/", "", $str));
 }
+

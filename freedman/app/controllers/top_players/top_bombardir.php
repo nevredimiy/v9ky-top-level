@@ -52,7 +52,7 @@ $topBombardi = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'count_goals', 
       </thead>
       <tbody>
         <?php foreach($topBombardi as $player): ?>
-        <tr data-playerid="<?= $player['player_id'] ?>" data-matchid="<?= $player['match_ids'] ?>" >
+        <tr class="<?= $player['total_key'] > 0 ? 'top-player' : 'out-of-contest' ?>" data-playerid="<?= $player['player_id'] ?>" data-matchid="<?= $player['match_ids'] ?>" >
           <td><?= isset($player['rank']) ? $player['rank'] : 1 ?></td>
           <td><img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo"></td>
           <td><img src="<?=$team_logo_path?>/<?= $player['team_photo'] ?>" alt="team-logo"></td>

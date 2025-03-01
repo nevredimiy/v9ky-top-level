@@ -2,7 +2,7 @@
   overflow: hidden;
 }
 
-.statistic caption{
+.statistic caption {
   position: relative;
 }
 
@@ -307,4 +307,27 @@
 #top-pas th:nth-child(9),
 #top-pas td:nth-child(9) {
   color: red;
+}
+
+table tr.top-goalkeeper {
+  font-weight: bold;
+}
+
+table tr.top-goalkeeper td {
+  background-color: #d4edda;
+  /* світло-зелений */
+}
+
+table tr.top-player {
+  font-weight: bold;
+}
+
+table tr.top-player td {
+  background-color: #d4edda;
+  /* світло-зелений */
+}
+
+table tr.out-of-contest {
+  color: #454545;
+  /* сірий */
 }

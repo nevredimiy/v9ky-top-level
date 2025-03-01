@@ -144,42 +144,23 @@ foreach ($teams as $team_id => $team_data) {
     ];
 }
 
-// // Подсчет статистики
-// foreach ($matches as $team1_id => $opponents) {
-//     foreach ($opponents as $team2_id => $score) {
-//         if (!isset($processed_matches["$team1_id-$team2_id"]) && !isset($processed_matches["$team2_id-$team1_id"])) {
-//             list($goals1, $goals2) = explode(':', $score);
-
-//             // Увеличиваем количество игр для обеих команд (домашний и выездной матч)
-//             $stats[$team1_id]['games']++;
-//             $stats[$team2_id]['games']++;
-
-//             // Определяем победителя, ничью или поражение
-//             if ($goals1 > $goals2) {
-//                 $stats[$team1_id]['wins']++;  // Победа домашней команды
-//                 $stats[$team2_id]['losses']++; // Поражение гостевой команды
-//                 $stats[$team1_id]['points'] += 3;
-//             } elseif ($goals1 < $goals2) {
-//                 $stats[$team2_id]['wins']++; // Победа гостевой команды
-//                 $stats[$team1_id]['losses']++; // Поражение домашней команды
-//                 $stats[$team2_id]['points'] += 3;
-//             } else {
-//                 // Ничья
-//                 $stats[$team1_id]['draws']++;
-//                 $stats[$team2_id]['draws']++;
-//                 $stats[$team1_id]['points'] += 1;
-//                 $stats[$team2_id]['points'] += 1;
-//             }
-
-//             // Отмечаем матч как обработанный, чтобы не дублировать
-//             $processed_matches["$team1_id-$team2_id"] = true;
-//         }
-//     }
-// }
-
-// Сортировка по очкам
+/// Сортировка с учетом всех критериев
 uasort($stats, function ($a, $b) {
-    return $b['points'] - $a['points'];
+    // 1. Сортировка по очкам
+    if ($b['points'] !== $a['points']) {
+        return $b['points'] - $a['points'];
+    }
+    
+    // 2. Сортировка по разнице мячей (забитые - пропущенные)
+    $goal_difference_a = $a['goals_scored'] - $a['goals_conceded'];
+    $goal_difference_b = $b['goals_scored'] - $b['goals_conceded'];
+    
+    if ($goal_difference_b !== $goal_difference_a) {
+        return $goal_difference_b - $goal_difference_a;
+    }
+
+    // 3. Сортировка по количеству забитых мячей
+    return $b['goals_scored'] - $a['goals_scored'];
 });
 
 
