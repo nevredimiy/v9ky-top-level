@@ -42,7 +42,8 @@ if(!empty($dataAllPlayers)){
   $topGravetc = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'topgravetc', $lastTur);
 
   // Отсортированный массив по рубрике Топ-Голкипер
-  $topGolkiper = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'golkiper', $lastTur);
+  // $topGolkiper = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'golkiper', $lastTur);
+  $topGolkiper = getTopGolkiper($allStaticPlayers, $dataAllPlayers, 'golkiper', $lastTur);
 
   // Отсортированный массив по рубрике Топ-Бомбардир
   $topBombardi = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'count_goals', $lastTur);
@@ -54,10 +55,10 @@ if(!empty($dataAllPlayers)){
   $topZhusnuk = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'zahusnuk', $lastTur);
 
   // Отсортированный массив по рубрике Топ-Дриблинг
-  $topDribling = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'dribling', $lastTur);
+  $topDribling = getTopDriblings($allStaticPlayers, $dataAllPlayers, 'dribling', $lastTur);
 
   // Отсортированный массив по рубрике Топ-Удар
-  $topUdar = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'udar', $lastTur);
+  $topUdar = getTopUdars($allStaticPlayers, $dataAllPlayers, 'udar', $lastTur);
 
   // Отсортированный массив по рубрике Топ-Пас
   $topPas = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'pas', $lastTur);

@@ -22,7 +22,12 @@ $dataAllPlayers = getDataPlayers($allStaticPlayers);
 // Отсортированный массив по рубрике Топ-Бомбардир
 $topBombardi = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'count_goals', $lastTur);
 
-// dump_arr($topBombardi);
+// Проверяем, есть ли значение у HTTP_REFERER  
+if (isset($_SERVER['HTTP_REFERER'])) {  
+  $previousPage = $_SERVER['HTTP_REFERER'];
+} else {
+$previousPage = $site_url;
+}
 
 
 ?>
@@ -32,7 +37,7 @@ $topBombardi = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'count_goals', 
     <table id="top-bombardir" class="draggable-container">
       <caption>
         ТОП-Бомбардир
-        <a class="statistic__link-to-home" href="<?= $site_url?><?=$get_query_temp?>">
+        <a class="statistic__link-to-home" href="<?= $previousPage?>">
           <img src="/css/components/statistic/assets/images/button-exit.svg" alt="exit">
         </a>
       </caption>
@@ -52,7 +57,8 @@ $topBombardi = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'count_goals', 
       </thead>
       <tbody>
         <?php foreach($topBombardi as $player): ?>
-        <tr class="<?= $player['total_key'] > 0 ? 'top-player' : 'out-of-contest' ?>" data-playerid="<?= $player['player_id'] ?>" data-matchid="<?= $player['match_ids'] ?>" >
+          <?php if($player['total_key'] <= 0) continue; ?>
+        <tr data-playerid="<?= $player['player_id'] ?>" data-matchid="<?= $player['match_ids'] ?>" >
           <td><?= isset($player['rank']) ? $player['rank'] : 1 ?></td>
           <td><img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo"></td>
           <td><img src="<?=$team_logo_path?>/<?= $player['team_photo'] ?>" alt="team-logo"></td>

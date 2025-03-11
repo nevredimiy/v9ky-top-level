@@ -173,13 +173,13 @@
 		<div class="kkd__info">
 			<ul class="kkd__list">
 				<li class="kkd__item"><span class="text-green">Г</span> - Гол</li>
-				<li class="kkd__item"><span class="text-green">ГП</span> - Гольоваа передача</li>
-				<li class="kkd__item"><span class="text-green">ЗП</span> - Загостюючий пас</li>
+				<li class="kkd__item"><span class="text-green">ГП</span> - Гольова передача</li>
+				<li class="kkd__item"><span class="text-green">ЗП</span> - Загостючий пас</li>
 				<li class="kkd__item"><span class="text-green">П</span> - Вдалий пас</li>
 				<li class="kkd__item"><span class="text-red">П</span> - Невдалий пас</li>
 				<li class="kkd__item"><span class="text-red">ВМ</span> - Втрата м'яча</li>
 				<li class="kkd__item"><span class="text-green">У</span> - Удар по воротам</li>
-				<li class="kkd__item"><span class="text-red">У</span> - Уда повз воріт</li>
+				<li class="kkd__item"><span class="text-red">У</span> - Удар повз воріт</li>
 				<li class="kkd__item"><span class="text-green">ОБ</span> - Вдала обводка</li>
 				<li class="kkd__item"><span class="text-red">ОБ</span> - Невдала обводка</li>
 				<li class="kkd__item"><span class="text-green">В</span> - Вдалий відбір м'яча</li>

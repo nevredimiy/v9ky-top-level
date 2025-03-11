@@ -41,7 +41,7 @@
 
 .table-league__table tr th,
 .table-league__table tr td {
-  padding: 5px;
+  padding: 3px;
   width: 34px;
   font-family: 'Roboto';
   font-style: normal;
@@ -69,7 +69,7 @@
 
 .table-league__table tr th:nth-child(3),
 .table-league__table tr td:nth-child(3) {
-  min-width: 160px;
+  min-width: 124px;
   text-align: left;
   justify-content: flex-start;
 }

@@ -1,8 +1,8 @@
 
 $(document).ready(function () {
 
-    // ВЕРХНИЙ СЛАЙДЕР С ДАТАМИ МАТЧЕЙ
-    $('.calendar-of-matches__grid-container').on('click', '[data-turid]', function (e) {
+     // ВЕРХНИЙ СЛАЙДЕР С ДАТАМИ МАТЧЕЙ
+    $('.calendar-of-matches__grid-container').on('click', '[data-first-day]', function (e) {
 
         e.preventDefault();
 
@@ -11,19 +11,42 @@ $(document).ready(function () {
         // Обновляем адресную строку  
         window.history.pushState({ path: newUrl }, '', newUrl);
 
-        let tur = $(this).attr('data-turid');
         let turnir = $(this).attr('data-turnir');
         let lastTur = $(this).attr('data-lasttur');
-        let selectedDate = $(this).attr('data-selecteddate');
+        let selectedDate = $(this).attr('data-first-day');
+        let firstDay = $(this).attr('data-first-day');
+        let lastDay = $(this).attr('data-last-day');
 
-        if (tur) {
+        if (firstDay) {
             $.ajax({
                 type: "post",
                 url: "../freedman/actions/actions.php",
-                data: JSON.stringify({ tur: tur, turnir: turnir, lasttur: lastTur, action: 'calendar_of_matches', selected_date: selectedDate }),
+                data: JSON.stringify({ 
+                    turnir: turnir, 
+                    lasttur: lastTur, 
+                    action: 'calendar_of_matches', 
+                    selected_date: selectedDate,  
+                    first_day: firstDay,
+                    last_day: lastDay
+                }),
                 dataType: 'json', // Ожидаем данные в формате JSON
                 success: function (response) {
+
                     $(".calendar-of-matches__grid-container").html(response.section1);
+
+                    document.querySelectorAll(".card-of-matches").forEach(function (card) {
+                        card.addEventListener("click", function (event) {
+                            // Проверяем, кликнули ли по .card-of-matches__score
+                            if (event.target.closest(".card-of-matches__score")) {
+                                // Ищем внутри текущего блока элемент с data-match-stats
+                                let statsLink = card.querySelector("[data-match-stats]");
+                                if (statsLink) {
+                                    statsLink.click(); // Имитируем клик по ссылке
+                                }
+                            }
+                        });
+                    });
+   
 
                     swiperMonthControls = new Swiper('.swiper-month-controls', {
                         enabled: true,
@@ -68,6 +91,28 @@ $(document).ready(function () {
                         }
                     });
 
+                    // перемещаем слайдер на текущий тур (тот который красненький)
+                    const slideIndex = $('.swiper-slide').toArray().findIndex(slide =>
+                        $(slide).find('.month-controls__button--current').length > 0
+                    );
+                    if (slideIndex !== -1) {
+                        // Центрируем найденный слайд
+                        swiperMonthControls.slideTo(slideIndex);
+                    } else {
+                        console.warn('Слайд с указанным дочерним классом не найден.');
+                    }
+                    
+                    function toggleScrollbar(swiper) {
+                        const scrollbar = document.querySelector('.swiper-scrollbar');
+                        
+                        if (!scrollbar) return; // Проверяем, есть ли скроллбар
+                    
+                        if (swiper.isLocked) {
+                            scrollbar.style.display = 'none'; // Скрываем скроллбар
+                        } else {
+                            scrollbar.style.display = 'block'; // Показываем скроллбар
+                        }
+                    }
 
                     $("#controls").html(response.section2);
 
@@ -523,7 +568,7 @@ $(document).ready(function () {
 function colorRedBtnCurrent() {
     let tur = $('.month-controls__button--current').attr('data-turid');
     let lastTur = $('.month-controls__button--current').attr('data-lasttur');
-    let dateLastTur = $('.month-controls__button--current').attr('data-datelasttur');// Дата в формате строки
+    let dateLastTur = $('.month-controls__button--current').attr('data-first-day');// Дата в формате строки
 
     // Получаем сегодняшнюю дату без времени (YYYY-MM-DD)
     let currentDate = new Date();

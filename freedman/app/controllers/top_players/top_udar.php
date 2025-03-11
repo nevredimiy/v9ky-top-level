@@ -1,5 +1,13 @@
 <?php
 
+// // Увімкнення відображення помилок
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+
+// // Встановлення рівня звітності помилок
+// error_reporting(E_ALL);
+
+
 include_once HOME . "/dates.php";
 include_once CONTROLLERS . "/head.php";
 
@@ -14,8 +22,14 @@ $allStaticPlayers = getAllStaticPlayers($turnir);
 $dataAllPlayers = getDataPlayers($allStaticPlayers); 
 
 // Отсортированный массив по рубрике Топ-Удар
-$topUdar = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'udar', $lastTur);
+$topUdar = getTopUdars($allStaticPlayers, $dataAllPlayers, 'udar', $lastTur);
 
+// Проверяем, есть ли значение у HTTP_REFERER  
+if (isset($_SERVER['HTTP_REFERER'])) {  
+    $previousPage = $_SERVER['HTTP_REFERER'];
+  } else {
+  $previousPage = $site_url;
+  }
 
 ?>
 
@@ -24,7 +38,7 @@ $topUdar = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'udar', $lastTur);
         <table id="top-udar" class="draggable-container">
         <caption>
             ТОП-Удар
-            <a class="statistic__link-to-home" href="<?= $site_url?><?=$get_query_temp?>">
+            <a class="statistic__link-to-home" href="<?= $previousPage?>">
           <img src="/css/components/statistic/assets/images/button-exit.svg" alt="exit">
         </a>
         </caption>

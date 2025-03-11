@@ -107,7 +107,8 @@
   align-self: baseline;
 }
 
-.card-of-matches__score {
+.card-of-matches__score,
+.card-of-matches__score-vs {
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 500;
@@ -117,6 +118,10 @@
   text-align: center;
   gap: 6px;
   color: #0B0B0B;
+}
+
+.calendar-of-matches__aside .card-of-matches__score {
+  cursor: pointer;
 }
 
 .card-of-matches--match-zone .card-of-matches__score {
@@ -734,7 +739,7 @@
   width: 30px;
 }
 
-.share-btn-item button svg{
+.share-btn-item button svg {
   width: 100%;
 }
 

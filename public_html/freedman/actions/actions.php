@@ -1,12 +1,12 @@
 <?php
 
 
-// Увімкнення відображення помилок
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// // Увімкнення відображення помилок
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
 
-// Встановлення рівня звітності помилок
-error_reporting(E_ALL);
+// // Встановлення рівня звітності помилок
+// error_reporting(E_ALL);
 
 
 require_once dirname(__DIR__) . '/../../freedman/config.php';
@@ -22,326 +22,264 @@ $data = json_decode(file_get_contents('php://input'), true);
 // Экшин календарей матчей. Это кнопочки желтые или белые кнопочки с  месяцем и числом.
 if(isset($data['action']) && $data['action'] == 'calendar_of_matches' ) {
     
-    if($data['tur'] && $data['turnir']) {
-
-        // Когда tournament пустая это ознчает, что в адресной строке нет названия тура. Обычно это надпись после слеша в адресной строке
-        // Если переменная tournament пустая, то заполняем ее из последнего сезона первым туром
-        if (!isset($tournament)) {
-       
-            $tournament = mb_substr( strstr( $_SERVER["REQUEST_URI"], "?", true ), 1 );
-
-            if(!$tournament) {
-                $tournament = getTournament();
-            }
-        }        
-
-        $lastTur = $data['lasttur'];
-        $currentTur = $data['tur'];
-        $turnir = $data['turnir'];
-        $selectedDate = $data['selected_date'];
-        
-        $allStaticPlayers = getAllStaticPlayers($turnir);
-        $dataAllPlayers = getDataPlayers($allStaticPlayers);
-
-        // ------ START 1  ------ //
-        // Получаем все даты 
-        function getDateMatchesOfLeague($turnir){
-
-            global $dbF;
-
-            $sql = "SELECT `id`,`date`,`field`,`team1`,`team2`,`turnir`,`canseled`,`tur` FROM `v9ky_match` WHERE `turnir`= :turnir ORDER by `date`";
-
-            $fields = $dbF->query($sql, [":turnir" => $turnir])->findAll();
-
-            return($fields);
-        }
-
-        function getLastActiveDate($turnir){
-            global $dbF;
-
-            $sql = "SELECT `date` FROM `v9ky_match` WHERE `turnir`= :turnir AND `canseled` = 1 ORDER by `date` DESC LIMIT 1";
-
-            $fields = $dbF->query($sql, [":turnir" => $turnir])->find();
-
-            return($fields['date']);
-
-        }
-
-        // Данные всех матчей выбранной лиги
-        $matches = getDateMatchesOfLeague($turnir);
-
-        function getUniqueDates($matches) {
-            // Список названий месяцев на украинском языке
-            $months_ua = [
-                "01" => "Січень", "02" => "Лютий", "03" => "Березень", "04" => "Квітень",
-                "05" => "Травень", "06" => "Червень", "07" => "Липень", "08" => "Серпень",
-                "09" => "Вересень", "10" => "Жовтень", "11" => "Листопад", "12" => "Грудень"
-            ];
-
-            $unique_dates = [];
-
-            foreach ($matches as $match) {
-                $date = date("Y-m-d", strtotime($match['date'])); // Получаем день и месяц в формате "dd.mm"
-                $day = date("d", strtotime($match['date'])); // День
-                $month = date("m", strtotime($match['date'])); // Месяц
-                $monthNum = date("m", strtotime($match['date'])); // Месяц
-                $year = date("Y", strtotime($match['date'])); // год
-                $tur = $match['tur'];
-                $canseled = $match['canseled'];
-
-                // Проверяем, есть ли уже такая дата в массиве
-                if (!isset($unique_dates[$date])) {
-                    $unique_dates[$date] = [
-                        "date" => $date,
-                        "year" => $year,
-                        "month" => $months_ua[$month], // Название месяца на украинском
-                        "month_num" => $monthNum, // Название месяца на украинском
-                        "day" => $day,
-                        "tur" => $tur,
-                        "canseled" => $canseled,
-                    ];
-                }
-
-            }
-
-            return array_values($unique_dates); // Возвращаем массив без ключей
-        }
-
-        // данные матчей в выбранный день
-        $dateMatches = getUniqueDates($matches);
-
-        // ------ END 1 ------ //
-
-
-
-
-        $dateLastTurString = $selectedDate;
-
     
-        // Преобразуем строку в объект даты
-        $dateLastTur = new DateTime($dateLastTurString);
+    // Когда tournament пустая это ознчает, что в адресной строке нет названия тура. Обычно это надпись после слеша в адресной строке
+    // Если переменная tournament пустая, то заполняем ее из последнего сезона первым туром
+    if (!isset($tournament)) {
+    
+        $tournament = mb_substr( strstr( $_SERVER["REQUEST_URI"], "?", true ), 1 );
 
-        // Добавляем 5 дней - это количество дней, когда админы должны внести все данные по последнему туру
-        $dateLastTur->modify('+5 days');
-
-        // Текущая дата и время
-        $currentDate = new DateTime();  // DELETE
-        $dateNow = new DateTime();
-
-
-
-        if($currentTur <= $lastTur && !empty($dataAllPlayers)) {
-            // Все игроки из выбранного тура
-            $bestPlayers = getPlayersOfTur($allStaticPlayers, $currentTur);
-
-            // Лучшие игроки - отфильтрованные
-            $bestPlayersForTable = mergeStaticAndData($bestPlayers, $dataAllPlayers);
-
-
-            $labels = [
-                'topgravetc' => ['icon' => 'star-icon.png', 'role' => 'Топ-Гравець'], 
-                'golkiper' => ['icon' => 'gloves-icon.png', 'role' => 'Топ-Голкіпер'], 
-                'bombardir' => ['icon' => 'football-icon.png', 'role' => 'Топ-Бомбардир'], 
-                'asistent' => ['icon' => 'boots-icon.svg', 'role' => 'Топ-Асистент'],
-                'zahusnuk' => ['icon' => 'pitt-icon.svg', 'role' => 'Топ-Захисник'],
-                'dribling' => ['icon' => 'player-icon.svg', 'role' => 'Топ-Дриблінг'],
-                'udar' => ['icon' => 'rocket-ball-icon.png', 'role' => 'Топ-Удар'],
-                'pas' => ['icon' => 'ball-icon.png', 'role' => 'Топ-Пас'],
-            ];
+        if(!$tournament) {
+            $tournament = getTournament();
         }
+    }               
 
+    $turnir = $data['turnir'];
+    $lastTur = $data['lasttur'];
+    $selectedDate = $data['selected_date'];
+    $firstDay = $data['first_day'];
+    $lastDay = $data['last_day'];
+    
+    $allStaticPlayers = getAllStaticPlayers($turnir);
+    $dataAllPlayers = getDataPlayers($allStaticPlayers);
 
-        //-----------------------------------//
+    $dateNow = new DateTime();
+    
+    // Данные матча выбранного турнира
+    $sql = "SELECT 
+        DATE(`date`) as `match_date`,
+        tur,
+        turnir,
+        canseled
+        FROM `v9ky_match` 
+        WHERE turnir = :turnir 
+        ORDER BY `date` ASC";
 
-        // Данные матчей выбранного тура и выбранного дня
-$dataCurrentTur = getDataCurrentTur( $turnir, $currentTur);
-$dataCurrentDay = getDataMatchesOfDay( $turnir, $selectedDate);
+    // Данные всех матчей выбранной лиги
+    $matches = $dbF->query($sql, [":turnir" => $turnir])->findAll();
 
-// Объединяет два массива данных матчей
-function mergeUniqueById($array1, $array2) {
-    $merged = [];
+    // Извлекаем даты в отдельный массив
+    $dates = array_column($matches, 'match_date');
+    
+    // Форматируем даты матчей для отображения в шаблоне
+    $dateMatches = formatMatchDates($dates);
 
-    // Добавляем элементы из первого массива
-    foreach ($array1 as $item) {
-        $merged[$item['id']] = $item;
+    $daysOfTur = ["first_day" => $firstDay, "last_day" => $lastDay];
+
+    $dataMatchesOfDate = 0;
+    if($daysOfTur['first_day']){
+        $dataMatchesOfDate = getDataMatchesOfDate($turnir, $daysOfTur['first_day'], $daysOfTur['last_day']);
     }
 
-    // Добавляем элементы из второго массива (если id нет в массиве)
-    foreach ($array2 as $item) {
-        if (!isset($merged[$item['id']])) {
+    // Строка - дата последнего сыгранного матча в турнире (canseled = 1) (формат Y-m-d)
+    $dateLastTurString = $selectedDate;
+
+    // Преобразуем строку в объект даты
+    $dateLastTur = new DateTime($dateLastTurString);
+
+    // Добавляем 5 дней - это количество дней, когда админы должны внести все данные по последнему туру
+    $dateLastTur->modify('+5 days');
+
+    $playerOfDateTur = getPlayersOfDateTur( $allStaticPlayers, $daysOfTur['first_day'], $daysOfTur['last_day'] );
+
+    // Лучшие игроки - отфильтрованные
+    $bestPlayersForTable = mergeStaticAndData($playerOfDateTur, $dataAllPlayers);
+
+
+    $labels = [
+        'topgravetc' => ['icon' => 'star-icon.png', 'role' => 'Топ-Гравець'], 
+        'golkiper' => ['icon' => 'gloves-icon.png', 'role' => 'Топ-Голкіпер'], 
+        'bombardir' => ['icon' => 'football-icon.png', 'role' => 'Топ-Бомбардир'], 
+        'asistent' => ['icon' => 'boots-icon.svg', 'role' => 'Топ-Асистент'],
+        'zahusnuk' => ['icon' => 'pitt-icon.svg', 'role' => 'Топ-Захисник'],
+        'dribling' => ['icon' => 'player-icon.svg', 'role' => 'Топ-Дриблінг'],
+        'udar' => ['icon' => 'rocket-ball-icon.png', 'role' => 'Топ-Удар'],
+        'pas' => ['icon' => 'ball-icon.png', 'role' => 'Топ-Пас'],
+    ];  
+
+    $currentTur = getMostFrequentTur($dataMatchesOfDate);   
+
+
+
+      
+
+
+    //-----------------------------------//
+
+    // Данные матчей выбранного тура и выбранного дня
+    $dataCurrentTur = getDataCurrentTur( $turnir, $currentTur);
+    $dataCurrentDay = getDataMatchesOfDay( $turnir, $selectedDate);
+
+    // Объединяет два массива данных матчей
+    function mergeUniqueById($array1, $array2) {
+        $merged = [];
+
+        // Добавляем элементы из первого массива
+        foreach ($array1 as $item) {
             $merged[$item['id']] = $item;
         }
+
+        // Добавляем элементы из второго массива (если id нет в массиве)
+        foreach ($array2 as $item) {
+            if (!isset($merged[$item['id']])) {
+                $merged[$item['id']] = $item;
+            }
+        }
+
+        // Преобразуем обратно в индексированный массив
+        $result = array_values($merged);
+
+        // Сортируем по дате (от меньшей к большей)
+        usort($result, function ($a, $b) {
+            return strtotime($a['date']) - strtotime($b['date']);
+        });
+
+        return $result;
     }
 
-    // Преобразуем обратно в индексированный массив
-    $result = array_values($merged);
-
-    // Сортируем по дате (от меньшей к большей)
-    usort($result, function ($a, $b) {
-        return strtotime($a['date']) - strtotime($b['date']);
-    });
-
-    return $result;
-}
-
-// Итоговый массив данных матчей, которые выбраны по дате и по туру  
-$matchesOfTurAndDate = mergeUniqueById($dataCurrentTur, $dataCurrentDay);
+    // Итоговый массив данных матчей, которые выбраны по дате и по туру  
+    $matchesOfTurAndDate = mergeUniqueById($dataCurrentTur, $dataCurrentDay);
             
-        // Добавляем два элемента в массивы - форматированная дата и время матча.
-        $dataCurrentTurWithDate = getArrayWithFormattedDate($matchesOfTurAndDate);
+    // Добавляем два элемента в массивы - форматированная дата и время матча.
+    $dataCurrentTurWithDate = getArrayWithFormattedDate($matchesOfTurAndDate);
 
-        $dataMatch = [];
+    $dataMatch = [];
         
-        foreach ($dataCurrentTurWithDate as $match) {
-            if($match['id'] == $dataCurrentTurWithDate[0]['id']){
-                $dataMatch['team1_name'] = $match['team1_name'];
-                $dataMatch['team1_photo'] = $match['team1_photo'];
-                $dataMatch['team2_name'] = $match['team2_name'];
-                $dataMatch['team2_photo'] = $match['team2_photo'];
-                $dataMatch['anons'] = $match['anons'];
-                $dataMatch['goals1'] = $match['goals1'];
-                $dataMatch['goals2'] = $match['goals2'];
-                break;
-            }
+    foreach ($dataCurrentTurWithDate as $match) {
+        if($match['id'] == $dataCurrentTurWithDate[0]['id']){
+            $dataMatch['team1_name'] = $match['team1_name'];
+            $dataMatch['team1_photo'] = $match['team1_photo'];
+            $dataMatch['team2_name'] = $match['team2_name'];
+            $dataMatch['team2_photo'] = $match['team2_photo'];
+            $dataMatch['anons'] = $match['anons'];
+            $dataMatch['goals1'] = $match['goals1'];
+            $dataMatch['goals2'] = $match['goals2'];
+            break;
         }
+    }
 
-
-        $historyMeets = getHistoryMeets($dataMatch['team1_name'], $dataMatch['team2_name']);
-
+    $historyMeets = getHistoryMeets($dataMatch['team1_name'], $dataMatch['team2_name']);
         
-        // количество побед, ничих, количество голов
-        $team1Wins = 0;
-        $team2Wins = 0;
-        $draws = 0;
-        $countGoals1 = 0;
-        $countGoals2 = 0;
+    // количество побед, ничих, количество голов
+    $team1Wins = 0;
+    $team2Wins = 0;
+    $draws = 0;
+    $countGoals1 = 0;
+    $countGoals2 = 0;
 
+    foreach($historyMeets as $match){
+        if($match['goals1'] > $match['goals2']) {
+            (strcasecmp(cleanString($dataMatch['team1_name']), cleanString($match['team1_name'])) === 0) ? $team1Wins ++ : $team2Wins ++; 
+        } elseif ($match['goals1'] < $match['goals2']) {
+            (strcasecmp(cleanString($dataMatch['team1_name']), cleanString($match['team1_name'])) === 0) ? $team2Wins ++ : $team1Wins ++; 
+        } else {
+            $draws ++;
+        }
+        (strcasecmp(cleanString($dataMatch['team1_name']), cleanString($match['team1_name'])) === 0) ? $countGoals1 += $match['goals1'] : $countGoals2 += $match['goals1'];
+        (strcasecmp(cleanString($dataMatch['team2_name']), cleanString($match['team2_name'])) === 0) ? $countGoals2 += $match['goals2'] : $countGoals1 += $match['goals2'];
+    }
+
+    // Находим прогноз на будущие матчи
+    // Рассчитываем общее количество матчей
+    $totalMatches = count($historyMeets);
+
+    // Вычисляем проценты
+    $team1WinPercent = $totalMatches == 0 ? 0 : ($team1Wins / $totalMatches) * 100;
+    $drawPercent = $totalMatches == 0 ? 0 : ($draws / $totalMatches) * 100;
+    $team2WinPercent = $totalMatches == 0 ? 0 : ($team2Wins / $totalMatches) * 100;
+
+    // Проверяем и корректируем проценты
+    $minimumPercent = 10;
+
+    // Список для перераспределения
+    $percentages = [
+        'team1Win' => $team1WinPercent,
+        'draw' => $drawPercent,
+        'team2Win' => $team2WinPercent,
+    ];
+
+    // Найти, какие значения меньше минимального
+    $totalReduction = 0;
+    foreach ($percentages as $key => &$percent) {
+        if ($percent < $minimumPercent) {
+            $totalReduction += $minimumPercent - $percent;
+            $percent = $minimumPercent;
+        }
+    }
+    unset($percent);
+
+    // Перераспределить излишек между остальными
+    $remainingKeys = array_keys(array_filter(
+        $percentages, 
+        function ($p) use ($minimumPercent) { 
+            
+            return $p > $minimumPercent;
+        } 
+    ));
+    if (count($remainingKeys) > 0) {
+        foreach ($remainingKeys as $key) {
+            $percentages[$key] -= $totalReduction / count($remainingKeys);
+        }
+    }
+
+    //-----------------------------------//
+
+
+
+    $resultOfTur = getResultOfTur($turnir, $currentTur);
+    $resultTur = [];
+
+    if(isset($resultOfTur['url1'])){
+        if (preg_match('/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/', $resultOfTur['url1'], $matches)) {
+            $videoId = $matches[1];
+            $resultTur['after_play'] = $videoId;
+        } 
+    }
+
+    if(isset($resultOfTur['url2'])){
+        if (preg_match('/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/', $resultOfTur['url2'], $matches)) {
+            $videoId = $matches[1];
+            $resultTur['top_goals'] = $videoId;
+        } 
+    }
+
+    if(isset($resultOfTur['url3'])){
+        if (preg_match('/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/', $resultOfTur['url3'], $matches)) {
+            $videoId = $matches[1];
+            $resultTur['top_save'] = $videoId;
+        } 
+    }
+
+    $randomNews = getRandomNews();
         
+    try {
+        ob_start();
+        require_once VIEWS . '/calendar_of_matches_content.tpl.php';
+        $section1Content = ob_get_clean();
+    } catch (Exception $e) {
+        $section1Content = '<p>Ошибка загрузки данных</p>';
+    }
 
-        // foreach($historyMeets as $match){
-        //     if($match['goals1'] > $match['goals2']) {
-        //         $dataMatch['team1_name'] == $match['team1_name'] ? $team1Wins ++ : $team2Wins ++; 
-        //     } elseif ($match['goals1'] < $match['goals2']) {
-        //         ($dataMatch['team1_name'] == $match['team1_name']) ? $team2Wins ++ : $team1Wins ++; 
-        //     } else {
-        //         $draws ++;
-        //     }
-        //     $countGoals1 += $match['goals1'];
-        //     $countGoals2 += $match['goals2'];
-        // }
-
-        foreach($historyMeets as $match){
-            if($match['goals1'] > $match['goals2']) {
-              (strcasecmp(cleanString($dataMatch['team1_name']), cleanString($match['team1_name'])) === 0) ? $team1Wins ++ : $team2Wins ++; 
-            } elseif ($match['goals1'] < $match['goals2']) {
-              (strcasecmp(cleanString($dataMatch['team1_name']), cleanString($match['team1_name'])) === 0) ? $team2Wins ++ : $team1Wins ++; 
-            } else {
-                $draws ++;
-            }
-            (strcasecmp(cleanString($dataMatch['team1_name']), cleanString($match['team1_name'])) === 0) ? $countGoals1 += $match['goals1'] : $countGoals2 += $match['goals1'];
-            (strcasecmp(cleanString($dataMatch['team2_name']), cleanString($match['team2_name'])) === 0) ? $countGoals2 += $match['goals2'] : $countGoals1 += $match['goals2'];
-        }
-
-        // Находим прогноз на будущие матчи
-        // Рассчитываем общее количество матчей
-        $totalMatches = count($historyMeets);
-
-        // Вычисляем проценты
-        $team1WinPercent = $totalMatches == 0 ? 0 : ($team1Wins / $totalMatches) * 100;
-        $drawPercent = $totalMatches == 0 ? 0 : ($draws / $totalMatches) * 100;
-        $team2WinPercent = $totalMatches == 0 ? 0 : ($team2Wins / $totalMatches) * 100;
-
-        // Проверяем и корректируем проценты
-        $minimumPercent = 10;
-
-        // Список для перераспределения
-        $percentages = [
-            'team1Win' => $team1WinPercent,
-            'draw' => $drawPercent,
-            'team2Win' => $team2WinPercent,
-        ];
-
-        // Найти, какие значения меньше минимального
-        $totalReduction = 0;
-        foreach ($percentages as $key => &$percent) {
-            if ($percent < $minimumPercent) {
-                $totalReduction += $minimumPercent - $percent;
-                $percent = $minimumPercent;
-            }
-        }
-        unset($percent);
-
-        // Перераспределить излишек между остальными
-        $remainingKeys = array_keys(array_filter(
-            $percentages, 
-            function ($p) use ($minimumPercent) { 
-                
-                return $p > $minimumPercent;
-            } 
-        ));
-        if (count($remainingKeys) > 0) {
-            foreach ($remainingKeys as $key) {
-                $percentages[$key] -= $totalReduction / count($remainingKeys);
-            }
-        }
-
-        //-----------------------------------//
-
-
-
-        $resultOfTur = getResultOfTur($turnir, $currentTur);
-        $resultTur = [];
-
-        if(isset($resultOfTur['url1'])){
-            if (preg_match('/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/', $resultOfTur['url1'], $matches)) {
-                $videoId = $matches[1];
-                $resultTur['after_play'] = $videoId;
-            } 
-        }
-
-        if(isset($resultOfTur['url2'])){
-            if (preg_match('/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/', $resultOfTur['url2'], $matches)) {
-                $videoId = $matches[1];
-                $resultTur['top_goals'] = $videoId;
-            } 
-        }
-
-        if(isset($resultOfTur['url3'])){
-            if (preg_match('/youtube\.com\/embed\/([a-zA-Z0-9_-]+)/', $resultOfTur['url3'], $matches)) {
-                $videoId = $matches[1];
-                $resultTur['top_save'] = $videoId;
-            } 
-        }
-
-        $randomNews = getRandomNews();
-        
+    if($currentTur <= $lastTur && $dateLastTur <= $dateNow){
         try {
             ob_start();
-            require_once VIEWS . '/calendar_of_matches_content.tpl.php';
-            $section1Content = ob_get_clean();
+            require VIEWS . '/controls_content.tpl.php';
+            $section2Content = ob_get_clean();
         } catch (Exception $e) {
-            $section1Content = '<p>Ошибка загрузки данных</p>';
+            $section2Content = '<p>Ошибка загрузки данных</p>';
         }
-        if($currentTur <= $lastTur && $dateLastTur <= $currentDate){
-            try {
-                ob_start();
-                require VIEWS . '/controls_content.tpl.php';
-                $section2Content = ob_get_clean();
-            } catch (Exception $e) {
-                $section2Content = '<p>Ошибка загрузки данных</p>';
-            }
-        } else {
-            $section2Content = "";
-        }
-        // Отправьте JSON-ответ
-        echo json_encode([
-            'success' => true,
-            'section1' => $section1Content,
-            'section2' => $section2Content
-        ]);
-        
-        die;
+    } else {
+        $section2Content = "";
     }
+    // Отправьте JSON-ответ
+    echo json_encode([
+        'success' => true,
+        'section1' => $section1Content,
+        'section2' => $section2Content
+    ]);
+    
+    die;
+    
 }
 
 
@@ -509,13 +447,13 @@ if(isset($data['action']) && $data['action'] == 'match_stats' ) {
         
         
         
-if(!isset($match['team1_id'])) {
-    $match['team1_id'] = '5331';
-}
+        // if(!isset($match['team1_id'])) {
+        //     $match['team1_id'] = '5331';
+        // }
 
-if(!isset($match['team2_id'])) {
-    $match['team2_id'] = '5332';
-}
+        // if(!isset($match['team2_id'])) {
+        //     $match['team2_id'] = '5332';
+        // }
 
         // Состав команды
         $team1Composition = getTeamComposition($data['match_id'], $dataMatch['team1_id']);
@@ -581,7 +519,7 @@ if(!isset($match['team2_id'])) {
         }
 
         // Текущая дата и время
-        $currentDate = new DateTime();
+        $dateNow = $currentDate = new DateTime();
 
         require_once VIEWS . "/match_stats.tpl.php";
         die;
@@ -590,8 +528,7 @@ if(!isset($match['team2_id'])) {
 
 if( isset($data['action']) && $data['action'] == 'kkd' ) {
 
-    if( $data['match_id'] && $data['tur'] && $data['turnir'] ) { 
-        
+    if( $data['match_id'] && $data['tur'] && $data['turnir'] ) {         
     
         // Данные тура
         $dataCurrentTur = getDataCurrentTur($data['turnir'], $data['tur']);
@@ -853,7 +790,7 @@ if(isset($data['action']) && $data['action'] == 'green_zone' ) {
         $dateLastTur->modify('+5 days');
 
         // Текущая дата и время
-        $currentDate = new DateTime();
+        $dateNow = $currentDate = new DateTime();
 
 
 

@@ -24,6 +24,9 @@ swiperMonthControls = new Swiper('.swiper-month-controls', {
 const slideIndex = $('.swiper-slide').toArray().findIndex(slide =>
   $(slide).find('.month-controls__button--current').length > 0
 );
+
+console.log(slideIndex);
+
 if (slideIndex !== -1) {
   // Центрируем найденный слайд
   swiperMonthControls.slideTo(slideIndex);

@@ -36,6 +36,14 @@
     <script src="<?= JS . '/action-calendar.js' ?>"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+    <?php 
+      // Получаем текущий URL
+      $current_url = $_SERVER['REQUEST_URI'];
+
+      if (strpos($current_url, "team_page") !== false): ?>
+        <script src="<?= JS . '/action-team-page.js' ?>"></script>
+    <?php endif; ?>
+
     <script>
       $(document).ready(function() {
         // Показать/скрыть кнопку в зависимости от прокрутки

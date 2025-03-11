@@ -32,7 +32,62 @@ if(isset($_GET['tur'])){
 $dateTurs = addLinkItem($dateTurs);
 
 // Данные тура
-$dataCurrentTur = getDataCurrentTur($turnir, $currentTur);
+// $dataCurrentTur = getDataCurrentTur($turnir, $currentTur);
+
+
+function getDataMatchesUnplayed(){
+    global $dbF;
+
+    $sql = 
+        "SELECT 
+        m.id,
+        m.anons,
+        t.season,
+        m.date,
+        m.tur, 
+        m.team1,
+        m.tcolor1 as color_tshirt1,
+        t1.id AS team1_id,
+        t1.name AS team1_name,
+        t1.pict AS team1_photo,
+        m.team2,    
+        m.tcolor2 as color_tshirt2,
+        t2.id AS team2_id,
+        t2.name AS team2_name,
+        t2.pict AS team2_photo,
+        m.field,
+        f.name AS field_name,
+        m.canseled,
+        m.gols1 AS goals1,
+        m.gols2 AS goals2,
+        t.ru AS turnir_name,
+        m.videohiden AS video_hd,
+        m.video AS video,
+        m.videobest AS videobest,
+        m.video_intervu AS video_intervu,
+        m.video_intervu2 AS video_intervu2
+    FROM 
+        v9ky_match m
+    LEFT JOIN 
+        `v9ky_team` t1 ON t1.id = m.team1
+    LEFT JOIN
+        `v9ky_team` t2 ON t2.id = m.team2
+    LEFT JOIN
+        `v9ky_turnir` t ON t.id = m.turnir
+    LEFT JOIN
+        `v9ky_fields` f ON f.id = m.field
+    WHERE m.canseled = 0
+    ORDER BY 
+        m.date";
+
+    // Делаем запрос в БД на игроков которые "вибули"
+    $fields = $dbF->query($sql)->findAll();
+    
+    return $fields;
+}
+
+$dataCurrentTur = getDataMatchesUnplayed();
+
 
 // Создаем массив для группировки
 $groupedData = [];

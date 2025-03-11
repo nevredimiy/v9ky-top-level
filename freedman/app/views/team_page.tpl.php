@@ -131,7 +131,7 @@
         >
         <img
           class="team-page__manager-team-logo"
-          src="<?= isset($teamHeads['manager']) ? $team_logo_path . $teamHeads['manager']['team_logo'] : $player_face_path . 'avatar.jpg'  ?>"
+          src="<?= $team_logo_path . $teamData['pict']  ?>"
           alt="manager"
         >
         <div class="team-page__manager-label">
@@ -153,7 +153,7 @@
         >
         <img
           class="team-page__manager-team-logo"
-          src="<?= isset($teamHeads['trainer']) ? $team_logo_path . $teamHeads['trainer']['team_logo'] : $player_face_path . 'avatar.jpg'  ?>"
+          src="<?= $team_logo_path . $teamData['pict']  ?>"
           alt="manager"
         >
         <div class="team-page__manager-label">
@@ -175,7 +175,7 @@
         ><span id="msg"></span>
         <img
           class="team-page__manager-team-logo"
-          src="<?= isset($teamHeads['capitan']) ? $team_logo_path . $teamHeads['capitan']['team_logo'] : $player_face_path . 'avatar.jpg'  ?>"
+          src="<?= $team_logo_path . $teamData['pict']  ?>"
           alt="Лого команди"
         >
         <div class="team-page__manager-label">
@@ -198,7 +198,7 @@
       </thead>
       <tbody> 
         <?php foreach($matches as $match) :?>
-        <tr>
+        <tr class="info_of_match">
             <td><?= $match['tur'] ?> тур</td>
             <td><?= $match['match_day'] ?></td>
             <td><?= $match['match_time'] ?></td>
@@ -211,7 +211,7 @@
             <?php if(empty($match['goals1'])):?>
               <td>VS</td>
             <?php else :?>
-            <td><?= $match['goals1'] ?> :  <?= $match['goals2'] ?></td>
+              <td data-match-id="<?= $match['id'] ?>" class="score-of-match"><?= $match['goals1'] ?> :  <?= $match['goals2'] ?></td>
             <?php endif ?>
 
             <td class="team__info team2" style="text-align: left">
@@ -223,6 +223,14 @@
         <?php endforeach ?>
       </tbody>
     </table>
+
+    <div id="matchStatsModal" class="stats_modal">
+        <div class="stats_modal-content">
+            <span class="close-btn">&times;</span>
+            <div id="stats_modal-loading">Загрузка...</div>
+            <div id="stats_modal-content"></div>
+        </div>
+    </div>
 
 
 <?php if ($kep){ ?>
@@ -406,11 +414,11 @@
               </div>
 
               <!-- Информация для капитанов -->
-              <div class="capitan-block">
-                <div class="border p-2">
+              <div class="<?= $kep ? 'capitan-block' : '' ?>">
+                <div class="<?= $kep ? 'border p-2' : '' ?>">
                   <?php  if($kep) faceupload($player['man'], $teamId, $tournament); ?>
                 </div>                
-                <div class="mb-2">
+                <div class="<?= $kep ? 'mb-2' : '' ?>">
                   <?php if($kep){ ?>
                     <div class="mt-2 mb-2 border p-2">
                       <label>Тел.</label>
@@ -627,9 +635,10 @@
             <p><?= $seasonName ?></p>
             
           </div>
+          <div id="dump" style="display: none"><?php dump($player) ?></div>
           
           <!-- Если игрок голкипер -->
-          <?php if($player['amplua'] == 1): ?>
+          <?php if($player['amplua'] == 1 || $player['amplua'] == 3): ?>
             <img src="/css/components/team-page/assets/images/goalkeeper-icon.svg" alt="" title="Голкіпер">
             <?php else : ?>
               <img src="/css/components/team-page/assets/images/player-boots-icon.svg" alt="" title="Гравець">

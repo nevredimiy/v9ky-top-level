@@ -9,6 +9,7 @@
  include_once CONTROLLERS . "/head.php";
  
  include_once CONTROLLERS . "/leagues.php";
+ include_once VIEWS . "/afisha.tpl.php";
  include_once CONTROLLERS . "/rating_players.php";
  include_once CONTROLLERS . "/table.php";
  include_once CONTROLLERS . "/calendar_of_matches.php";

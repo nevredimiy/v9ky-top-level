@@ -217,14 +217,14 @@ switch($tournament) {
 			
 			case "index_2023": $title="Всеукраїнський турнір з мініфутболу"; require_once("index_2023.php"); break;
 			
-			case "top_gravetc": $title="Топ-Бомбардири ліги"; require_once(CONTROLLERS . "/top_players/top_gravetc.php"); break;
+			case "top_gravetc": $title="Топ-Гравець ліги"; require_once(CONTROLLERS . "/top_players/top_gravetc.php"); break;
 			case "top_bombardir": $title="Топ-Бомбардири ліги"; require_once(CONTROLLERS . "/top_players/top_bombardir.php"); break;
 			case "top_golkiper": $title="Топ-Голкіпер ліги"; require_once(CONTROLLERS . "/top_players/top_golkiper.php"); break;
 			case "top_asist": $title="Топ-Асистент ліги"; require_once(CONTROLLERS . "/top_players/top_asist.php"); break;
 			case "top_zahusnuk": $title="Топ-Захисник ліги"; require_once(CONTROLLERS . "/top_players/top_zahusnuk.php"); break;
-			case "top_dribling": $title="Топ-Захисник ліги"; require_once(CONTROLLERS . "/top_players/top_dribling.php"); break;
-			case "top_udar": $title="Топ-Захисник ліги"; require_once(CONTROLLERS . "/top_players/top_udar.php"); break;
-			case "top_pas": $title="Топ-Захисник ліги"; require_once(CONTROLLERS . "/top_players/top_pas.php"); break;
+			case "top_dribling": $title="Топ-Дриблінг ліги"; require_once(CONTROLLERS . "/top_players/top_dribling.php"); break;
+			case "top_udar": $title="Топ-Удар ліги"; require_once(CONTROLLERS . "/top_players/top_udar.php"); break;
+			case "top_pas": $title="Топ-Пас ліги"; require_once(CONTROLLERS . "/top_players/top_pas.php"); break;
 			case "stadiums": $title="Стадіони"; require_once(CONTROLLERS . "/stadiums.php"); break;
 			case "teams_of_league": $title="Команди ліги"; require_once(CONTROLLERS . "/teams_of_league.php"); break;
 			case "team_page": $title="Інформація про команду"; require_once(CONTROLLERS . "/team_page.php"); break;
@@ -236,6 +236,7 @@ switch($tournament) {
 			case "news": $title="Експрес-підсумки"; require_once(CONTROLLERS . "/news/news.php"); break;
 			case "news_show": $title="Експрес-підсумки"; require_once(CONTROLLERS . "/news/news_show.php"); break;
 			case "developer_page": $title="Сторінка розробника"; require_once(CONTROLLERS . "/dev/developer_page.php"); break;
+			case "archive": $title="Архів турнірів V9KY"; require_once(CONTROLLERS . "/archive.php"); break;
 			
 			case "violators": $title="Порушники ліги"; require_once("violators.php"); break;
             case "violators_new": $title="Порушники ліги"; require_once("violators_new.php"); break;

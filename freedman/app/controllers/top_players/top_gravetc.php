@@ -15,8 +15,15 @@ $allStaticPlayers = getAllStaticPlayers($turnir);
 $dataAllPlayers = getDataPlayers($allStaticPlayers); 
 
 // Отсортированный массив по рубрике Топ-Гравець
-$topGravetc = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'topgravetc', $lastTur);
+// $topGravetc = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'topgravetc', $lastTur);
+$topGravetc = getTopGravtsi($allStaticPlayers, $dataAllPlayers, $lastTur);
 
+// Проверяем, есть ли значение у HTTP_REFERER  
+if (isset($_SERVER['HTTP_REFERER'])) {  
+    $previousPage = $_SERVER['HTTP_REFERER'];
+  } else {
+  $previousPage = $site_url;
+  }
 
 ?>
 
@@ -25,7 +32,7 @@ $topGravetc = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'topgravetc', $l
         <table id="top-gravetc" class="draggable-container">
         <caption>
             ТОП-Гравець
-            <a class="statistic__link-to-home" href="<?= $site_url?><?=$get_query_temp?>">
+            <a class="statistic__link-to-home" href="<?= $previousPage?>">
                 <img src="/css/components/statistic/assets/images/button-exit.svg" alt="exit">
             </a>
         </caption>

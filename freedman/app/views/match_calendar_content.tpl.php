@@ -1,28 +1,4 @@
-<div class="calendar-of-matches__head-nav">
 
-    <div class="swiper swiper-month-controls swiper-initialized swiper-horizontal">
-        <div class="swiper-wrapper swiper-wrapper-month-controls" id="swiper-wrapper-2894150f39673565"
-            aria-live="polite" style="transition-duration: 0ms; transform: translate3d(0px, 0px, 0px);">
-            
-            <?php foreach($dateTurs as $dateTur): ?>
-            <div class="swiper-slide swiper-slide-month-controls swiper-slide-active" role="group" aria-label="1 / 15"
-                style="margin-right: 5px;">
-                <a data-switch-tur="<?=$dateTur['tur'] ?>" data-turnir="<?= $turnir ?>" data-lasttur="<?= $lastTur?>"
-                    class="month-controls__button
-                    <?= $dateTur['tur'] <= $lastTur ? 'month-controls__button--past ' : '' ?>
-                    <?= $currentTur ==  $dateTur['tur'] ? 'month-controls__button--current' : '' ?>"
-                    <?= $currentTur != $dateTur['tur'] ? "href={$site_url}{$dateTur['link']}" : '' ?>>
-                    <p><?= date_translate($dateTur['month_min_name']) ?></p>
-                    <p><?= $dateTur['day_min']?></p>
-                </a>
-            </div>
-            <?php endforeach ?>
-        </div>
-
-        <div class="swiper-scrollbar"></div>
-    </div> <!-- swiper  -->
-
-</div>
 <div class="match-zone__current-date">
     <?php $i = 1 ?>
     <?php foreach($groupedData as $key => $value) : ?>
@@ -94,3 +70,4 @@
     <?php $i++ ?>
     <?php endforeach ?>
 </div>
+

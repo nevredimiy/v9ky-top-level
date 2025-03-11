@@ -598,3 +598,74 @@
   width: 100%;
   line-height: 1.5;
 }
+
+.score-of-match {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.score-of-match:hover {
+  text-decoration: underline;
+}
+
+/* Общий стиль модального окна */
+#matchStatsModal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Запрещает прокрутку фона */
+  z-index: 9999;
+}
+
+/* Контейнер для контента внутри модального окна */
+#stats_modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%; /* Занимает 80% ширины экрана */
+  min-width: 400px;
+  max-width: 900px; /* Максимальная ширина */
+  max-height: 90vh; /* Максимальная высота */
+  overflow-y: auto; /* Прокрутка, если контент превышает окно */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+/* Для мобильных устройств */
+@media (max-width: 768px) {
+  #stats_modal-content {
+      width: 95%;
+      max-width: 100%;
+      max-height: 80vh; /* Ограничиваем высоту */
+  }
+}
+
+/* Стили для кнопки закрытия */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+  padding: 5px;
+  border-radius: 50%;
+  background-color: red;
+  width: 15px;
+  height: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: aliceblue;
+}
+
+.close-btn:hover {
+  opacity: 0.8;
+}

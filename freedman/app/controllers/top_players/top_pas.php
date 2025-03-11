@@ -16,6 +16,12 @@ $dataAllPlayers = getDataPlayers($allStaticPlayers);
 // Отсортированный массив по рубрике Топ-Пас
 $topPas = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'pas', $lastTur);
 
+// Проверяем, есть ли значение у HTTP_REFERER  
+if (isset($_SERVER['HTTP_REFERER'])) {  
+    $previousPage = $_SERVER['HTTP_REFERER'];
+  } else {
+  $previousPage = $site_url;
+  }
 
 ?>
 
@@ -24,7 +30,7 @@ $topPas = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'pas', $lastTur);
         <table id="top-pas" class="draggable-container">
         <caption>
             ТОП-Пас
-            <a class="statistic__link-to-home" href="<?= $site_url?><?=$get_query_temp?>">
+            <a class="statistic__link-to-home" href="<?= $previousPage?>">
           <img src="/css/components/statistic/assets/images/button-exit.svg" alt="exit">
         </a>
         </caption>

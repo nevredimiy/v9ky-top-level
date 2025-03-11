@@ -1,6 +1,4 @@
 <?php
-
-
 if(!isset($turnir)){
     $turnir = getTurnir();
 }
@@ -13,9 +11,6 @@ if(isset($currentTur)){
         $currentTur = $_GET['tur'];
     }
 }
-
-
-
 
 $resultOfTur = getResultOfTur($turnir, $currentTur);
 $resultTur = [];
@@ -42,7 +37,5 @@ if(isset($resultOfTur['url3'])){
 }
    
 $randomNews = getRandomNews();
-
-
 
 include_once VIEWS . '/controls.tpl.php';

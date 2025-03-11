@@ -18,7 +18,8 @@
     $uri_parts = explode('/', trim($url_path, ' /'));
     // Получаем имя турнира
     $slug = array_shift($uri_parts); 
-
+    
+    
     $_SESSION['last_selected_tournament'] = '';
 
     // Проверяем, передан ли слаг турнира
@@ -31,6 +32,8 @@
             $slug = $_SESSION['last_selected_tournament'];
         }
     }
+    
+    
     // Записывавем текущую лигу из сесесии
     $tournament = htmlspecialchars($slug);
     // Если tournament несуществует

@@ -1,172 +1,81 @@
 <?php
 
-// // Увімкнення відображення помилок
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
+// Увімкнення відображення помилок
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
 
-// // Встановлення рівня звітності помилок
-// error_reporting(E_ALL);
+// Встановлення рівня звітності помилок
+error_reporting(E_ALL);
+
+if(!isset($tournament) || empty($tournament)){
+    $tournament = getTournament();
+}
 
 if(!isset($turnir)){
-    $turnir = getTurnir();
+    $turnir = getTurnir($tournament);
 }
 
-// Последний тур в турнире (в лиге).
-$lastTur = intval(getLastTur($turnir));
-
-
-// Получаем все даты 
-function getDateMatchesOfLeague($turnir){
-
-    global $dbF;
-
-    $sql = "SELECT `id`,`date`,`field`,`team1`,`team2`,`turnir`,`canseled`,`tur` FROM `v9ky_match` WHERE `turnir`= :turnir ORDER by `date`";
-
-    $fields = $dbF->query($sql, [":turnir" => $turnir])->findAll();
-
-    return($fields);
-}
-
-function getLastActiveDate($turnir){
-    global $dbF;
-
-    $sql = "SELECT `date` FROM `v9ky_match` WHERE `turnir`= :turnir AND `canseled` = 1 ORDER by `date` DESC LIMIT 1";
-
-    $fields = $dbF->query($sql, [":turnir" => $turnir])->find();
-
-    return($fields['date']);
-
-}
-
-// Данные всех матчей выбранной лиги
-$matches = getDateMatchesOfLeague($turnir);
-
-function getUniqueDates($matches) {
-    // Список названий месяцев на украинском языке
-    $months_ua = [
-        "01" => "Січень", "02" => "Лютий", "03" => "Березень", "04" => "Квітень",
-        "05" => "Травень", "06" => "Червень", "07" => "Липень", "08" => "Серпень",
-        "09" => "Вересень", "10" => "Жовтень", "11" => "Листопад", "12" => "Грудень"
-    ];
-
-    $unique_dates = [];
-
-    foreach ($matches as $match) {
-        $date = date("Y-m-d", strtotime($match['date'])); // Получаем день и месяц в формате "dd.mm"
-        $day = date("d", strtotime($match['date'])); // День
-        $month = date("m", strtotime($match['date'])); // Месяц
-        $monthNum = date("m", strtotime($match['date'])); // Месяц
-        $year = date("Y", strtotime($match['date'])); // год
-        $tur = $match['tur'];
-        $canseled = $match['canseled'];
-
-        // Проверяем, есть ли уже такая дата в массиве
-        if (!isset($unique_dates[$date])) {
-            $unique_dates[$date] = [
-                "date" => $date,
-                "year" => $year,
-                "month" => $months_ua[$month], // Название месяца на украинском
-                "month_num" => $monthNum, // Название месяца на украинском
-                "day" => $day,
-                "tur" => $tur,
-                "canseled" => $canseled,
-            ];
-        }
-
-    }
-
-    return array_values($unique_dates); // Возвращаем массив без ключей
-}
-
-// данные матчей в выбранный день
-$dateMatches = getUniqueDates($matches);
-
-
-
-if (!isset($allStaticPlayers)) {    
-    $allStaticPlayers = getAllStaticPlayers($turnir);
-}
-
-// Получаем данные всех игроков - ФИО, фото и т.д.
-if(!isset($dataAllPlayers)) {  
-  $dataAllPlayers = getDataPlayers($allStaticPlayers); 
-}
-
-// // --------------- под снос -----------------//
-// // Получаем массив с датами каждого тура
-// $dateTurs = getDateTurs($turnir);
-
-
-// // Добавляем элемент link в массив
-// $dateTurs = addLinkItem($dateTurs);
-// // --------------- Конец под снос -----------------//
-
-
-if(isset($_GET['date'])) {
-    $selectedDate = $_GET['date'];
+if(isset($_GET['first_day'])) {
+    $selectedDate = $_GET['first_day'];
 } else {
     $selectedDate = date("Y-m-d", strtotime(getLastActiveDate($turnir)));
 }
 
+$dateNow = new DateTime();
+ 
+// Данные матча выбранного турнира
+$sql = "SELECT 
+    DATE(`date`) as `match_date`,
+    tur,
+    turnir,
+    canseled
+    FROM `v9ky_match` 
+    WHERE turnir = :turnir 
+    ORDER BY `date` ASC";
+$matches = $dbF->query($sql, [":turnir" => $turnir])->findAll();
+ 
+// Извлекаем даты в отдельный массив
+$dates = array_column($matches, 'match_date');
+ 
+// Форматируем даты матчей для отображения в шаблоне
+$dateMatches = formatMatchDates($dates);
 
-// Выбранный тур
-if(isset($_GET['tur'])){
-    // Берем тур из адресной строки
-    $currentTur = $_GET['tur'];
-} else {
-    foreach($dateMatches as $dateMatch){
-        if($dateMatch['date'] == $selectedDate){
-            $currentTur = $dateMatch['tur'];
-        }
-    }
+$daysOfTur = getFirstAndLastDays($dateMatches, $selectedDate);
+
+$dataMatchesOfDate = 0;
+if($daysOfTur['first_day']){
+    $dataMatchesOfDate = getDataMatchesOfDate($turnir, $daysOfTur['first_day'], $daysOfTur['last_day']);
 }
 
-
-//-------- Здесь обр вни-------//
-// Находим дату выбранного турнира. Это нужно для сравнения с текущей датой, что бы правильно отображать данные.
-// $dateLastTurString = '';
-// foreach($dateTurs as $dateT){
-//     if($dateT['tur'] == $currentTur) {
-//         $dateLastTurString = $dateT['min_date'];
-//     }
-// }
-
+// Строка - дата последнего сыгранного матча в турнире (canseled = 1) (формат Y-m-d)
 $dateLastTurString = $selectedDate;
-//-------- Конец Здесь обр вни-------//
 
 // Преобразуем строку в объект даты
 $dateLastTur = new DateTime($dateLastTurString);
 
-
 // Добавляем 5 дней - это количество дней, когда админы должны внести все данные по последнему туру
 $dateLastTur->modify('+5 days');
 
-//-------- Здесь удалить 1 стр-------//
-// Текущая дата и время. Эту дату сравниваем с $dateLastTur для правильного отображения данных
-$currentDate = new DateTime();
-$dateNow = new DateTime();
-//-------- Здесь удалить 1 стр-------//
+$playerOfDateTur = getPlayersOfDateTur( $allStaticPlayers, $daysOfTur['first_day'], $daysOfTur['last_day'] );
 
-if($currentTur <= $lastTur && !empty($dataAllPlayers)) {
-    // Все игроки из выбранного тура
-    $bestPlayers = getPlayersOfTur($allStaticPlayers, $currentTur);
-    
+// Лучшие игроки - отфильтрованные
+$bestPlayersForTable = mergeStaticAndData($playerOfDateTur, $dataAllPlayers);
 
-    // Лучшие игроки - отфильтрованные
-    $bestPlayersForTable = mergeStaticAndData($bestPlayers, $dataAllPlayers);
 
-    
-    $labels = [
-        'topgravetc' => ['icon' => 'star-icon.png', 'role' => 'Топ-Гравець'], 
-        'golkiper' => ['icon' => 'gloves-icon.png', 'role' => 'Топ-Голкіпер'], 
-        'bombardir' => ['icon' => 'football-icon.png', 'role' => 'Топ-Бомбардир'], 
-        'asistent' => ['icon' => 'boots-icon.svg', 'role' => 'Топ-Асистент'],
-        'zahusnuk' => ['icon' => 'pitt-icon.svg', 'role' => 'Топ-Захисник'],
-        'dribling' => ['icon' => 'player-icon.svg', 'role' => 'Топ-Дриблінг'],
-        'udar' => ['icon' => 'rocket-ball-icon.png', 'role' => 'Топ-Удар'],
-        'pas' => ['icon' => 'ball-icon.png', 'role' => 'Топ-Пас'],
-    ];
-}
+$labels = [
+    'topgravetc' => ['icon' => 'star-icon.png', 'role' => 'Топ-Гравець'], 
+    'golkiper' => ['icon' => 'gloves-icon.png', 'role' => 'Топ-Голкіпер'], 
+    'bombardir' => ['icon' => 'football-icon.png', 'role' => 'Топ-Бомбардир'], 
+    'asistent' => ['icon' => 'boots-icon.svg', 'role' => 'Топ-Асистент'],
+    'zahusnuk' => ['icon' => 'pitt-icon.svg', 'role' => 'Топ-Захисник'],
+    'dribling' => ['icon' => 'player-icon.svg', 'role' => 'Топ-Дриблінг'],
+    'udar' => ['icon' => 'rocket-ball-icon.png', 'role' => 'Топ-Удар'],
+    'pas' => ['icon' => 'ball-icon.png', 'role' => 'Топ-Пас'],
+];
+
+
+
+$currentTur = getMostFrequentTur($dataMatchesOfDate);
 
 
 

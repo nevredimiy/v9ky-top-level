@@ -118,6 +118,8 @@
   width: 100%;
 }
 
+
+
 .green-zone .player-card__left-icon img {
   height: 15px;
 }
@@ -155,7 +157,7 @@
 }
 
 @media screen and (min-width: 1026px) {
-  
+
   .green-zone__current {
     padding: 0 80px;
   }
@@ -184,4 +186,18 @@
     font-size: 20px;
   }
 
+}
+
+
+#match-static>div.controls__action.tabs>div>div:nth-child(1)>div>div {
+  max-width: 150px;
+  padding-top: 15px;
+}
+
+#match-static>div.controls__action.tabs>div>div:nth-child(1)>div>div>div.player-card__role{
+  font-size: 16px;
+}
+
+#match-static > div.controls__action.tabs > div > div:nth-child(1) > div > div > div.player-card__name {
+  font-size: 16px;
 }
