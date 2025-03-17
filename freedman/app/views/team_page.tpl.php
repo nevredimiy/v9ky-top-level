@@ -1,7 +1,3 @@
-<?php 
-    require_once CONTROLLERS . '/head.php';
-    require_once CONTROLLERS . '/menu.php';
-?>
 
 <section class="team-page">
  <div class="container">
@@ -136,7 +132,7 @@
         >
         <div class="team-page__manager-label">
           <p><span> <?=  isset($teamHeads['manager']['player_lastname'] ) ? $teamHeads['manager']['player_lastname'] : 'менеджер' ?></span></p>
-          <p><?=  isset($teamHeads['manager']) ? $teamHeads['manager']['player_firstname'] .' '.  $teamHeads['manager']['player_middlename'] : '' ?></p>
+          <p><?=  isset($teamHeads['manager']) ? $teamHeads['manager']['player_firstname'] : '' ?></p>
         </div>
       </div>
 
@@ -158,7 +154,7 @@
         >
         <div class="team-page__manager-label">
           <p><span> <?=  isset($teamHeads['trainer']['player_lastname'] ) ? $teamHeads['trainer']['player_lastname'] : 'тренер' ?></span></p>
-          <p><?=  isset($teamHeads['trainer']) ? $teamHeads['trainer']['player_firstname'] .' '.  $teamHeads['trainer']['player_middlename'] : '' ?></p>
+          <p><?=  isset($teamHeads['trainer']) ? $teamHeads['trainer']['player_firstname'] : '' ?></p>
         </div>
       </div>
       <div class="team-page__manager">
@@ -180,7 +176,7 @@
         >
         <div class="team-page__manager-label">
           <p><span> <?=  isset($teamHeads['capitan']['player_lastname'] ) ? $teamHeads['capitan']['player_lastname'] : 'місце для капітана' ?></span></p>
-          <p><?=  isset($teamHeads['capitan']) ? $teamHeads['capitan']['player_firstname'] .' '.  $teamHeads['capitan']['player_middlename'] : '' ?></p>
+          <p><?=  isset($teamHeads['capitan']) ? $teamHeads['capitan']['player_firstname'] : '' ?></p>
         </div>
       </div>
       
@@ -267,6 +263,58 @@
   </tr>
 </table>
 
+
+<br>
+<table class="capitan-table">
+  <tr>
+      <th colspan='2'><?= isset( $teamHeads['manager']['player_id']) ? 'Змінити' : 'Додати' ?> менеджера</th>
+  </tr>
+  <tr>
+    <th>Менеджер</th>
+    <th>Дія</th>
+  </tr>
+  <tr>
+    <td align="center">
+        <select name="players_list" id="manager_list">
+            <option value="0">-- Призначити менеджера --</option>
+            <?php foreach($players as $p): ?>
+                <option value="<?= $p['id'] ?>" <?= $teamHeads['manager']['player_id'] ==  $p['id'] ? 'selected' : '' ?> >
+                    <?= $p['name1'] ?> <?= $p['name2'] ?>
+                </option>
+            <?php endforeach ?>
+        </select>
+    </td>
+    <td align="center"><input type='button' value='Призначити менеджера' onclick='newManager(<?=$teamId?>);' style="color:green"></td>
+  </tr>
+</table>
+
+<br>
+
+<table class="capitan-table">
+  <tr>
+      <th colspan='2'><?= isset( $teamHeads['manager']['player_id']) ? 'Змінити' : 'Додати' ?> тренера</th>
+  </tr>
+  <tr>
+    <th>Тренер</th>
+    <th>Дія</th>
+  </tr>
+  <tr>
+    <td align="center">
+        <select name="player_list" id="trainer_list">
+            <option value="0">-- Призначити тренера --</option>
+            <?php foreach($players as $p): ?>
+                <option value="<?= $p['id'] ?>" <?= $teamHeads['trainer']['player_id'] ==  $p['id'] ? 'selected' : '' ?> >
+                    <?= $p['name1'] ?> <?= $p['name2'] ?>
+                </option>
+            <?php endforeach ?>
+        </select>
+    </td>
+    <td align="center"><input type='button' value='Призначити менеджера' onclick='newTrainer(<?=$teamId?>);' style="color:green"></td>
+  </tr>
+</table>
+
+<br>
+
 <br>
 <center><h2 style="color: #dfdfdf; background-color: #575757;">Напишіть нижче щотижневі новини або цікаві факти команди які можуть бути використані в наших публікаціях і відеоматеріалах</h2>
   <textarea type="text" id="cap_story" rows="3" cols="100">Текст новини</textarea><br>
@@ -349,44 +397,51 @@
                 <?php endif ?>
                                   
               </div>
-              <!-- Информация для капитанов -->
-              <div class="">
-                <div class="">
+                <!-- Информация для капитанов -->
+                <div class="<?= $kep ? 'capitan-block' : '' ?>">
+                  <div class="<?= $kep ? 'border p-2' : '' ?>">
                   <?php  if($kep) faceupload($player['man'], $teamId, $tournament); ?>
-                </div>                
-                <div class="">
+                  </div>                
+                  <div class="<?= $kep ? 'mb-2' : '' ?>">
                   <?php if($kep){ ?>
-                      <span>Тел.
-                        <input type='text' id='mantel<?=$player['id'];?>' value='<?=$player['tel'];?>' style='color:blue' placeholder='38068XXXXXXX'>
-                        <input type='button' value='Зберегти' onclick="mantel(<?=$player['id'];?>, <?=$player['man'];?>);">
-                      </span>
-                      <span>Амплуа
-                        <select class='form-control' id="amplua_<?=$player['id'];?>" size=1 onchange="amplua(<?=$player['id'];?>, <?=$player['man'];?>);">
+                  <div class="mt-2 mb-2 border p-2">
+                  <label>Тел.</label>
+                  <input type='text' id='mantel<?=$player['id'];?>' value='<?=$player['tel'];?>' style='color:blue; width: 100px' placeholder='38068XXXXXXX'>
+                  </div>
+                  <div class="mt-2 mb-2 border p-2 bg-green">
+                  <input type='button' value='Зберегти' onclick="mantel(<?=$player['id'];?>, <?=$player['man'];?>);">
+                  </div>
+                  <div class="mb-2 border p-2">
+                  <lable>Амплуа</label>
+                  <select class='form-control' id="amplua_<?=$player['id'];?>" size=1 onchange="amplua(<?=$player['id'];?>, <?=$player['man'];?>);">
                           <option value='0' <?php if($player['amplua']==0) echo "selected";?>>-</option>
-                          <option value='1' <?php if($player['amplua']==1) echo "selected";?>>Нападник</option>
-                          <option value='2' <?php if($player['amplua']==2) echo "selected";?>>Захисник</option>
+                          <option value='2' <?php if($player['amplua']==2) echo "selected";?>>Гравець</option>
                           <option value='3' <?php if($player['amplua']==3) echo "selected";?>>Воротар</option>
-                        </select>
-                      </span> 
-                      <div class="">
-                      <?php 
-                        if($kep)
-                        {
+                  </select>
+                  </div> 
+                  <div class="mb-2 border p-2">
+                  <?php 
+                  if($kep)
+                  {
                           if ($player['active'] == 1) {
-                            echo"<font color='green'>Заявлений</font></td><td>";
-                            echo'<input type="button" value="Відкликати" onclick="out('.$teamId.', '.$player["id"].', 0);">';
+                          echo '<div class="mt-2 mb-2">';
+                          echo"<font color='green'>Заявлений</font>";
+                          echo'<input type="button" value="Відкликати" onclick="out('.$teamId.', '.$player["id"].', 0);">';
+                          echo '</div>';
                           }else {
-                            echo'<font color="red">Відкликаний</font></td><td>';
-                            echo'<input type="button" value="Заявити" onclick="out('.$teamId.', '.$player["id"].', 1);">';
+                          echo '<div class="mt-2 mb-2">';
+                          echo'<font color="red">Відкликаний</font>';
+                          echo'<input type="button" value="Заявити" onclick="out('.$teamId.', '.$player["id"].', 1);">';
+                          echo '</div>';
                           }
-                        } 
-                        ?>
-                      </td>
-                      </div>
+                  } 
+                  ?>
+                  
+                  </div>
                   <?php } ?>
-                </div>                
-              </div>
-              <!-- КОНЕЦ Информация для капитанов -->
+                  </div>                
+                </div>
+                <!-- КОНЕЦ Информация для капитанов -->
 
               <div class="card-player-full__name">
                 <p><span><?= $dataAllPlayers[$player['id']]['last_name'] ?> </span></p>
@@ -413,50 +468,51 @@
 
               </div>
 
-              <!-- Информация для капитанов -->
-              <div class="<?= $kep ? 'capitan-block' : '' ?>">
-                <div class="<?= $kep ? 'border p-2' : '' ?>">
+               <!-- Информация для капитанов -->
+               <div class="<?= $kep ? 'capitan-block' : '' ?>">
+                  <div class="<?= $kep ? 'border p-2' : '' ?>">
                   <?php  if($kep) faceupload($player['man'], $teamId, $tournament); ?>
-                </div>                
-                <div class="<?= $kep ? 'mb-2' : '' ?>">
+                  </div>                
+                  <div class="<?= $kep ? 'mb-2' : '' ?>">
                   <?php if($kep){ ?>
-                    <div class="mt-2 mb-2 border p-2">
-                      <label>Тел.</label>
-                      <input type='text' id='mantel<?=$player['id'];?>' value='<?=$player['tel'];?>' style='color:blue; width: 100px' placeholder='38068XXXXXXX'>
-                      <input type='button' value='Зберегти' onclick="mantel(<?=$player['id'];?>, <?=$player['man'];?>);">
-                    </div>
-                    <div class="mb-2 border p-2">
-                      <lable>Амплуа</label>
-                      <select class='form-control' id="amplua_<?=$player['id'];?>" size=1 onchange="amplua(<?=$player['id'];?>, <?=$player['man'];?>);">
-                        <option value='0' <?php if($player['amplua']==0) echo "selected";?>>-</option>
-                        <option value='1' <?php if($player['amplua']==1) echo "selected";?>>Нападник</option>
-                        <option value='2' <?php if($player['amplua']==2) echo "selected";?>>Захисник</option>
-                        <option value='3' <?php if($player['amplua']==3) echo "selected";?>>Воротар</option>
-                      </select>
-                      </div> 
-                    <div class="mb-2 border p-2">
-                    <?php 
-                      if($kep)
-                      {
-                        if ($player['active'] == 1) {
+                  <div class="mt-2 mb-2 border p-2">
+                  <label>Тел.</label>
+                  <input type='text' id='mantel<?=$player['id'];?>' value='<?=$player['tel'];?>' style='color:blue; width: 100px' placeholder='38068XXXXXXX'>
+                  </div>
+                  <div class="mt-2 mb-2 border p-2 bg-green">
+                  <input type='button' value='Зберегти' onclick="mantel(<?=$player['id'];?>, <?=$player['man'];?>);">
+                  </div>
+                  <div class="mb-2 border p-2">
+                  <lable>Амплуа</label>
+                  <select class='form-control' id="amplua_<?=$player['id'];?>" size=1 onchange="amplua(<?=$player['id'];?>, <?=$player['man'];?>);">
+                          <option value='0' <?php if($player['amplua']==0) echo "selected";?>>-</option>
+                          <option value='2' <?php if($player['amplua']==2) echo "selected";?>>Гравець</option>
+                          <option value='3' <?php if($player['amplua']==3) echo "selected";?>>Воротар</option>
+                  </select>
+                  </div> 
+                  <div class="mb-2 border p-2">
+                  <?php 
+                  if($kep)
+                  {
+                          if ($player['active'] == 1) {
                           echo '<div class="mt-2 mb-2">';
                           echo"<font color='green'>Заявлений</font>";
                           echo'<input type="button" value="Відкликати" onclick="out('.$teamId.', '.$player["id"].', 0);">';
                           echo '</div>';
-                        }else {
+                          }else {
                           echo '<div class="mt-2 mb-2">';
                           echo'<font color="red">Відкликаний</font>';
                           echo'<input type="button" value="Заявити" onclick="out('.$teamId.', '.$player["id"].', 1);">';
                           echo '</div>';
-                        }
-                      } 
-                      ?>
-                    
-                    </div>
+                          }
+                  } 
+                  ?>
+                  
+                  </div>
                   <?php } ?>
-                </div>                
-              </div>
-              <!-- КОНЕЦ Информация для капитанов -->
+                  </div>                
+                </div>
+                <!-- КОНЕЦ Информация для капитанов -->
 
               <div class="card-player-full__name">
                 <p><span><?= $dataPlayer['player_lastname'] ?> </span></p>
@@ -896,6 +952,31 @@
     });
   }
 
+
+  function newManager(team){
+    const selectElement = document.getElementById("manager_list");  
+    const player = selectElement.value; 
+
+    myClass.newManager(team, player, {
+
+        "onFinish": function(response){
+            document.location.reload();
+        }
+    });
+  }
+
+  function newTrainer(team){
+    const selectElement = document.getElementById("trainer_list");  
+    const player = selectElement.value; 
+
+    myClass.newTrainer(team, player, {
+
+        "onFinish": function(response){
+            document.location.reload();
+        }
+    });
+  }
+
   function newstory(team){
     val1 = document.getElementById("cap_story").value;
 
@@ -911,7 +992,3 @@
   }
 </script>
 
-
-<?php 
-    require_once CONTROLLERS . '/footer.php';
-?>

@@ -237,6 +237,10 @@ switch($tournament) {
 			case "news_show": $title="Експрес-підсумки"; require_once(CONTROLLERS . "/news/news_show.php"); break;
 			case "developer_page": $title="Сторінка розробника"; require_once(CONTROLLERS . "/dev/developer_page.php"); break;
 			case "archive": $title="Архів турнірів V9KY"; require_once(CONTROLLERS . "/archive.php"); break;
+			case "archived": $title="Архів турнірів V9KY"; require_once(CONTROLLERS . "/archived.php"); break;
+			case "addteam1": $title="Заявити команду"; require_once(CONTROLLERS . "/addteam1.php"); break;
+			case "addteam2": $title="Заявити команду"; require_once(CONTROLLERS . "/addteam2.php"); break;
+			case "addteam3": $title="Заявити команду"; require_once(CONTROLLERS . "/addteam3.php"); break;
 			
 			case "violators": $title="Порушники ліги"; require_once("violators.php"); break;
             case "violators_new": $title="Порушники ліги"; require_once("violators_new.php"); break;

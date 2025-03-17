@@ -1,0 +1,73 @@
+<?php 
+
+// // Увімкнення відображення помилок
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+
+// Встановлення рівня звітності помилок
+error_reporting(E_ALL);
+
+
+require_once CONTROLLERS . "/head.php";
+// require_once CONTROLLERS . "/leagues.php";
+
+if(!isset($turnir) && !isset($tournament)) {
+    $turnir = getTurnir();
+}
+
+if(!isset($turnir)) {
+    $turnir = getTurnir($tournament);
+}
+
+
+// Формируем ссылку. Берем данные из адресной строки
+$urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// Разбиваем путь на части
+$urlPathParts = explode('/', trim($urlPath, '/')); 
+// Получаем текущие GET-параметры
+$queryString = $_SERVER['QUERY_STRING'];
+
+// Получаем массив лиг
+$leagues = getLeagues($turnir);
+
+// Обрабатываем каждую лигу. Формируем ссылку исходя из адресной строки и добавляем в массив leagues.
+foreach ($leagues as $key => $league) {
+  
+    // Первая часть uri всегда будет слаг текущией лиги
+    $urlPathParts[0] = $league['slug'];
+    
+    // Собираем новый путь
+    $newPath = implode('/', $urlPathParts);
+    
+    // Добавляем GET-параметры, если они есть
+    $myLink = $queryString ? $newPath . '?' . $queryString : $newPath;
+    
+    // Добавляем ссылку в массив лиг
+    $leagues[$key]['link'] = $myLink;
+    
+    if (preg_match('/^(.+?)\s*(\(.+\))$/u', $league['full_name'], $matches)) {
+        $leagues[$key]['name'] = trim($matches[1]); // "Суперліга"
+        $leagues[$key]['locale_name'] = str_replace(["(", ")"], "", trim($matches[2])); // "(Футзал)"
+    } else {
+        $leagues[$key]['name'] = $league['full_name']; 
+        $leagues[$key]['locale_name'] = $league['city_name'];
+        
+    }
+
+    
+}
+
+require_once VIEWS . '/leagues.tpl.php';
+
+
+
+
+include_once CONTROLLERS . "/rating_players.php";
+dd($turnir);
+// include_once CONTROLLERS . "/table.php";
+
+
+include_once CONTROLLERS . "/calendar_of_matches.php";
+include_once CONTROLLERS . "/controls.php";
+include_once CONTROLLERS . "/disqualification.php";
+include_once CONTROLLERS . "/footer.php";

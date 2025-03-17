@@ -170,6 +170,52 @@ class Validationc {
         return $test;
     }
 
+    public function newManager($team_id, $player_id){
+        global $dbF;
+
+        if($player_id == '0'){
+            return;
+        }
+
+        // Объявляем переменную ошибки
+        $error = "";
+
+        $sql = "UPDATE `v9ky_team` SET `manager` = :player_id WHERE `id` = :team_id";
+        if($dbF->query($sql, [":player_id" => $player_id, ":team_id" => $team_id])){
+            $error = "Обновіть сторінку. менеджер перезаписаний";
+        }else {
+            $error = "Помилка! Менеджер не записаний";
+        }
+
+        $test = $this->sel_all($team_id, $error);
+
+        return $test;
+
+    }
+
+    public function newTrainer($team_id, $player_id){
+        global $dbF;
+
+        if($player_id == '0'){
+            return;
+        }
+
+        // Объявляем переменную ошибки
+        $error = "";
+
+        $sql = "UPDATE `v9ky_team` SET `trainer` = :player_id WHERE `id` = :team_id";
+        if($dbF->query($sql, [":player_id" => $player_id, ":team_id" => $team_id])){
+            $error = "Обновіть сторінку. тренер перезаписаний";
+        }else {
+            $error = "Помилка! Тренер не записаний";
+        }
+
+        $test = $this->sel_all($team_id, $error);
+
+        return $test;
+
+    }
+
     public function delstory($id, $team) {
         global $dbF;
         $tes = "";
@@ -348,7 +394,7 @@ class Validationc {
 
 $ajax = new PHPLiveX();
 $myClass = new Validationc();
-$ajax->AjaxifyObjectMethods(array("myClass" => array("validation", "sms", "_out", "newplay", "delout", "newstory", "amplua", "delstory", "mantel")));
+$ajax->AjaxifyObjectMethods(array("myClass" => array("validation", "sms", "_out", "newplay", "delout", "newstory", "amplua", "delstory", "mantel", "newManager", "newTrainer")));
 $ajax->Run(); // Must be called inside the 'html' or 'body' tags
 function faceupload($man, $team, $tour){
     echo '<form class="upload-image" method="post" action="http://v9ky.in.ua/capitan/crop/" enctype="multipart/form-data">
@@ -487,11 +533,9 @@ $matches = getMatches($turnir, $teamId);
 // Добавляем два элемента в массив с форматированными датами: match_day и match_time
 $matches = getArrayWithFormattedDate($matches);
 
+require_once CONTROLLERS . '/head.php';
+require_once CONTROLLERS . '/menu.php';
 
 require_once VIEWS . '/team_page.tpl.php';
 
-
-
-
-
-
+require_once CONTROLLERS . '/footer.php';

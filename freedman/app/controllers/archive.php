@@ -13,7 +13,7 @@ $sql = "SELECT
 $cities = $dbF->query($sql)->findAll();
 // dump_arr($cities);
 
-$dataTurnirs1 = [];
+$listTurnirs = [];
 foreach($cities as $city){
     $sql1 = "SELECT * 
             FROM v9ky_turnir t
@@ -21,28 +21,11 @@ foreach($cities as $city){
             ORDER BY t.id DESC";
     
     $fields = $dbF->query($sql1, [":city_id" => $city['city_id']])->findAll();
-    $dataTurnirs1[$city['city_name']][] = $fields;
+    $listTurnirs[$city['city_name']][] = $fields;
     
 }
 
-?>
 
-<div class="container">
-<?php foreach($dataTurnirs1 as $key => $data) : ?>
-        <?php foreach($data as $item): ?>
-                <?php foreach($item as $it) : ?>
-
-                        <p> <?= $key ?> / <?= $it['season'] ?> / <?= $it['ru'] ?></p>
-                        <br>
-
-                <?php endforeach ?>
-                <br>
-        
-<?php endforeach ?>
-<?php endforeach ?>
-</div>
-
-<?php
 
 
 require_once VIEWS . "/archive.tpl.php";

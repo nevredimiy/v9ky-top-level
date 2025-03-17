@@ -916,12 +916,15 @@ function getTeamHeads($teamId){
     foreach($fields as $field) {
         if($field['capitan'] != 0){
             $teamHeads['capitan'] = getPlayerData($field['capitan']);
+            $teamHeads['capitan']['player_id'] = $field['capitan'];
         }
         if($field['manager'] != 0){
             $teamHeads['manager'] = getPlayerData($field['manager']);
+            $teamHeads['manager']['player_id'] = $field['manager'];
         }
         if($field['trainer'] != 0){
             $teamHeads['trainer'] = getPlayerData($field['trainer']);
+            $teamHeads['trainer']['player_id'] = $field['trainer'];
         }
     }
 
@@ -932,6 +935,8 @@ function getPlayerData($playerId){
     global $dbF;
 
     $sql = "SELECT 
+        m.`id` AS man_id, 
+        m.`tel`, 
         m.`name1` AS player_lastname, 
         m.`name2` AS player_firstname, 
         mf.`pict` AS player_photo,
@@ -2199,204 +2204,214 @@ function getMostFrequentTur($array) {
 function getTopGravtsi($allStaticPlayers, $dataAllPlayers, $lastTur){
 
     // Преобразование массива
-    $topGravtsi = [];
-    $row = [];
+  $topPlayers = [];
+  $row = [];
 
-    foreach ($allStaticPlayers as $playerId => $matches) {
-        $matchCount = count($matches); // Количество матчей
-        $countGoals = array_sum(array_column($matches, 'count_goals'));
-        $countAsists = array_sum(array_column($matches, 'count_asists'));
-        
-        $countGolevoypas = array_sum(array_column($matches, 'golevoypas'));
-        $countYellowCards = array_sum(array_column($matches, 'yellow_cards'));
-        $countYellowRedCards = array_sum(array_column($matches, 'yellow_red_cards'));
-        $countRed_cards = array_sum(array_column($matches, 'red_cards'));  
-        $matchIdKeys = array_keys($matches);
-        // Ищем количество лучших игроков матча.
-        $countBPM = array_count_values( array_column( $matches, 'count_best_player_of_match' ) );
-        $countBestPlayerOfMatch = isset($countBPM[$playerId]) ? $countBPM[$playerId] : 0;
+  foreach ($allStaticPlayers as $playerId => $matches) {
+      $matchCount = count($matches); // Количество матчей
+      $countGoals = array_sum(array_column($matches, 'count_goals'));
+      $countAsists = array_sum(array_column($matches, 'count_asists'));
+      
+      $countGolevoypas = array_sum(array_column($matches, 'golevoypas'));
+      $countYellowCards = array_sum(array_column($matches, 'yellow_cards'));
+      $countYellowRedCards = array_sum(array_column($matches, 'yellow_red_cards'));
+      $countRed_cards = array_sum(array_column($matches, 'red_cards'));  
+      $matchIdKeys = array_keys($matches);
+      // Ищем количество лучших игроков матча.
+      $countBPM = array_count_values( array_column( $matches, 'count_best_player_of_match' ) );
+      $countBestPlayerOfMatch = isset($countBPM[$playerId]) ? $countBPM[$playerId] : 0;
 
-        $totalGoals = array_sum(array_column($matches, 'count_goals'));
-        $totalGolevoypas = array_sum(array_column($matches, 'golevoypas'));
-        $totalZagostrennia = array_sum(array_column($matches, 'zagostrennia'));
-        $totalPasplus = array_sum(array_column($matches, 'pasplus'));
-        $totalPasminus= array_sum(array_column($matches, 'pasminus'));
-        $totalVtrata = array_sum(array_column($matches, 'vtrata'));
-        $totalVstvor = array_sum(array_column($matches, 'vstvor'));
-        $totalMimo = array_sum(array_column($matches, 'mimo'));
-        $totalObvodkaplus = array_sum(array_column($matches, 'obvodkaplus'));
-        $totalObvodkaminus = array_sum(array_column($matches, 'obvodkaminus'));
-        $totalOtbor = array_sum(array_column($matches, 'otbor'));
-        $totalOtbormin = array_sum(array_column($matches, 'otbormin'));
-        $totalBlok = array_sum(array_column($matches, 'blok'));
-        $totalSeyv = array_sum(array_column($matches, 'seyv'));
-        $totalSeyvmin = array_sum(array_column($matches, 'seyvmin'));
+      $totalGoals = array_sum(array_column($matches, 'count_goals'));
+      $totalGolevoypas = array_sum(array_column($matches, 'golevoypas'));
+      $totalZagostrennia = array_sum(array_column($matches, 'zagostrennia'));
+      $totalPasplus = array_sum(array_column($matches, 'pasplus'));
+      $totalPasminus= array_sum(array_column($matches, 'pasminus'));
+      $totalVtrata = array_sum(array_column($matches, 'vtrata'));
+      $totalVstvor = array_sum(array_column($matches, 'vstvor'));
+      $totalMimo = array_sum(array_column($matches, 'mimo'));
+      $totalObvodkaplus = array_sum(array_column($matches, 'obvodkaplus'));
+      $totalObvodkaminus = array_sum(array_column($matches, 'obvodkaminus'));
+      $totalOtbor = array_sum(array_column($matches, 'otbor'));
+      $totalOtbormin = array_sum(array_column($matches, 'otbormin'));
+      $totalBlok = array_sum(array_column($matches, 'blok'));
+      $totalSeyv = array_sum(array_column($matches, 'seyv'));
+      $totalSeyvmin = array_sum(array_column($matches, 'seyvmin'));
 
-        $totalKeySort = $totalGoals * 15 
-            + $totalGolevoypas * 10 
-            + $totalZagostrennia * 10
-            + $totalPasplus * 3 
-            - $totalPasminus * 3 
-            - $totalVtrata * 3 
-            + $totalVstvor * 7 
-            - $totalMimo * 4 
-            + $totalObvodkaplus * 5 
-            - $totalObvodkaminus * 3 
-            + $totalOtbor * 8 
-            - $totalOtbormin * 5 
-            + $totalBlok * 4 
-            + $totalSeyv * 15 
-            - $totalSeyv * 7;
+      $totalKeySort = $totalGoals * 15 
+          + $totalGolevoypas * 10 
+          + $totalZagostrennia * 10
+          + $totalPasplus * 3 
+          - $totalPasminus * 3 
+          - $totalVtrata * 3 
+          + $totalVstvor * 7 
+          - $totalMimo * 4 
+          + $totalObvodkaplus * 5 
+          - $totalObvodkaminus * 3 
+          + $totalOtbor * 8 
+          - $totalOtbormin * 5 
+          + $totalBlok * 4 
+          + $totalSeyv * 15 
+          - $totalSeyv * 7;
 
-        if(!is_array($totalKeySort)) {
-    
-            $keySortPerMatch = $matchCount > 0 ? $totalKeySort / $matchCount : 0; // Среднее значений по ключу $keySort за матч
-            
-            $row = [
-                'player_id' => $playerId,
-                'match_count' => $matchCount,
-                'total_key' => $totalKeySort,
-                'key_per_match' => round($keySortPerMatch, 2), // Округляем до 2 знаков
-                'match_ids' => implode(" ", $matchIdKeys),
-        
-                'last_name' => isset($dataAllPlayers[$playerId]['last_name']) ? $dataAllPlayers[$playerId]['last_name'] : '',
-                'first_name' => isset($dataAllPlayers[$playerId]['first_name']) ? $dataAllPlayers[$playerId]['first_name'] : '',
-                'player_photo' => isset($dataAllPlayers[$playerId]['player_photo']) ? $dataAllPlayers[$playerId]['player_photo'] : '',
-                'team_photo' => isset($dataAllPlayers[$playerId]['team_photo']) ? $dataAllPlayers[$playerId]['team_photo'] : '',
-                'team_name' => isset($dataAllPlayers[$playerId]['team_name']) ? $dataAllPlayers[$playerId]['team_name'] : '',
-                'team_id' => isset($dataAllPlayers[$playerId]['team_id']) ? $dataAllPlayers[$playerId]['team_id'] : '',
-    
-                'count_goals' => $countGoals,
-                'count_asists' => $countAsists,
-                'golevoypas' => $countGolevoypas, 
-                'yellow_cards' => $countYellowCards,
-                'yellow_red_cards' => $countYellowRedCards,
-                'red_cards' => $countRed_cards,
-                'count_best_player_of_match' => $countBestPlayerOfMatch,
-            ];
-    
-        } 
+      if(!is_array($totalKeySort)) {
+  
+          $keySortPerMatch = $matchCount > 0 ? $totalKeySort / $matchCount : 0; // Среднее значений по ключу $keySort за матч
+          
+          $row = [
+              'player_id' => $playerId,
+              'match_count' => $matchCount,
+              'total_key' => $totalKeySort,
+              'key_per_match' => round($keySortPerMatch, 2), // Округляем до 2 знаков
+              'match_ids' => implode(" ", $matchIdKeys),
+      
+              'last_name' => isset($dataAllPlayers[$playerId]['last_name']) ? $dataAllPlayers[$playerId]['last_name'] : '',
+              'first_name' => isset($dataAllPlayers[$playerId]['first_name']) ? $dataAllPlayers[$playerId]['first_name'] : '',
+              'player_photo' => isset($dataAllPlayers[$playerId]['player_photo']) ? $dataAllPlayers[$playerId]['player_photo'] : '',
+              'team_photo' => isset($dataAllPlayers[$playerId]['team_photo']) ? $dataAllPlayers[$playerId]['team_photo'] : '',
+              'team_name' => isset($dataAllPlayers[$playerId]['team_name']) ? $dataAllPlayers[$playerId]['team_name'] : '',
+              'team_id' => isset($dataAllPlayers[$playerId]['team_id']) ? $dataAllPlayers[$playerId]['team_id'] : '',
+  
+              'count_goals' => $countGoals,
+              'count_asists' => $countAsists,
+              'golevoypas' => $countGolevoypas, 
+              'yellow_cards' => $countYellowCards,
+              'yellow_red_cards' => $countYellowRedCards,
+              'red_cards' => $countRed_cards,
+              'count_best_player_of_match' => $countBestPlayerOfMatch,
+              'v9ky' => isset($dataAllPlayers[$playerId]['v9ky']) ? (int)$dataAllPlayers[$playerId]['v9ky'] : 0,
+          ];
+  
+      } 
 
 
-        // Добавляем значение для каждого матча
-        foreach ($matches as $matchId => $stats) {
-            if(isset($stats['tur'])){
-                $row["match_{$stats[ 'tur' ]}_key"] = 
-                $stats['count_goals'] * 15 
-                + $stats['count_asists'] * 10
-                + $stats['zagostrennia'] * 10
-                + $stats['pasplus'] * 3 
-                - $stats['pasminus'] * 3 
-                - $stats['vtrata'] * 3
-                + $stats['vstvor'] * 7 
-                - $stats['mimo'] * 4 
-                + $stats['obvodkaplus'] * 5
-                - $stats['obvodkaminus'] * 3 
-                + $stats['otbor'] * 8 
-                - $stats['otbormin'] * 5
-                + $stats['blok'] * 4 
-                + $stats['seyv'] * 15 
-                - $stats['seyvmin'] * 7;
-            }
-        }
-        $topGravtsi[] = $row;
+      // Добавляем значение для каждого матча
+      foreach ($matches as $matchId => $stats) {
+          if(isset($stats['tur'])){
+              $row["match_{$stats[ 'tur' ]}_key"] = 
+              $stats['count_goals'] * 15 
+              + $stats['count_asists'] * 10
+              + $stats['zagostrennia'] * 10
+              + $stats['pasplus'] * 3 
+              - $stats['pasminus'] * 3 
+              - $stats['vtrata'] * 3
+              + $stats['vstvor'] * 7 
+              - $stats['mimo'] * 4 
+              + $stats['obvodkaplus'] * 5
+              - $stats['obvodkaminus'] * 3 
+              + $stats['otbor'] * 8 
+              - $stats['otbormin'] * 5
+              + $stats['blok'] * 4 
+              + $stats['seyv'] * 15 
+              - $stats['seyvmin'] * 7;
+          }
+      }
+
+
+      // Додаємо гравця у відповідний масив
+      if ($row['v9ky']) {
+        $outOfTopPlayers[] = $row;
+    } else {
+        $topPlayers[] = $row;
     }
+  }
 
-    // Сортируем игроков
-    usort($topGravtsi, function ($a, $b) use ($lastTur) {
-        // 1. Сортировка по (total_key)
-        if ($a['total_key'] != $b['total_key']) {
-            return ($b['total_key'] > $a['total_key']) ? 1 : -1; // По убыванию
-        }
+  // Сортируем игроков
+  usort($topPlayers, function ($a, $b) use ($lastTur) {
+      // 1. Сортировка по (total_key)
+      if ($a['total_key'] != $b['total_key']) {
+          return ($b['total_key'] > $a['total_key']) ? 1 : -1; // По убыванию
+      }
 
-        // 2. Сортировка по «Матчів» (count_matches)
-        if ($a['match_count'] != $b['match_count']) {
-            return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
-        }
-        // 3. Сортировка по последнему сыгранному матчу (total_3_match)
-        if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
+      // 2. Сортировка по «Матчів» (count_matches)
+      if ($a['match_count'] != $b['match_count']) {
+          return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
+      }
+      // 3. Сортировка по последнему сыгранному матчу (total_3_match)
+      if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
 
-        if ($a["match_{$lastTur}_key"] != $b["match_{$lastTur}_key"]) {
-            return ($b["match_{$lastTur}_key"] > $a["match_{$lastTur}_key"]) ? 1 : -1; // По убыванию
-        }
+      if ($a["match_{$lastTur}_key"] != $b["match_{$lastTur}_key"]) {
+          return ($b["match_{$lastTur}_key"] > $a["match_{$lastTur}_key"]) ? 1 : -1; // По убыванию
+      }
 
-        }
+      }
 
-        // Если все значения равны, оставить текущий порядок
-        return 0;
-    });
+      // Если все значения равны, оставить текущий порядок
+      return 0;
+  });
 
-    // Присваиваем позиции
-    $rank = 1; // Начальный порядковый номер
-    foreach ($topGravtsi as $index => &$player) {
+  // Присваиваем позиции
+  $rank = 1; // Начальный порядковый номер
+  foreach ($topPlayers as $index => &$player) {
 
-        // если в последнем туре не играли оба савниваемых игрока
-        if( isset( $topGravtsi[$index - 1]["match_{$lastTur}_key"] ) && isset( $player["match_{$lastTur}_key"] ) ) {
-        
-        // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
-        if (
-            $index > 0 &&
-            $topGravtsi[$index - 1]['total_key'] === $player['total_key'] &&
-            $topGravtsi[$index - 1]['match_count'] === $player['match_count'] &&
-            $topGravtsi[$index - 1]["match_{$lastTur}_key"] === $player["match_{$lastTur}_key"]
-        ) {
-            $player['rank'] = isset( $topGravtsi[$index - 1]['rank'] ) ? $topGravtsi[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
-        } else {
-            $player['rank'] = $rank; // Новый ранг
-        }
+      // если в последнем туре не играли оба савниваемых игрока
+      if( isset( $topPlayers[$index - 1]["match_{$lastTur}_key"] ) && isset( $player["match_{$lastTur}_key"] ) ) {
+      
+      // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
+      if (
+          $index > 0 &&
+          $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
+          $topPlayers[$index - 1]['match_count'] === $player['match_count'] &&
+          $topPlayers[$index - 1]["match_{$lastTur}_key"] === $player["match_{$lastTur}_key"]
+      ) {
+          $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
+      } else {
+          $player['rank'] = $rank; // Новый ранг
+      }
 
-        } else {
-        // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
-        if (
-            $index > 0 &&
-            $topGravtsi[$index - 1]['total_key'] === $player['total_key'] &&
-            $topGravtsi[$index - 1]['match_count'] === $player['match_count']
-        ) {
-            $player['rank'] = isset( $topGravtsi[$index - 1]['rank'] ) ? $topGravtsi[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
-        } else {
-            $player['rank'] = $rank; // Новый ранг
-        }
-        }
-        $rank++; // Увеличиваем счетчик
-    }
+      } else {
+      // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
+      if (
+          $index > 0 &&
+          $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
+          $topPlayers[$index - 1]['match_count'] === $player['match_count']
+      ) {
+          $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
+      } else {
+          $player['rank'] = $rank; // Новый ранг
+      }
+      }
+      $rank++; // Увеличиваем счетчик
+  }
 
-
-    return $topGravtsi;
+  if(isset($outOfTopPlayers)){
+    $topPlayers = array_merge($topPlayers, $outOfTopPlayers);
+}
+  return $topPlayers;
     
 }
 
 function getTopGolkiper($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 0)
 {  
-    // Преобразование массива
     $topPlayers = [];
+    $outOfTopPlayers = [];
 
     foreach ($allStaticPlayers as $playerId => $matches) {
-        $matchCount = count($matches); // Кількість матчів
-        $totalKeySort = calculateArrayByColumn($keySort, $matches); // Сума всіх значень по ключу $keySort
-        $countGoals = array_sum(array_column($matches, 'count_goals'));
-        $countAsists = array_sum(array_column($matches, 'count_asists'));
-        $countGolevoypas = array_sum(array_column($matches, 'golevoypas'));
-        $countYellowCards = array_sum(array_column($matches, 'yellow_cards'));
-        $countYellowRedCards = array_sum(array_column($matches, 'yellow_red_cards'));
-        $countRed_cards = array_sum(array_column($matches, 'red_cards'));
+        $matchCount = 0; // Лічильник значущих матчів
+        $totalKeySort = calculateArrayByColumn($keySort, $matches); // Загальна статистика
 
-        $matchIdKeys = array_keys($matches);
-        // Підрахунок кількості найкращих гравців матчу
-        $countBPM = array_count_values(array_column($matches, 'count_best_player_of_match'));
-        $countBestPlayerOfMatch = isset($countBPM[$playerId]) ? $countBPM[$playerId] : 0;
-
-        // Голкіпери
         if ($keySort == "golkiper" && is_array($totalKeySort)) {
             $totalSaves = $totalKeySort['seyv'] + $totalKeySort['seyvmin'];
-            $isTop = $totalSaves >= 10; // Позначаємо, чи воротар входить у топ
 
-            $keySortPerMatch = $matchCount > 0 ? $totalKeySort['total_value'] / $matchCount : 0; // Середнє значення по ключу $keySort за матч
-            
+            // Підрахунок значущих матчів (тільки якщо були сейви)
+            foreach ($matches as $stats) {
+                if ((isset($stats['seyv']) && $stats['seyv'] > 0) || (isset($stats['seyvmin']) && $stats['seyvmin'] > 0)) {
+                    $matchCount++;
+                }
+            }
+
+            // Не додаємо гравців, у яких немає матчів і сейвів
+            if ($totalKeySort['total_value'] == 0 && $matchCount == 0) {
+                continue;
+            }
+
+            // Середнє значення по ключу $keySort за матч
+            $keySortPerMatch = $matchCount > 0 ? $totalKeySort['total_value'] / $matchCount : 0;
+
             $row = [
                 'player_id' => $playerId,
                 'match_count' => $matchCount,
                 'total_key' => $totalKeySort['total_value'],
-                'key_per_match' => round($keySortPerMatch, 2), // Округлення до 2 знаків
+                'key_per_match' => round($keySortPerMatch, 2),
                 'seyv' => $totalKeySort['seyv'],
                 'seyvmin' => $totalKeySort['seyvmin'],
                 'team_id' => isset($dataAllPlayers[$playerId]['team_id']) ? $dataAllPlayers[$playerId]['team_id'] : '',
@@ -2405,34 +2420,44 @@ function getTopGolkiper($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur =
                 'player_photo' => isset($dataAllPlayers[$playerId]['player_photo']) ? $dataAllPlayers[$playerId]['player_photo'] : '',
                 'team_photo' => isset($dataAllPlayers[$playerId]['team_photo']) ? $dataAllPlayers[$playerId]['team_photo'] : '',
                 'team_name' => isset($dataAllPlayers[$playerId]['team_name']) ? $dataAllPlayers[$playerId]['team_name'] : '',
-                'is_top' => $isTop, // Позначка для візуального відображення
+                'v9ky' => isset($dataAllPlayers[$playerId]['v9ky']) ? (int)$dataAllPlayers[$playerId]['v9ky'] : 0,
+                'is_top' => ($matchCount >= 2 && $totalSaves >= 10) // Відзначаємо ТОП гравців
+                
             ];
 
             // Додаємо значення для кожного матчу
             foreach ($matches as $matchId => $stats) {
                 $seyv = isset($stats['seyv']) ? $stats['seyv'] : 0;
                 $seyvmin = isset($stats['seyvmin']) ? $stats['seyvmin'] : 0;
-                $denominator = $seyv + $seyvmin; // Знаменник
-                
+                $denominator = $seyv + $seyvmin;
+
                 if (isset($stats['tur'])) {
-                    $row["match_{$stats['tur']}_key"] = $denominator == 0
-                        ? 0 
-                        : round((100 / $denominator) * $stats['seyv'], 1);
+                    $row["match_{$stats['tur']}_key"] = ($denominator == 0) ? '-' : round((100 / $denominator) * $stats['seyv'], 1) . "%";
                 }
             }
 
-            $topPlayers[] = $row;
+            // Додаємо гравця у відповідний масив
+            if ($row['is_top'] && !$row['v9ky']) {
+                $topPlayers[] = $row;
+            } else {
+                $outOfTopPlayers[] = $row;
+            }
+
+            // // Додаємо гравця у відповідний масив
+            // if ($row['is_top'] && !$row['v9ky']) {
+            //     $topPlayers[] = $row;
+            // } elseif(!$row['is_top'] && !$row['v9ky']) {
+            //     $outOfTopPlayers[] = $row;
+            // } else {
+            //     $v9kyPlayers = $row;
+            // }
         }
     }
 
-    // Сортуємо воротарів
+    // Сортуємо ТОП-воротарів
     usort($topPlayers, function ($a, $b) use ($lastTur) {
-        // 1. Спочатку сортуємо за "топовістю" (ті, що мають >10 сейвів, йдуть першими)
-        if ($a['is_top'] !== $b['is_top']) {
-            return $b['is_top'] - $a['is_top']; // true (1) буде вище за false (0)
-        }
 
-        // 2. Сортування за total_key (сумарні очки)
+         // 2. Сортування за total_key (сумарні очки)
         if ($a['total_key'] != $b['total_key']) {
             return ($b['total_key'] > $a['total_key']) ? 1 : -1;
         }
@@ -2448,11 +2473,17 @@ function getTopGolkiper($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur =
                 return ($b["match_{$lastTur}_key"] > $a["match_{$lastTur}_key"]) ? 1 : -1;
             }
         }
-
         return 0;
     });
 
-    // Присвоюємо позиції
+    // Сортуємо "не ТОП" воротарів, просто по матчах
+    usort($outOfTopPlayers, function ($a, $b) {
+        return $b['total_key'] - $a['total_key'];
+    });
+
+    $topPlayers = array_merge($topPlayers, $outOfTopPlayers);
+
+    // Присвоюємо позиції ТОП гравцям
     $rank = 1;
     foreach ($topPlayers as $index => &$player) {
         if ($index > 0 && $topPlayers[$index - 1]['total_key'] === $player['total_key']
@@ -2465,136 +2496,143 @@ function getTopGolkiper($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur =
         $rank++;
     }
 
+    // Об'єднуємо ТОП і НЕ ТОП гравців (ТОП йдуть першими, потім всі інші)
     return $topPlayers;
 }
 
 function getTopDriblings($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 0)
 {
-    // Преобразование массива
-    $topPlayers = [];
+     // Преобразование массива
+     $topPlayers = [];
   
-    foreach ($allStaticPlayers as $playerId => $matches) {
-      
-      $matchCount = count($matches); // Количество матчей
-      $totalKeySort = calculateArrayByColumn($keySort, $matches); // Сумма всех значений по ключу $keySort
-      $countGoals = array_sum(array_column($matches, 'count_goals'));
-      $countAsists = array_sum(array_column($matches, 'count_asists'));
-      $countGolevoypas = array_sum(array_column($matches, 'golevoypas'));
-      $countYellowCards = array_sum(array_column($matches, 'yellow_cards'));
-      $countYellowRedCards = array_sum(array_column($matches, 'yellow_red_cards'));
-      $countRed_cards = array_sum(array_column($matches, 'red_cards'));
-  
-      $matchIdKeys = array_keys($matches);
-      // Ищем количество лучших игроков матча.
-      $countBPM = array_count_values( array_column( $matches, 'count_best_player_of_match' ) );
-      $countBestPlayerOfMatch = isset($countBPM[$playerId]) ? $countBPM[$playerId] : 0;
-  
-      // Дріблінг
-      if ($keySort == "dribling" && is_array($totalKeySort)) {
-        // Исключаем игроков с нулевыми показателями дриблинга
-        if ($totalKeySort['obvodka_plus'] == 0 && $totalKeySort['obvodka_minus'] == 0) {
-            continue; // Пропускаем этого игрока
-        }
-          
-        $keySortPerMatch = $matchCount > 0 ? $totalKeySort['total_value'] / $matchCount : 0; // Среднее значений по ключу $keySort за матч
-        
-      
-        $row = [
-          'player_id' => $playerId,
-          'match_count' => $matchCount,
-          'total_key' => $totalKeySort['total_value'],
-          'key_per_match' => round($keySortPerMatch, 2), // Округляем до 2 знаков
-          'obvodkaplus' => $totalKeySort['obvodka_plus'],
-          'obvodkaminus' => $totalKeySort['obvodka_minus'],
-  
-          'last_name' => isset($dataAllPlayers[$playerId]['last_name']) ? $dataAllPlayers[$playerId]['last_name'] : '',
-          'first_name' => isset($dataAllPlayers[$playerId]['first_name']) ? $dataAllPlayers[$playerId]['first_name'] : '',
-          'player_photo' => isset($dataAllPlayers[$playerId]['player_photo']) ? $dataAllPlayers[$playerId]['player_photo'] : '',
-          'team_photo' => isset($dataAllPlayers[$playerId]['team_photo']) ? $dataAllPlayers[$playerId]['team_photo'] : '',
-          'team_name' => isset($dataAllPlayers[$playerId]['team_name']) ? $dataAllPlayers[$playerId]['team_name'] : '',
-          'team_id' => isset($dataAllPlayers[$playerId]['team_id']) ? $dataAllPlayers[$playerId]['team_id'] : '',
-        ];
-  
-        
-        // Добавляем значение для каждого матча
-        foreach ($matches as $matchId => $stats) {
-          if(isset($stats[ 'tur' ])) {
-            $row["match_{$stats[ 'tur' ]}_key"] = $stats[ 'obvodkaplus' ] - $stats[ 'obvodkaminus' ];
-          }
-  
-        }
-        
+     foreach ($allStaticPlayers as $playerId => $matches) {
+       
+       $matchCount = count($matches); // Количество матчей
+       $totalKeySort = calculateArrayByColumn($keySort, $matches); // Сумма всех значений по ключу $keySort
+       $countGoals = array_sum(array_column($matches, 'count_goals'));
+       $countAsists = array_sum(array_column($matches, 'count_asists'));
+       $countGolevoypas = array_sum(array_column($matches, 'golevoypas'));
+       $countYellowCards = array_sum(array_column($matches, 'yellow_cards'));
+       $countYellowRedCards = array_sum(array_column($matches, 'yellow_red_cards'));
+       $countRed_cards = array_sum(array_column($matches, 'red_cards'));
+   
+       $matchIdKeys = array_keys($matches);
+       // Ищем количество лучших игроков матча.
+       $countBPM = array_count_values( array_column( $matches, 'count_best_player_of_match' ) );
+       $countBestPlayerOfMatch = isset($countBPM[$playerId]) ? $countBPM[$playerId] : 0;
+   
+       // Дріблінг
+       if ($keySort == "dribling" && is_array($totalKeySort)) {
+         // Исключаем игроков с нулевыми показателями дриблинга
+         if ($totalKeySort['obvodka_plus'] == 0 && $totalKeySort['obvodka_minus'] == 0) {
+             continue; // Пропускаем этого игрока
+         }
+           
+         $keySortPerMatch = $matchCount > 0 ? $totalKeySort['total_value'] / $matchCount : 0; // Среднее значений по ключу $keySort за матч
+         
+       
+         $row = [
+           'player_id' => $playerId,
+           'match_count' => $matchCount,
+           'total_key' => $totalKeySort['total_value'],
+           'key_per_match' => round($keySortPerMatch, 2), // Округляем до 2 знаков
+           'obvodkaplus' => $totalKeySort['obvodka_plus'],
+           'obvodkaminus' => $totalKeySort['obvodka_minus'],  
+           'last_name' => isset($dataAllPlayers[$playerId]['last_name']) ? $dataAllPlayers[$playerId]['last_name'] : '',
+           'first_name' => isset($dataAllPlayers[$playerId]['first_name']) ? $dataAllPlayers[$playerId]['first_name'] : '',
+           'player_photo' => isset($dataAllPlayers[$playerId]['player_photo']) ? $dataAllPlayers[$playerId]['player_photo'] : '',
+           'team_photo' => isset($dataAllPlayers[$playerId]['team_photo']) ? $dataAllPlayers[$playerId]['team_photo'] : '',
+           'team_name' => isset($dataAllPlayers[$playerId]['team_name']) ? $dataAllPlayers[$playerId]['team_name'] : '',
+           'team_id' => isset($dataAllPlayers[$playerId]['team_id']) ? $dataAllPlayers[$playerId]['team_id'] : '',
+           'v9ky' => isset($dataAllPlayers[$playerId]['v9ky']) ? (int)$dataAllPlayers[$playerId]['v9ky'] : 0
+         ];
+   
+         
+         // Добавляем значение для каждого матча
+         foreach ($matches as $matchId => $stats) {
+           if(isset($stats[ 'tur' ])) {
+             $row["match_{$stats[ 'tur' ]}_key"] = $stats[ 'obvodkaplus' ] - $stats[ 'obvodkaminus' ];
+           }  
+         }
+ 
+         // Додаємо гравця у відповідний масив
+         if ($row['v9ky']) {
+             $outOfTopPlayers[] = $row;
+         } else {
+             $topPlayers[] = $row;
+         }
+         
+       }
+   
+     }
+   
+     // Сортируем игроков
+     usort($topPlayers, function ($a, $b) use ($lastTur) {
+       // 1. Сортировка по (total_key)
+       if ($a['total_key'] != $b['total_key']) {
+           return ($b['total_key'] > $a['total_key']) ? 1 : -1; // По убыванию
+       }
+   
+       // 2. Сортировка по «Матчів» (count_matches)
+       if ($a['match_count'] != $b['match_count']) {
+           return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
+       }
+       // 3. Сортировка по последнему сыгранному матчу (total_3_match)
+       if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
+   
+         if ($a["match_{$lastTur}_key"] != $b["match_{$lastTur}_key"]) {
+             return ($b["match_{$lastTur}_key"] > $a["match_{$lastTur}_key"]) ? 1 : -1; // По убыванию
+         }
+       }
+       // Если все значения равны, оставить текущий порядок
+       return 0;
+     });
+   
+     // Присваиваем позиции
+     $rank = 1; // Начальный порядковый номер
+     foreach ($topPlayers as $index => &$player) {
+   
+       // если в последнем туре не играли оба сравниваемых игрока
+       if( isset( $topPlayers[$index - 1]["match_{$lastTur}_key"] ) && isset( $player["match_{$lastTur}_key"] ) ) {
+         
+         // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
+         if (
+             $index > 0 &&
+             $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
+             $topPlayers[$index - 1]['match_count'] === $player['match_count'] &&
+             $topPlayers[$index - 1]["match_{$lastTur}_key"] === $player["match_{$lastTur}_key"]
+         ) {
+             $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
+         } else {
+             $player['rank'] = $rank; // Новый ранг
+         }
+   
+       } else {
+         // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
+         if (
+           $index > 0 &&
+           $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
+           $topPlayers[$index - 1]['match_count'] === $player['match_count']
+         ) {
+             $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
+         } else {
+             $player['rank'] = $rank; // Новый ранг
+         }
+       }
+         $rank++; // Увеличиваем счетчик
+     }
+ 
+     
+     if( isset( $outOfTopPlayers ) ) {
+        $topPlayers = array_merge($topPlayers, $outOfTopPlayers);
       }
-  
-      $topPlayers[] = $row;
-  
-    }
-  
-    // Сортируем игроков
-    usort($topPlayers, function ($a, $b) use ($lastTur) {
-      // 1. Сортировка по (total_key)
-      if ($a['total_key'] != $b['total_key']) {
-          return ($b['total_key'] > $a['total_key']) ? 1 : -1; // По убыванию
-      }
-  
-      // 2. Сортировка по «Матчів» (count_matches)
-      if ($a['match_count'] != $b['match_count']) {
-          return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
-      }
-      // 3. Сортировка по последнему сыгранному матчу (total_3_match)
-      if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
-  
-        if ($a["match_{$lastTur}_key"] != $b["match_{$lastTur}_key"]) {
-            return ($b["match_{$lastTur}_key"] > $a["match_{$lastTur}_key"]) ? 1 : -1; // По убыванию
-        }
-      }
-      // Если все значения равны, оставить текущий порядок
-      return 0;
-    });
-  
-    // Присваиваем позиции
-    $rank = 1; // Начальный порядковый номер
-    foreach ($topPlayers as $index => &$player) {
-  
-      // если в последнем туре не играли оба сравниваемых игрока
-      if( isset( $topPlayers[$index - 1]["match_{$lastTur}_key"] ) && isset( $player["match_{$lastTur}_key"] ) ) {
-        
-        // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
-        if (
-            $index > 0 &&
-            $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
-            $topPlayers[$index - 1]['match_count'] === $player['match_count'] &&
-            $topPlayers[$index - 1]["match_{$lastTur}_key"] === $player["match_{$lastTur}_key"]
-        ) {
-            $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
-        } else {
-            $player['rank'] = $rank; // Новый ранг
-        }
-  
-      } else {
-        // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
-        if (
-          $index > 0 &&
-          $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
-          $topPlayers[$index - 1]['match_count'] === $player['match_count']
-        ) {
-            $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
-        } else {
-            $player['rank'] = $rank; // Новый ранг
-        }
-      }
-        $rank++; // Увеличиваем счетчик
-    }
-  
-    
-  
-    return $topPlayers;
+     return $topPlayers;
   
   
-}
-  
+}  
 
-function getTopUdars($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 0){
+function getTopUdars($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 0)
+{
     // Преобразование массива
     $topPlayers = [];
   
@@ -2637,6 +2675,7 @@ function getTopUdars($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 0)
           'team_photo' => isset($dataAllPlayers[$playerId]['team_photo']) ? $dataAllPlayers[$playerId]['team_photo'] : '',
           'team_name' => isset($dataAllPlayers[$playerId]['team_name']) ? $dataAllPlayers[$playerId]['team_name'] : '',
           'team_id' => isset($dataAllPlayers[$playerId]['team_id']) ? $dataAllPlayers[$playerId]['team_id'] : '',
+          'v9ky' => isset($dataAllPlayers[$playerId]['v9ky']) ? (int)$dataAllPlayers[$playerId]['v9ky'] : 0
         ];
 
         // Добавляем значение для каждого матча
@@ -2648,7 +2687,12 @@ function getTopUdars($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 0)
         
       }
   
-      $topPlayers[] = $row;
+       // Додаємо гравця у відповідний масив
+       if ($row['v9ky']) {
+            $outOfTopPlayers[] = $row;
+        } else {
+            $topPlayers[] = $row;
+        }
   
     }
   
@@ -2708,7 +2752,671 @@ function getTopUdars($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 0)
         $rank++; // Увеличиваем счетчик
     }
   
-    
+    if( isset( $outOfTopPlayers ) ) {
+        $topPlayers = array_merge($topPlayers, $outOfTopPlayers);
+    }
   
     return $topPlayers;
+}
+
+function getTopBombardir($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 0)
+{  
+
+    // Преобразование массива
+   $topPlayers = [];
+  
+   foreach ($allStaticPlayers as $playerId => $matches) {
+       $matchCount = count($matches); // Количество матчей
+       $totalKeySort = calculateArrayByColumn($keySort, $matches); // Сумма всех значений по ключу $keySort
+       $countGoals = array_sum(array_column($matches, 'count_goals'));
+       $countAsists = array_sum(array_column($matches, 'count_asists'));
+       $countGolevoypas = array_sum(array_column($matches, 'golevoypas'));
+       $countYellowCards = array_sum(array_column($matches, 'yellow_cards'));
+       $countYellowRedCards = array_sum(array_column($matches, 'yellow_red_cards'));
+       $countRed_cards = array_sum(array_column($matches, 'red_cards'));
+  
+       $matchIdKeys = array_keys($matches);
+       // Ищем количество лучших игроков матча.
+       $countBPM = array_count_values( array_column( $matches, 'count_best_player_of_match' ) );
+       $countBestPlayerOfMatch = isset($countBPM[$playerId]) ? $countBPM[$playerId] : 0;
+            
+       // Инициализируем строку для таблицы. Для Бомбардиров и Асистентов
+       if(!is_array($totalKeySort)) {
+         
+         $keySortPerMatch = $matchCount > 0 ? $totalKeySort / $matchCount : 0; // Среднее значений по ключу $keySort за матч
+         
+         $row = [
+             'player_id' => $playerId,
+             'match_count' => $matchCount,
+             'total_key' => $totalKeySort,
+             'key_per_match' => round($keySortPerMatch, 2), // Округляем до 2 знаков
+             'match_ids' => implode(" ", $matchIdKeys),
+  
+             'last_name' => isset($dataAllPlayers[$playerId]['last_name']) ? $dataAllPlayers[$playerId]['last_name'] : '',
+             'first_name' => isset($dataAllPlayers[$playerId]['first_name']) ? $dataAllPlayers[$playerId]['first_name'] : '',
+             'player_photo' => isset($dataAllPlayers[$playerId]['player_photo']) ? $dataAllPlayers[$playerId]['player_photo'] : '',
+             'team_photo' => isset($dataAllPlayers[$playerId]['team_photo']) ? $dataAllPlayers[$playerId]['team_photo'] : '',
+             'team_name' => isset($dataAllPlayers[$playerId]['team_name']) ? $dataAllPlayers[$playerId]['team_name'] : '',
+             'team_id' => isset($dataAllPlayers[$playerId]['team_id']) ? $dataAllPlayers[$playerId]['team_id'] : '',
+  
+             'count_goals' => $countGoals,
+             'count_asists' => $countAsists,
+             'golevoypas' => $countGolevoypas, 
+             'yellow_cards' => $countYellowCards,
+             'yellow_red_cards' => $countYellowRedCards,
+             'red_cards' => $countRed_cards,
+             'count_best_player_of_match' => $countBestPlayerOfMatch,
+             'v9ky' => isset($dataAllPlayers[$playerId]['v9ky']) ? (int)$dataAllPlayers[$playerId]['v9ky'] : 0,
+         ];
+  
+       } 
+
+       // Добавляем значение для каждого матча
+       foreach ($matches as $matchId => $stats) {
+        if(isset($stats[ 'tur' ])) {
+          $row["match_{$stats[ 'tur' ]}_key"] = $stats[ 'count_goals' ];
+        }
+
+      }
+  
+      // Додаємо гравця у відповідний масив
+      if ($row['v9ky']) {
+        $outOfTopPlayers[] = $row;
+      } else {
+        $topPlayers[] = $row;
+      }
+      
+   }
+  
+  
+     
+   // Сортируем игроков
+   usort($topPlayers, function ($a, $b) use ($lastTur) {
+     // 1. Сортировка по (total_key)
+     if ($a['total_key'] != $b['total_key']) {
+         return ($b['total_key'] > $a['total_key']) ? 1 : -1; // По убыванию
+     }
+  
+     // 2. Сортировка по «Матчів» (count_matches)
+     if ($a['match_count'] != $b['match_count']) {
+         return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
+     }
+     // 3. Сортировка по последнему сыгранному матчу (total_3_match)
+     if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
+  
+       if ($a["match_{$lastTur}_key"] != $b["match_{$lastTur}_key"]) {
+           return ($b["match_{$lastTur}_key"] > $a["match_{$lastTur}_key"]) ? 1 : -1; // По убыванию
+       }
+  
+     }
+  
+     // Если все значения равны, оставить текущий порядок
+     return 0;
+   });
+  
+   // Присваиваем позиции
+   $rank = 1; // Начальный порядковый номер
+   foreach ($topPlayers as $index => &$player) {
+  
+     // если в последнем туре не играли оба сравниваемых игрока
+     if( isset( $topPlayers[$index - 1]["match_{$lastTur}_key"] ) && isset( $player["match_{$lastTur}_key"] ) ) {
+       
+       // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
+       if (
+           $index > 0 &&
+           $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
+           $topPlayers[$index - 1]['match_count'] === $player['match_count'] &&
+           $topPlayers[$index - 1]["match_{$lastTur}_key"] === $player["match_{$lastTur}_key"]
+       ) {
+           $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
+       } else {
+           $player['rank'] = $rank; // Новый ранг
+       }
+  
+     } else {
+       // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
+       if (
+         $index > 0 &&
+         $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
+         $topPlayers[$index - 1]['match_count'] === $player['match_count']
+       ) {
+           $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
+       } else {
+           $player['rank'] = $rank; // Новый ранг
+       }
+     }
+       $rank++; // Увеличиваем счетчик
+   }
+  
+   if( isset( $outOfTopPlayers ) ) {
+    $topPlayers = array_merge($topPlayers, $outOfTopPlayers);
+  }
+    
+    return $topPlayers;
+  
+}
+
+function getTopAsists($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 0)
+{  
+
+    // Преобразование массива
+   $topPlayers = [];
+  
+   foreach ($allStaticPlayers as $playerId => $matches) {
+       $matchCount = count($matches); // Количество матчей
+       $totalKeySort = calculateArrayByColumn($keySort, $matches); // Сумма всех значений по ключу $keySort
+       $countGoals = array_sum(array_column($matches, 'count_goals'));
+       $countAsists = array_sum(array_column($matches, 'count_asists'));
+       $countGolevoypas = array_sum(array_column($matches, 'golevoypas'));
+       $countYellowCards = array_sum(array_column($matches, 'yellow_cards'));
+       $countYellowRedCards = array_sum(array_column($matches, 'yellow_red_cards'));
+       $countRed_cards = array_sum(array_column($matches, 'red_cards'));
+  
+       $matchIdKeys = array_keys($matches);
+       // Ищем количество лучших игроков матча.
+       $countBPM = array_count_values( array_column( $matches, 'count_best_player_of_match' ) );
+       $countBestPlayerOfMatch = isset($countBPM[$playerId]) ? $countBPM[$playerId] : 0;
+            
+       // Инициализируем строку для таблицы. Для Бомбардиров и Асистентов
+       if(!is_array($totalKeySort)) {
+         
+         $keySortPerMatch = $matchCount > 0 ? $totalKeySort / $matchCount : 0; // Среднее значений по ключу $keySort за матч
+         
+         $row = [
+             'player_id' => $playerId,
+             'match_count' => $matchCount,
+             'total_key' => $totalKeySort,
+             'key_per_match' => round($keySortPerMatch, 2), // Округляем до 2 знаков
+             'match_ids' => implode(" ", $matchIdKeys),
+  
+             'last_name' => isset($dataAllPlayers[$playerId]['last_name']) ? $dataAllPlayers[$playerId]['last_name'] : '',
+             'first_name' => isset($dataAllPlayers[$playerId]['first_name']) ? $dataAllPlayers[$playerId]['first_name'] : '',
+             'player_photo' => isset($dataAllPlayers[$playerId]['player_photo']) ? $dataAllPlayers[$playerId]['player_photo'] : '',
+             'team_photo' => isset($dataAllPlayers[$playerId]['team_photo']) ? $dataAllPlayers[$playerId]['team_photo'] : '',
+             'team_name' => isset($dataAllPlayers[$playerId]['team_name']) ? $dataAllPlayers[$playerId]['team_name'] : '',
+             'team_id' => isset($dataAllPlayers[$playerId]['team_id']) ? $dataAllPlayers[$playerId]['team_id'] : '',
+  
+             'count_goals' => $countGoals,
+             'count_asists' => $countAsists,
+             'golevoypas' => $countGolevoypas, 
+             'yellow_cards' => $countYellowCards,
+             'yellow_red_cards' => $countYellowRedCards,
+             'red_cards' => $countRed_cards,
+             'count_best_player_of_match' => $countBestPlayerOfMatch,
+             'v9ky' => isset($dataAllPlayers[$playerId]['v9ky']) ? (int)$dataAllPlayers[$playerId]['v9ky'] : 0,
+         ];
+  
+       } 
+
+         // Асист
+      if( $keySort == 'count_goals' || $keySort == 'golevoypas' || $keySort == 'count_asists'){
+        
+        // Добавляем значение для каждого матча
+        foreach ($matches as $matchId => $stats) {
+          if(isset($stats[ 'tur' ] )) {
+            $row["match_{$stats[ 'tur' ]}_key"] = $stats[ $keySort ];         
+          }
+        }
+
+      }
+  
+      // Додаємо гравця у відповідний масив
+      if ($row['v9ky']) {
+        $outOfTopPlayers[] = $row;
+      } else {
+        $topPlayers[] = $row;
+      }
+      
+   }  
+     
+   // Сортируем игроков
+   usort($topPlayers, function ($a, $b) use ($lastTur) {
+     // 1. Сортировка по (total_key)
+     if ($a['total_key'] != $b['total_key']) {
+         return ($b['total_key'] > $a['total_key']) ? 1 : -1; // По убыванию
+     }
+  
+     // 2. Сортировка по «Матчів» (count_matches)
+     if ($a['match_count'] != $b['match_count']) {
+         return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
+     }
+     // 3. Сортировка по последнему сыгранному матчу (total_3_match)
+     if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
+  
+       if ($a["match_{$lastTur}_key"] != $b["match_{$lastTur}_key"]) {
+           return ($b["match_{$lastTur}_key"] > $a["match_{$lastTur}_key"]) ? 1 : -1; // По убыванию
+       }
+  
+     }
+  
+     // Если все значения равны, оставить текущий порядок
+     return 0;
+   });
+  
+   // Присваиваем позиции
+   $rank = 1; // Начальный порядковый номер
+   foreach ($topPlayers as $index => &$player) {
+  
+     // если в последнем туре не играли оба сравниваемых игрока
+     if( isset( $topPlayers[$index - 1]["match_{$lastTur}_key"] ) && isset( $player["match_{$lastTur}_key"] ) ) {
+       
+       // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
+       if (
+           $index > 0 &&
+           $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
+           $topPlayers[$index - 1]['match_count'] === $player['match_count'] &&
+           $topPlayers[$index - 1]["match_{$lastTur}_key"] === $player["match_{$lastTur}_key"]
+       ) {
+           $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
+       } else {
+           $player['rank'] = $rank; // Новый ранг
+       }
+  
+     } else {
+       // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
+       if (
+         $index > 0 &&
+         $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
+         $topPlayers[$index - 1]['match_count'] === $player['match_count']
+       ) {
+           $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
+       } else {
+           $player['rank'] = $rank; // Новый ранг
+       }
+     }
+       $rank++; // Увеличиваем счетчик
+   }
+  
+   if( isset( $outOfTopPlayers ) ) {
+    $topPlayers = array_merge($topPlayers, $outOfTopPlayers);
+  }
+    
+    return $topPlayers;
+  
+}
+
+function getTopZhusnuks($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 0)
+{
+    // Преобразование массива
+    $topPlayers = [];
+  
+    foreach ($allStaticPlayers as $playerId => $matches) {
+      
+      $matchCount = count($matches); // Количество матчей
+      $totalKeySort = calculateArrayByColumn($keySort, $matches); // Сумма всех значений по ключу $keySort
+      $countGoals = array_sum(array_column($matches, 'count_goals'));
+      $countAsists = array_sum(array_column($matches, 'count_asists'));
+      $countGolevoypas = array_sum(array_column($matches, 'golevoypas'));
+      $countYellowCards = array_sum(array_column($matches, 'yellow_cards'));
+      $countYellowRedCards = array_sum(array_column($matches, 'yellow_red_cards'));
+      $countRed_cards = array_sum(array_column($matches, 'red_cards'));
+  
+      $matchIdKeys = array_keys($matches);
+      // Ищем количество лучших игроков матча.
+      $countBPM = array_count_values( array_column( $matches, 'count_best_player_of_match' ) );
+      $countBestPlayerOfMatch = isset($countBPM[$playerId]) ? $countBPM[$playerId] : 0;
+
+      $keySortPerMatch = $matchCount > 0 ? $totalKeySort / $matchCount : 0; // Среднее значений по ключу $keySort за матч
+
+      $row = [
+        'player_id' => $playerId,
+        'match_count' => $matchCount,
+        'total_key' => $totalKeySort,
+        'key_per_match' => round($keySortPerMatch, 2), // Округляем до 2 знаков
+        'match_ids' => implode(" ", $matchIdKeys),
+
+        'last_name' => isset($dataAllPlayers[$playerId]['last_name']) ? $dataAllPlayers[$playerId]['last_name'] : '',
+        'first_name' => isset($dataAllPlayers[$playerId]['first_name']) ? $dataAllPlayers[$playerId]['first_name'] : '',
+        'player_photo' => isset($dataAllPlayers[$playerId]['player_photo']) ? $dataAllPlayers[$playerId]['player_photo'] : '',
+        'team_photo' => isset($dataAllPlayers[$playerId]['team_photo']) ? $dataAllPlayers[$playerId]['team_photo'] : '',
+        'team_name' => isset($dataAllPlayers[$playerId]['team_name']) ? $dataAllPlayers[$playerId]['team_name'] : '',
+        'team_id' => isset($dataAllPlayers[$playerId]['team_id']) ? $dataAllPlayers[$playerId]['team_id'] : '',
+
+        'count_goals' => $countGoals,
+        'count_asists' => $countAsists,
+        'golevoypas' => $countGolevoypas, 
+        'yellow_cards' => $countYellowCards,
+        'yellow_red_cards' => $countYellowRedCards,
+        'red_cards' => $countRed_cards,
+        'count_best_player_of_match' => $countBestPlayerOfMatch,
+        'v9ky' => isset($dataAllPlayers[$playerId]['v9ky']) ? (int)$dataAllPlayers[$playerId]['v9ky'] : 0,
+      ];
+
+
+       // Захисник
+       if( $keySort == 'zahusnuk') {
+        // Добавляем значение для каждого матча
+        foreach ($matches as $matchId => $stats) {
+          if( isset( $stats[ 'tur' ] ) ) {            
+            $row["match_{$stats[ 'tur' ]}_key"] = $stats[ 'otbor' ] + $stats[ 'blok' ];                            
+          }
+        }
+      }
+  
+      // Додаємо гравця у відповідний масив
+      if ($row['v9ky']) {
+        $outOfTopPlayers[] = $row;
+      } else {
+        $topPlayers[] = $row;
+      }
+  
+    }
+  
+    // Сортируем игроков
+    usort($topPlayers, function ($a, $b) use ($lastTur) {
+      // 1. Сортировка по (total_key)
+      if ($a['total_key'] != $b['total_key']) {
+          return ($b['total_key'] > $a['total_key']) ? 1 : -1; // По убыванию
+      }
+  
+      // 2. Сортировка по «Матчів» (count_matches)
+      if ($a['match_count'] != $b['match_count']) {
+          return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
+      }
+      // 3. Сортировка по последнему сыгранному матчу (total_3_match)
+      if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
+  
+        if ($a["match_{$lastTur}_key"] != $b["match_{$lastTur}_key"]) {
+            return ($b["match_{$lastTur}_key"] > $a["match_{$lastTur}_key"]) ? 1 : -1; // По убыванию
+        }
+      }
+      // Если все значения равны, оставить текущий порядок
+      return 0;
+    });
+  
+    // Присваиваем позиции
+    $rank = 1; // Начальный порядковый номер
+    foreach ($topPlayers as $index => &$player) {
+  
+      // если в последнем туре не играли оба сравниваемых игрока
+      if( isset( $topPlayers[$index - 1]["match_{$lastTur}_key"] ) && isset( $player["match_{$lastTur}_key"] ) ) {
+        
+        // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
+        if (
+            $index > 0 &&
+            $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
+            $topPlayers[$index - 1]['match_count'] === $player['match_count'] &&
+            $topPlayers[$index - 1]["match_{$lastTur}_key"] === $player["match_{$lastTur}_key"]
+        ) {
+            $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
+        } else {
+            $player['rank'] = $rank; // Новый ранг
+        }
+  
+      } else {
+        // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
+        if (
+          $index > 0 &&
+          $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
+          $topPlayers[$index - 1]['match_count'] === $player['match_count']
+        ) {
+            $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
+        } else {
+            $player['rank'] = $rank; // Новый ранг
+        }
+      }
+        $rank++; // Увеличиваем счетчик
+    }
+  
+    if( isset( $outOfTopPlayers ) ) {
+        $topPlayers = array_merge($topPlayers, $outOfTopPlayers);
+      }
+  
+    return $topPlayers;
+}
+
+function getTopPases($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 0)
+{  
+
+    // Преобразование массива
+   $topPlayers = [];
+  
+   foreach ($allStaticPlayers as $playerId => $matches) {
+       $matchCount = count($matches); // Количество матчей
+       $totalKeySort = calculateArrayByColumn($keySort, $matches); // Сумма всех значений по ключу $keySort
+       $countGoals = array_sum(array_column($matches, 'count_goals'));
+       $countAsists = array_sum(array_column($matches, 'count_asists'));
+       $countGolevoypas = array_sum(array_column($matches, 'golevoypas'));
+       $countYellowCards = array_sum(array_column($matches, 'yellow_cards'));
+       $countYellowRedCards = array_sum(array_column($matches, 'yellow_red_cards'));
+       $countRed_cards = array_sum(array_column($matches, 'red_cards'));
+  
+       $matchIdKeys = array_keys($matches);
+       // Ищем количество лучших игроков матча.
+       $countBPM = array_count_values( array_column( $matches, 'count_best_player_of_match' ) );
+       $countBestPlayerOfMatch = isset($countBPM[$playerId]) ? $countBPM[$playerId] : 0;
+            
+       // Инициализируем строку для таблицы. Для Бомбардиров и Асистентов
+       if(!is_array($totalKeySort)) {
+         
+         $keySortPerMatch = $matchCount > 0 ? $totalKeySort / $matchCount : 0; // Среднее значений по ключу $keySort за матч
+         
+         $row = [
+             'player_id' => $playerId,
+             'match_count' => $matchCount,
+             'total_key' => $totalKeySort,
+             'key_per_match' => round($keySortPerMatch, 2), // Округляем до 2 знаков
+             'match_ids' => implode(" ", $matchIdKeys),
+  
+             'last_name' => isset($dataAllPlayers[$playerId]['last_name']) ? $dataAllPlayers[$playerId]['last_name'] : '',
+             'first_name' => isset($dataAllPlayers[$playerId]['first_name']) ? $dataAllPlayers[$playerId]['first_name'] : '',
+             'player_photo' => isset($dataAllPlayers[$playerId]['player_photo']) ? $dataAllPlayers[$playerId]['player_photo'] : '',
+             'team_photo' => isset($dataAllPlayers[$playerId]['team_photo']) ? $dataAllPlayers[$playerId]['team_photo'] : '',
+             'team_name' => isset($dataAllPlayers[$playerId]['team_name']) ? $dataAllPlayers[$playerId]['team_name'] : '',
+             'team_id' => isset($dataAllPlayers[$playerId]['team_id']) ? $dataAllPlayers[$playerId]['team_id'] : '',
+  
+             'count_goals' => $countGoals,
+             'count_asists' => $countAsists,
+             'golevoypas' => $countGolevoypas, 
+             'yellow_cards' => $countYellowCards,
+             'yellow_red_cards' => $countYellowRedCards,
+             'red_cards' => $countRed_cards,
+             'count_best_player_of_match' => $countBestPlayerOfMatch,
+             'v9ky' => isset($dataAllPlayers[$playerId]['v9ky']) ? (int)$dataAllPlayers[$playerId]['v9ky'] : 0,
+         ];
+  
+       } 
+
+      // Пас
+      if ($keySort == "pas" && is_array($totalKeySort)) {
+
+        $keySortPerMatch = $matchCount > 0 ? $totalKeySort['total_value'] / $matchCount : 0; // Среднее значений по ключу $keySort за матч
+        
+        $row = [
+          'player_id' => $playerId,
+          'match_count' => $matchCount,
+          'total_key' => $totalKeySort['total_value'],
+          'key_per_match' => round($keySortPerMatch, 2), // Округляем до 2 знаков
+          'obvodkaplus' => isset($totalKeySort['obvodka_plus']) ? $totalKeySort['obvodka_plus'] : 0,
+          'obvodkaminus' => isset($totalKeySort['obvodka_minus']) ? $totalKeySort['obvodka_minus'] : 0,
+          'zagostrennia' => isset($totalKeySort['zagostrennia']) ? $totalKeySort['zagostrennia'] : 0,
+          'pasplus' => isset($totalKeySort['pasplus']) ? $totalKeySort['pasplus'] : 0,
+          'pasminus' => isset($totalKeySort['pasminus']) ? $totalKeySort['pasminus'] : 0,
+
+          'last_name' => isset($dataAllPlayers[$playerId]['last_name']) ? $dataAllPlayers[$playerId]['last_name'] : '',
+          'first_name' => isset($dataAllPlayers[$playerId]['first_name']) ? $dataAllPlayers[$playerId]['first_name'] : '',
+          'player_photo' => isset($dataAllPlayers[$playerId]['player_photo']) ? $dataAllPlayers[$playerId]['player_photo'] : '',
+          'team_photo' => isset($dataAllPlayers[$playerId]['team_photo']) ? $dataAllPlayers[$playerId]['team_photo'] : '',
+          'team_name' => isset($dataAllPlayers[$playerId]['team_name']) ? $dataAllPlayers[$playerId]['team_name'] : '',
+          'team_id' => isset($dataAllPlayers[$playerId]['team_id']) ? $dataAllPlayers[$playerId]['team_id'] : '',
+          'v9ky' => isset($dataAllPlayers[$playerId]['v9ky']) ? (int)$dataAllPlayers[$playerId]['v9ky'] : 0,
+        ];
+        
+        // Добавляем значение для каждого матча
+        foreach ($matches as $matchId => $stats) {
+          if(isset($stats[ 'tur' ])){
+            $row["match_{$stats[ 'tur' ]}_key"] = ($stats[ 'zagostrennia' ] * 5 + $stats[ 'pasplus' ]) - $stats[ 'pasminus' ] * 3;
+          }
+        }
+        
+      }    
+  
+      // Додаємо гравця у відповідний масив
+      if ($row['v9ky']) {
+        $outOfTopPlayers[] = $row;
+      } else {
+        $topPlayers[] = $row;
+      }
+      
+   }  
+     
+   // Сортируем игроков
+   usort($topPlayers, function ($a, $b) use ($lastTur) {
+     // 1. Сортировка по (total_key)
+     if ($a['total_key'] != $b['total_key']) {
+         return ($b['total_key'] > $a['total_key']) ? 1 : -1; // По убыванию
+     }
+  
+     // 2. Сортировка по «Матчів» (count_matches)
+     if ($a['match_count'] != $b['match_count']) {
+         return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
+     }
+     // 3. Сортировка по последнему сыгранному матчу (total_3_match)
+     if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
+  
+       if ($a["match_{$lastTur}_key"] != $b["match_{$lastTur}_key"]) {
+           return ($b["match_{$lastTur}_key"] > $a["match_{$lastTur}_key"]) ? 1 : -1; // По убыванию
+       }
+  
+     }
+  
+     // Если все значения равны, оставить текущий порядок
+     return 0;
+   });
+  
+   // Присваиваем позиции
+   $rank = 1; // Начальный порядковый номер
+   foreach ($topPlayers as $index => &$player) {
+  
+     // если в последнем туре не играли оба сравниваемых игрока
+     if( isset( $topPlayers[$index - 1]["match_{$lastTur}_key"] ) && isset( $player["match_{$lastTur}_key"] ) ) {
+       
+       // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
+       if (
+           $index > 0 &&
+           $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
+           $topPlayers[$index - 1]['match_count'] === $player['match_count'] &&
+           $topPlayers[$index - 1]["match_{$lastTur}_key"] === $player["match_{$lastTur}_key"]
+       ) {
+           $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
+       } else {
+           $player['rank'] = $rank; // Новый ранг
+       }
+  
+     } else {
+       // Если это не первый игрок и текущий игрок имеет те же значения, что и предыдущий
+       if (
+         $index > 0 &&
+         $topPlayers[$index - 1]['total_key'] === $player['total_key'] &&
+         $topPlayers[$index - 1]['match_count'] === $player['match_count']
+       ) {
+           $player['rank'] = isset( $topPlayers[$index - 1]['rank'] ) ? $topPlayers[$index - 1]['rank'] : $rank; // Присваиваем тот же ранг
+       } else {
+           $player['rank'] = $rank; // Новый ранг
+       }
+     }
+       $rank++; // Увеличиваем счетчик
+   }
+  
+    if( isset( $outOfTopPlayers ) ) {
+        $topPlayers = array_merge($topPlayers, $outOfTopPlayers);
+    }
+    
+    return $topPlayers;
+  
+}
+
+
+function getCupData($turnir){
+    global $dbF;
+
+    $sql = "SELECT `cup_stage`
+            FROM `v9ky_match`
+            WHERE turnir=:turnir 
+            AND `cup_stage` > 0 
+            GROUP BY cup_stage";
+
+    $cupgroup = $dbF->query($sql, [":turnir" => $turnir])->findAll();
+
+    $cupData = [];
+
+    if (!empty($cupgroup)){
+
+        $cupData = [];
+        foreach($cupgroup as $item){
+            $sql1 = "SELECT 
+                    m.`cup_stage`, 
+                    m.`id` AS match_id, 
+                    m.`canseled`,
+                    m.`team1`,
+                    t1.`name` AS team1_name,
+                    m.`gols1` AS goals1,
+                    m.`gols2` AS goals2,
+                    m.`team2`,
+                    t2.`name` AS team2_name
+                    FROM `v9ky_match` m
+                    LEFT JOIN `v9ky_team` t1 
+                            ON t1.`id` = m.`team1`
+                    LEFT JOIN `v9ky_team` t2 
+                            ON t2.`id` = m.`team2`
+                    WHERE m.turnir=:turnir
+                    AND m.cup_stage=:item_cup_stage";
+
+            $cups1 = $dbF->query($sql1, [":turnir" => $turnir, ":item_cup_stage" => $item['cup_stage']])->findAll();
+            
+
+            foreach($cups1 as $key => $cup){
+                switch ($item['cup_stage']){
+                    case 1: $cupData["Фінал"][$key] = $cup; break;
+                    case 2: $cupData["Матч за 3-е місце"][$key] = $cup; break;
+                    case 3: $cupData["Півфінал"][$key] = $cup; break;
+                    case 4: $cupData["1/4 КУБКУ"][$key] = $cup; break;
+                    case 5: $cupData["1/8 КУБКУ"][$key] = $cup; break;
+                    case 6: $cupData["1/16 КУБКУ"][$key] = $cup; break;
+                    case 7: $cupData["1/32 КУБКУ"][$key] = $cup; break;
+                    case 8: $cupData["1/64 КУБКУ"][$key] = $cup; break;
+                    case 10: $cupData["Золотий матч"][$key] = $cup; break;
+                }
+            }               
+                
+        }   
+        
+        foreach($cupData as $k => $v){
+
+            if($k == 'Фінал') {
+                foreach($v as $v1){
+                    if($v1['goals1'] || $v1['goals2']){
+                        if( $v1['goals1'] > $v1['goals2']){
+                                $cupData[$k][0]['cup1'] = 'goldcup.png';
+                                $cupData[$k][0]['cup2'] = 'silvercup.png';
+                        } else {
+                                $cupData[$k][0]['cup1'] = 'silvercup.png';   
+                                $cupData[$k][0]['cup2'] = 'goldcup.png';
+                        }
+                    }
+                }
+            }
+
+            if($k == 'Матч за 3-е місце') {
+                foreach($v as $v1){
+                    if($v1['goals1'] || $v1['goals2']){
+                        if($v1['goals1'] > $v1['goals2']){
+                                $cupData[$k][0]['cup1'] = 'bronzecup.png';
+                        } else {
+                                $cupData[$k][0]['cup2'] = 'bronzecup.png';
+                        }
+                    }
+                }
+            }
+
+        }
+            
+    }
+
+    if(empty($cupData)) {                
+            return 0;
+    } 
+
+    return $cupData;
+    
 }

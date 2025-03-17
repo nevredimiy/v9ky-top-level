@@ -58,12 +58,12 @@
 
 
 .table-league__table tr td.td-scored,
-.table-league__table tr th.td-scored{
+.table-league__table tr th.td-scored {
   width: 66px;
 }
 
 .table-league__table tr th .cell--scored,
-.table-league__table tr td .cell--scored{
+.table-league__table tr td .cell--scored {
   width: 66px;
 }
 
@@ -272,10 +272,11 @@ td .cell--team-logo {
     border: 1px solid rgba(32, 32, 32, 0.2);
   }
 
-  .td-scored{
+  .td-scored {
     width: 66px;
   }
-  .cell--scored{
+
+  .cell--scored {
     width: 66px;
   }
 }
@@ -420,4 +421,42 @@ td .cell--team-logo {
   .live {
     font-size: 16px;
   }
+}
+
+.cup__block {
+  display: flex;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.cup__block-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  margin: 26px 0;
+  padding: 26px 32px;
+  box-shadow: 5px 5px 20px #b7b7b7;
+  background-color: #fff;
+}
+
+.cup__block-wrap>div {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 3fr 1fr 3fr;
+  align-items: baseline;
+}
+
+
+.cup__block-wrap>div {
+  text-align: center;
+}
+
+.cup__block-wrap>div>div:first-child {
+  text-align: right;
+}
+
+.cup__block-wrap>div>div:last-child {
+  text-align: left;
 }

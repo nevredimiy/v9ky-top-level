@@ -1,6 +1,13 @@
 
 <?php
 
+// // Увімкнення відображення помилок
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+
+// // Встановлення рівня звітності помилок
+// error_reporting(E_ALL);
+
 include_once HOME . "/dates.php";
 include_once CONTROLLERS . "/head.php";
 
@@ -57,7 +64,12 @@ if (isset($_SERVER['HTTP_REFERER'])) {
                 <td><?= isset($player['rank']) ? $player['rank'] : "?" ?></td>
                 <td><img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo"></td>
                 <td><img src="<?=$team_logo_path?>/<?= $player['team_photo'] ?>" alt="team-logo"></td>
-                <td class="name-cell"><?= $player['last_name'] ?> <?= $player['first_name'] ?></td>
+                <td class="name-cell" data-v9ky="<?=  $player['v9ky'] ?>">
+                    <?php if($player['v9ky']) : ?>
+                        <img src="<?= IMAGES . '/player-v9ku.png' ?>" alt="">
+                    <?php endif ?>
+                    <?= $player['last_name'] ?> <?= $player['first_name'] ?>
+                </td>
                 <td><?= $player['total_key'] ?></td>
                 <td><?= $player['match_count'] ?></td>
                 <td><?= $player['key_per_match'] ?></td>
@@ -72,4 +84,4 @@ if (isset($_SERVER['HTTP_REFERER'])) {
         </table>
     </div>
 </div>
-<?php include_once "freedman/footer.php" ?>
+<?php include_once  CONTROLLERS . "/footer.php" ?>

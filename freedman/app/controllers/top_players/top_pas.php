@@ -14,7 +14,7 @@ $allStaticPlayers = getAllStaticPlayers($turnir);
 $dataAllPlayers = getDataPlayers($allStaticPlayers); 
 
 // Отсортированный массив по рубрике Топ-Пас
-$topPas = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'pas', $lastTur);
+$topPas = getTopPases($allStaticPlayers, $dataAllPlayers, 'pas', $lastTur);
 
 // Проверяем, есть ли значение у HTTP_REFERER  
 if (isset($_SERVER['HTTP_REFERER'])) {  
@@ -45,9 +45,9 @@ if (isset($_SERVER['HTTP_REFERER'])) {
             <th class="th_s" data-label="М">Матчів</th>
             
             <th class="th_s" data-label="П+">Пас+ (+1)</th>
-            <th class="th_s" data-label="П-">Пас- (-1)</th>
+            <th class="th_s" data-label="П-">Пас- (-3)</th>
             <?php for($i = 1; $i <= 10; $i++): ?>
-              <th data-label="<?= $i ?>}"><?= $i ?></th>
+              <th data-label="<?= $i ?>"><?= $i ?></th>
             <?php endfor ?>
             </tr>
         </thead>
@@ -58,7 +58,12 @@ if (isset($_SERVER['HTTP_REFERER'])) {
                 <td><?= isset($player['rank']) ? $player['rank'] : "?" ?></td>
                 <td><img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo"></td>
                 <td><img src="<?=$team_logo_path?>/<?= $player['team_photo'] ?>" alt="team-logo"></td>
-                <td  class="name-cell"><?= $player['last_name'] ?> <?= $player['first_name'] ?></td>
+                <td class="name-cell">
+                <?php if(isset($player['v9ky']) && $player['v9ky']) : ?>
+                    <img src="<?= IMAGES . '/player-v9ku.png' ?>" alt="">
+                  <?php endif ?>
+                  <?= $player['last_name'] ?> <?= $player['first_name'] ?>
+                </td>
                 <td><?= $player['total_key'] ?></td>
                 <td><?= $player['match_count'] ?></td>
                 
@@ -75,4 +80,4 @@ if (isset($_SERVER['HTTP_REFERER'])) {
         </table>
     </div>
 </div>
-<?php include_once "freedman/footer.php" ?>
+<?php include_once  CONTROLLERS . "/footer.php" ?>

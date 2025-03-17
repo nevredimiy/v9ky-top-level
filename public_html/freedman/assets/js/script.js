@@ -34,10 +34,34 @@ $(document).ready(function () {
         }, 800); // Скорость прокрутки в миллисекундах (800 = 0.8 секунды)
     });
 
+    // ссылка в шапке - "Заявити команду на найближчі турніри"
+    $("#form-zayavka").submit(function (event) {
+        event.preventDefault(); // Предотвращаем перезагрузку страницы
+
+        $.ajax({
+            url: "send_mail.php", // Обработчик на сервере
+            type: "POST",
+            data: $(this).serialize(), // Отправляем все данные формы
+            success: function (response) {
+                if (response === "success") {
+                    $("#successMessage").fadeIn(); // Показываем сообщение
+                    setTimeout(function () {
+                        $("#successMessage").fadeOut(); // Через 2 сек скрываем
+                    }, 2000);
+                    $("#form-zayavka")[0].reset(); // Очищаем форму
+                } else {
+                    alert("Ошибка отправки! Попробуйте снова.");
+                }
+            },
+            error: function () {
+                alert("Ошибка соединения с сервером!");
+            }
+        });
+    });
 
 });
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     let postTitle = document.title;
     let postUrl = window.location.href;
     let telegramButton = document.querySelector(".share-telegram");
@@ -78,24 +102,24 @@ document.addEventListener("DOMContentLoaded", function() {
                     method: "POST",
                     body: formData
                 })
-                .then(response => response.json())
-                .then(data => {
+                    .then(response => response.json())
+                    .then(data => {
 
-                    setButtonState(false); // Разблокируем кнопку после загрузки
+                        setButtonState(false); // Разблокируем кнопку после загрузки
 
-                    if (data.success) {
-                        callback(data.link); // Передаем ссылку на изображение в Telegram
-                    } else {
-                        console.error("Ошибка загрузки:", data.error);
-                        alert("Ошибка загрузки изображения!");
-                    }
-                })
-                .catch(error => {
-                    setButtonState(false); // Разблокируем кнопку после загрузки
+                        if (data.success) {
+                            callback(data.link); // Передаем ссылку на изображение в Telegram
+                        } else {
+                            console.error("Ошибка загрузки:", data.error);
+                            alert("Ошибка загрузки изображения!");
+                        }
+                    })
+                    .catch(error => {
+                        setButtonState(false); // Разблокируем кнопку после загрузки
 
-                    console.error("Ошибка AJAX:", error);
-                    alert("Ошибка при загрузке данных!");
-                });
+                        console.error("Ошибка AJAX:", error);
+                        alert("Ошибка при загрузке данных!");
+                    });
             });
         });
     }
@@ -178,7 +202,7 @@ $(document).ready(function () {
 
     captureBtn.on("click", function () {
         let captureElement = $(".content-to-capture");
-        
+
         if (captureElement.length === 0) {
             alert("Помилка: елемент для скріншоту не знайдено!");
             return;

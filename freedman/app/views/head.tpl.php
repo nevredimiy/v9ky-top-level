@@ -65,7 +65,7 @@
                 </div>
 
                 <div class="nav__block">
-                    <a class="button-nav button-with-arrow button--order-team" href="<?=$site_url?>">
+                    <a class="button-nav button-with-arrow button--order-team" href="<?=$url;?>/addmyteam/">
                         <p class="button-with-arrow__title">Заявити команду</p>
                         <p class="button-with-arrow__description">на найближчі турніри</p>
                         <img src="/css/components/header/assets/images/arrow.svg" alt="arrow"
@@ -123,3 +123,5 @@
         </div>
     </header>
     <main class="main">
+
+    

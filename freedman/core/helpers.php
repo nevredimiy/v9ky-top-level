@@ -267,8 +267,7 @@ function getTopPlayers($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 
 
       }
 
-       // Голкіпер
-      
+      // Голкіпер      
       if ($keySort == "golkiper" && is_array($totalKeySort)) {
 
         if(($totalKeySort['seyv'] + $totalKeySort['seyvmin']) > 10) {
@@ -311,8 +310,6 @@ function getTopPlayers($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 
       
       $topPlayers[] = $row;
   }
-
-
     
   // Сортируем игроков
   usort($topPlayers, function ($a, $b) use ($lastTur) {

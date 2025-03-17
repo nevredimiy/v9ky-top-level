@@ -57,21 +57,27 @@ if (isset($_SERVER['HTTP_REFERER'])) {
         <?php $int = 0; ?>
         <?php foreach($topGolkiper as $player): ?>
 
-          
+          <div id="dump" style="display: none"><?php dump($player); ?></div>
           
 
-            <tr class="<?= $player['is_top'] ? 'top-player' : 'out-of-contest' ?>" data-playerid="<?= $player['player_id'] ?>" data-matchid="<?= $player['match_ids'] ?>" data-serial-number="<?= $int ?>" >
+          <tr class="<?= $player['is_top'] && !$player['v9ky'] ? 'top-player' : 'out-of-contest' ?>" data-playerid="<?= $player['player_id'] ?>" data-matchid="<?= $player['match_ids'] ?>" data-serial-number="<?= $int ?>" >
               <td><?= isset($player['rank']) ? $player['rank'] : "?" ?></td>
               <td><img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo"></td>
               <td><img src="<?=$team_logo_path?>/<?= $player['team_photo'] ?>" alt="team-logo"></td>
-              <td class="name-cell"><?= $player['last_name'] ?> <?= $player['first_name'] ?></td>
+              <td class="name-cell">
+                <?php if($player['v9ky']) : ?>
+                  <img src="<?= IMAGES . '/player-v9ku.png' ?>" alt="">
+                <?php endif ?>
+                <?= $player['last_name'] ?> <?= $player['first_name'] ?>
+              </td>
               <td><?= $player['total_key'] ?></td>
               <td><?= $player['match_count'] ?></td>
               <td><?= $player['seyv'] ?></td>
               <td><?= $player['seyvmin'] ?></td>
               <?php for ($i = 1; $i <= 10; $i++): ?>
-              <?php $stub = $i > $lastTur ? '?' : '-' ?>
-              <td class="turs" <?= $i > $lastTur ? 'style="opacity:0.5"' : '' ?> ><?= isset($player["match_{$i}_key"]) ? $player["match_{$i}_key"] . "%"  : $stub  ?></td>
+                <td class="turs" <?= $i > $lastTur ? 'style="opacity:0.5"' : '' ?>>
+                    <?= isset($player["match_{$i}_key"]) ? $player["match_{$i}_key"] : '-' ?>
+                </td>
               <?php endfor ?>
           </tr>
 
@@ -83,4 +89,4 @@ if (isset($_SERVER['HTTP_REFERER'])) {
     </table>
     </div>
 </div>
-<?php include_once "freedman/footer.php" ?>
+<?php include_once  CONTROLLERS . "/footer.php" ?>

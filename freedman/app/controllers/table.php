@@ -5,9 +5,20 @@ if (!isset($turnir)) {
     die('Ошибка: переменная $turnir не задана.');
 }
 
+if(!isset($turnir) && !isset($tournament)) {
+    $turnir = getTurnir();
+}
 
-// SQL-запрос для получения данных
-$sql = "SELECT 
+if(!isset($turnir)) {
+    $turnir = getTurnir($tournament);
+}
+
+
+function getDataTable($turnir, $canseled){
+    global $dbF;
+  
+    // SQL-запрос для получения данных
+    $sql = "SELECT 
     t1.id AS team1_id,
     t1.name AS team1_name,
     t1.pict AS team1_logo,
@@ -18,26 +29,39 @@ $sql = "SELECT
     m.gols2 AS team2_goals,
     t1.grupa AS team1_group,
     t2.grupa AS team2_group,
-    t.ru AS turnir_name
-FROM 
+    t.ru AS turnir_name,
+    t.cup
+  
+    FROM 
     v9ky_match m
-JOIN 
+    JOIN 
     v9ky_team t1 ON m.team1 = t1.id
-JOIN 
+    JOIN 
     v9ky_team t2 ON m.team2 = t2.id
-LEFT JOIN 
+    LEFT JOIN 
     v9ky_turnir t ON t.id = m.turnir
-WHERE 
-    m.turnir = :turnir AND canseled = 1
-ORDER BY 
+    WHERE 
+    m.turnir = :turnir AND canseled = :canseled
+    ORDER BY 
     t1.grupa ASC, t1.name ASC, t2.name ASC";
+  
+  
+    $result = $dbF->query($sql, [":turnir" => $turnir, ":canseled" => $canseled])->findAll();
+    
+    return $result;
+  
+  }
+  
+  $result = getDataTable($turnir, 1);
+  
+  
+  if (!$result) {
+    $result = getDataTable($turnir, 0);
+  }
 
-$result = $dbF->query($sql, [":turnir" => $turnir])->findAll();
 
-if (!$result) {
-    echo "SQL Query Error: " . $dbF->error;
-    die('Ошибка выполнения запроса.');
-}
+// Определяем количество кругов
+$cupMode = isset($result[0]['cup']) ? (int)$result[0]['cup'] : 2; // По умолчанию два круга
 
 // Проверяем есть ли группы в турнире
 $groups = []; // массив для название групп (['A', 'B' ...])
@@ -67,6 +91,11 @@ foreach ($result as $row) {
     $goals1 = (int)$row['team1_goals'];
     $goals2 = (int)$row['team2_goals'];
 
+    // Если один круг, проверяем, был ли матч уже учтен
+    if ($cupMode === 0 && isset($matches[$team2][$team1])) {
+        continue; // Пропускаем повторный матч
+    }
+
     // Инициализируем команду в массиве, если её там нет
     foreach ([$team1, $team2] as $team) {
         if (!isset($games_count[$team])) {
@@ -79,20 +108,23 @@ foreach ($result as $row) {
         }
     }
 
-    // Увеличиваем счётчик игр
-    $games_count[$team1]++;
-    $games_count[$team2]++;
-
     // Определяем результат матча
-    if ($goals1 > $goals2) {
+    if( !is_null( $row['team1_goals'] ) || !is_null( $row['team2_goals'] ) ){
+
+        // Увеличиваем счётчик игр
+        $games_count[$team1]++;
+        $games_count[$team2]++;
+        
+        if ($goals1 > $goals2) {
         $wins_count[$team1]++;   // Победа team1
         $losses_count[$team2]++; // Поражение team2
-    } elseif ($goals2 > $goals1) {
+        } elseif ($goals2 > $goals1) {
         $wins_count[$team2]++;   // Победа team2
         $losses_count[$team1]++; // Поражение team1
-    } else {
+        } else {
         $draws_count[$team1]++;  // Ничья
         $draws_count[$team2]++;
+        }
     }
 
     // Записываем забитые и пропущенные мячи
@@ -120,8 +152,6 @@ foreach ($result as $row) {
          'logo' => $row['team2_logo'], 
          'group' => $row['team2_group']
      ];
-
-
 }
 
 // Инициализация турнирной таблицы
@@ -163,5 +193,7 @@ uasort($stats, function ($a, $b) {
     return $b['goals_scored'] - $a['goals_scored'];
 });
 
+// Данные кубка
+$cupData = getCupData($turnir);
 
 require_once VIEWS . '/table.tpl.php';

@@ -1,6 +1,6 @@
 <section class="ratings">
     <h2 class="title">Рейтинги гравців ліги</h2>
-    <div class="d-none"><?php var_dump($player['total_key']) ?></div>
+    <div id="dump" class="d-none"><?php var_dump($topPlayers) ?></div>
     <div class="swiper-ratings ratings__container">
 
         <div class="swiper-wrapper ratings__wrap containers">

@@ -1,5 +1,36 @@
 
 <section class="table-league">
+
+<!-- Если кубок, то выводим реультат кубка -->
+    <?php if(isset($cupData) && $cupData):?>
+        <div class="cup__block">
+            <div class="cup__block-wrap">
+                <?php foreach($cupData as $key => $cup): ?>
+                    <h2><?= $key ?></h2>
+                    <?php foreach($cup as $match): ?>
+                        <div class="">
+                            
+                            <div class="">
+                                <?php if(isset($match['cup1'])): ?>
+                                    <img width="20" height="30" src="<?= IMAGES . '/' . $match['cup1'] ?>" alt="">
+                                <?php endif ?>
+                                <?= $match['team1_name']?>
+                            </div>
+                            <div class=""><?= $match['goals1']?>:<?= $match['goals2']?></div>
+                            <div class="">
+                                <?= $match['team2_name']?>
+                                <?php if(isset($match['cup2'])): ?>
+                                    <img width="20" height="30" src="<?= IMAGES . '/' . $match['cup2'] ?>" alt="">
+                                <?php endif ?>    
+                            </div>   
+                                                            
+                        </div>
+                    <?php endforeach ?>
+                <?php endforeach ?>
+            </div>
+        </div>
+    <?php endif ?>
+
     <?php foreach ($groups ?: [''] as $group): ?>
         <?php 
         // Фильтруем команды, оставляя только те, что принадлежат текущей группе
@@ -14,7 +45,7 @@
         <h2 class="table-league__title title title--inverse">
             <span>Турнірна таблиця</span>
             <span><?= $result[0]['turnir_name'] ?></span>
-            <?= $group ? "<span>Группа $group</span>" : '' ?>
+            <?= $group ? "<span>Група $group</span>" : '' ?>
         </h2>
 
         <div class="swiper swiper-table">

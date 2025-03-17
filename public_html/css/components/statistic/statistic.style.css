@@ -292,9 +292,7 @@
 #top-golkiper th:nth-child(7),
 #top-golkiper td:nth-child(7),
 #top-pas th:nth-child(7),
-#top-pas td:nth-child(7),
-#top-pas th:nth-child(8),
-#top-pas td:nth-child(8) {
+#top-pas td:nth-child(7) {
   color: green;
 }
 
@@ -304,8 +302,8 @@
 #top-dribling td:nth-child(8),
 #top-golkiper th:nth-child(8),
 #top-golkiper td:nth-child(8),
-#top-pas th:nth-child(9),
-#top-pas td:nth-child(9) {
+#top-pas th:nth-child(8),
+#top-pas td:nth-child(8) {
   color: red;
 }
 
@@ -329,4 +327,14 @@ table tr.top-player td {
 table tr.out-of-contest {
   color: #454545;
   /* сірий */
+}
+
+.name-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.statistic table tr td.name-cell img {
+  max-width: 30px;
 }

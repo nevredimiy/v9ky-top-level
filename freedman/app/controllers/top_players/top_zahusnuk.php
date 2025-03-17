@@ -14,7 +14,7 @@ $allStaticPlayers = getAllStaticPlayers($turnir);
 $dataAllPlayers = getDataPlayers($allStaticPlayers); 
 
 // Отсортированный массив по рубрике Топ-Захистник
-$topZhusnuk = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'zahusnuk', $lastTur);
+$topZhusnuk = getTopZhusnuks($allStaticPlayers, $dataAllPlayers, 'zahusnuk', $lastTur);
 
 // Проверяем, есть ли значение у HTTP_REFERER  
 if (isset($_SERVER['HTTP_REFERER'])) {  
@@ -57,7 +57,12 @@ $previousPage = $site_url;
             <td><?= isset($player['rank']) ? $player['rank'] : "?" ?></td>
             <td><img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo"></td>
             <td><img src="<?=$team_logo_path?>/<?= $player['team_photo'] ?>" alt="team-logo"></td>
-            <td class="name-cell"><?= $player['last_name'] ?> <?= $player['first_name'] ?></td>
+            <td class="name-cell">
+              <?php if(isset($player['v9ky']) && $player['v9ky']) : ?>
+                <img src="<?= IMAGES . '/player-v9ku.png' ?>" alt="">
+              <?php endif ?>
+              <?= $player['last_name'] ?> <?= $player['first_name'] ?>
+            </td>
             <td><?= $player['total_key'] ?></td>
             <td><?= $player['match_count'] ?></td>
             <td><?= $player['key_per_match'] ?></td>
@@ -72,4 +77,4 @@ $previousPage = $site_url;
     </table>
     </div>
 </div>
-<?php include_once "freedman/footer.php" ?>
+<?php include_once  CONTROLLERS . "/footer.php" ?>

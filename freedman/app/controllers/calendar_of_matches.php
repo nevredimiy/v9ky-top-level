@@ -40,6 +40,10 @@ $dates = array_column($matches, 'match_date');
 // Форматируем даты матчей для отображения в шаблоне
 $dateMatches = formatMatchDates($dates);
 
+if($selectedDate == '1970-01-01'){
+    $selectedDate = $dateMatches[0]['first_day'];
+  }
+
 $daysOfTur = getFirstAndLastDays($dateMatches, $selectedDate);
 
 $dataMatchesOfDate = 0;
