@@ -1695,7 +1695,7 @@ function formatMatchDates($dates)
     });
 
     $result = []; // Масив для збереження згрупованих дат
-
+    
     // Ініціалізація першої групи
     $current_group = [$dates[0]->format("d")]; // Додаємо перший день
     $first_day = $dates[0]->format("Y-m-d"); // Зберігаємо перший день у форматі YYYY-MM-DD
@@ -3366,6 +3366,13 @@ function getCupData($turnir){
             
 
             foreach($cups1 as $key => $cup){
+                
+                // Если нет результата кубка
+                if(!$cup['team1'] || !$cup['team2']) {
+                    $cup['team1_name'] = 'Команда 1';
+                    $cup['team2_name'] = 'Команда 2';
+                }
+
                 switch ($item['cup_stage']){
                     case 1: $cupData["Фінал"][$key] = $cup; break;
                     case 2: $cupData["Матч за 3-е місце"][$key] = $cup; break;

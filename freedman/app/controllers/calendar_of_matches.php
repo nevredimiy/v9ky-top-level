@@ -1,11 +1,11 @@
 <?php
 
-// Увімкнення відображення помилок
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// // Увімкнення відображення помилок
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
 
-// Встановлення рівня звітності помилок
-error_reporting(E_ALL);
+// // Встановлення рівня звітності помилок
+// error_reporting(E_ALL);
 
 if(!isset($tournament) || empty($tournament)){
     $tournament = getTournament();
@@ -36,7 +36,11 @@ $matches = $dbF->query($sql, [":turnir" => $turnir])->findAll();
  
 // Извлекаем даты в отдельный массив
 $dates = array_column($matches, 'match_date');
- 
+
+
+if(!empty($dates)){
+
+
 // Форматируем даты матчей для отображения в шаблоне
 $dateMatches = formatMatchDates($dates);
 
@@ -204,6 +208,8 @@ $matchesOfTurAndDate = mergeUniqueById($dataCurrentTur, $dataCurrentDay);
           $percentages[$key] -= $totalReduction / count($remainingKeys);
       }
   }
+
+}
 
 //-----------------------------------//
 

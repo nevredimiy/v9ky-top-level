@@ -4,11 +4,11 @@
             <?php foreach($data as $item): ?>
                 <?php foreach($item as $it) : ?>
                     <div class="flex justify-center fz-16">
-                            <p> 
-                                    <!-- <a href="<?=$site_url?>/<?= $it['name'] ?>/archived"> -->
-                                            <?= $key ?> / <?= $it['season'] ?> / <?= $it['ru'] ?>
-                                    <!-- </a> -->
-                            </p>
+                        <p> 
+                            <a href="<?=$site_url?>/<?= $it['name'] ?>/city_news">
+                                    <?= $key ?> / <?= $it['season'] ?> / <?= $it['ru'] ?>
+                            </a>
+                        </p>
 
                     </div>
 

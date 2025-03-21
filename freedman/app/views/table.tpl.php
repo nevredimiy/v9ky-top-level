@@ -1,5 +1,5 @@
 
-<section class="table-league">
+<section data-cup-mode="<?= $cupMode ?>" class="table-league">
 
 <!-- Если кубок, то выводим реультат кубка -->
     <?php if(isset($cupData) && $cupData):?>

@@ -53,14 +53,14 @@
                                     src="<?= $team_logo_path ?>/<?= $match['team1_photo'] ?>" alt="Логотип команди">
 
                                     <div class="card-of-matches__score">                                
-    <?php if( $match['goals1'] != null ): ?>        
-        <span><?= $match['goals1'] ?></span>
-        :
-        <span><?= $match['goals2'] ?></span>
-    <?php else:?>
-        <span>VS</span>
-    <?php endif?>
-</div>
+                                        <?php if( $match['goals1'] != null ): ?>        
+                                            <span><?= $match['goals1'] ?></span>
+                                            :
+                                            <span><?= $match['goals2'] ?></span>
+                                        <?php else:?>
+                                            <span>VS</span>
+                                        <?php endif?>
+                                    </div>
 
                                 <img class="card-of-matches__team-logo card-of-matches__team-logo--right"
                                     src="<?= $team_logo_path ?>/<?= $match['team2_photo'] ?>" alt="leicester">

@@ -26,11 +26,11 @@
                         href="<?=$site_url?>/<?=$tournament ?>/stadiums/">стадіони</a>
                 </div>
             </div>
-            <!-- <div class="swiper-slide swiper-slide-nav">
+            <div class="swiper-slide swiper-slide-nav">
                 <div class="swiper-slide navigation__item"><a
                         href="<?=$site_url?>/<?=$tournament ?>/archive/">Архів</a>
                 </div>
-            </div> -->
+            </div>
             <div class="swiper-slide swiper-slide-nav">
                 <div class="swiper-slide navigation__item"><a
                         href="<?=$site_url?>/<?=$tournament ?>/contacts_championship/">контакти</a>

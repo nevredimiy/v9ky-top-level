@@ -204,7 +204,7 @@
                 <span class="team_name truncate"><?=$match['team1'];?></span>
                 <img style="margin-left: 10px" src="<?= $team_logo_path ?><?= $match['team1_photo'] ?>" alt="" width=30>
             </td>
-            <?php if(empty($match['goals1'])):?>
+            <?php if($match['goals1'] == NULL):?>
               <td>VS</td>
             <?php else :?>
               <td data-match-id="<?= $match['id'] ?>" class="score-of-match"><?= $match['goals1'] ?> :  <?= $match['goals2'] ?></td>
