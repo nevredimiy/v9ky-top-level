@@ -247,6 +247,7 @@ td .cell--team-logo {
   }
 
   .cell--team {
+    display: block;
     margin-right: 50px;
     white-space: nowrap;
     overflow: hidden;
@@ -258,6 +259,7 @@ td .cell--team-logo {
     height: 26px;
     width: 26px;
     border-radius: var(--border-radius-m);
+    color: #c9c9c9;
   }
 
   .cell--games,

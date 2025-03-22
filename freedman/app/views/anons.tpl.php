@@ -45,7 +45,7 @@
                     </thead>
                     <tbody>
                         
-                        <? foreach($historyMeets as $match): ?>
+                        <?php foreach($historyMeets as $match): ?>
                         <tr>
                             <td><?= $match['season_name'] ?></td>
                             <td><?= $match['liga_name'] ?></td>

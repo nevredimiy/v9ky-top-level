@@ -14,207 +14,108 @@ if(!isset($turnir)) {
 }
 
 
+// 1. Получаем команды и определяем группы
+$sql = "SELECT 
+        tm.`id`, 
+        tm.`name`, 
+        tm.`grupa`,
+        tm.pict AS logo,
+        t.ru AS turnir_name,
+        t.cup
+      FROM `v9ky_team` tm
+      LEFT JOIN 
+        v9ky_turnir t ON t.id = tm.turnir
+      WHERE tm.`turnir` = :turnirId 
+      ORDER BY tm.`grupa`, tm.`name`";
+$teams = $dbF->query($sql,['turnirId' => $turnir])->findAll();
 
-function getDataTable($turnir, $canseled){
-    global $dbF;
-  
-    // SQL-запрос для получения данных
-    $sql = "SELECT 
-    t1.id AS team1_id,
-    t1.name AS team1_name,
-    t1.pict AS team1_logo,
-    t2.id AS team2_id,
-    t2.name AS team2_name,
-    t2.pict AS team2_logo,
-    m.gols1 AS team1_goals,
-    m.gols2 AS team2_goals,
-    t1.grupa AS team1_group,
-    t2.grupa AS team2_group,
-    t.ru AS turnir_name,
-    t.cup
-  
-    FROM 
-    v9ky_match m
-    JOIN 
-    v9ky_team t1 ON m.team1 = t1.id
-    JOIN 
-    v9ky_team t2 ON m.team2 = t2.id
-    LEFT JOIN 
-    v9ky_turnir t ON t.id = m.turnir
-    WHERE 
-    m.turnir = :turnir AND canseled = :canseled AND m.cup_stage = 0 
-    ORDER BY 
-    t1.grupa ASC, t1.name ASC, t2.name ASC";
-  
-  
-    $result = $dbF->query($sql, [":turnir" => $turnir, ":canseled" => $canseled])->findAll();
-    
-    return $result;
-  
-  }
-  
-  $result = getDataTable($turnir, 1);
-  
-  if(!$result) {
-    $sql = "SELECT 
-            tm.id AS team1_id,
-            tm.name AS team1_name,
-            tm.pict AS team1_logo,
-            tm.id AS team2_id,
-            tm.name AS team2_name,
-            tm.pict AS team2_logo,
-            tm.grupa AS team1_group,
-            tm.grupa AS team2_group,
-            t.ru AS turnir_name,
-            t.cup
-            FROM `v9ky_team` tm
-            LEFT JOIN 
-              v9ky_turnir t ON t.id = tm.turnir
-            WHERE `turnir` = :turnir";
-    $result = $dbF->query($sql, [":turnir" => $turnir])->findAll();
-  }
-  
-  
-  // Определяем количество кругов
-  $cupMode = isset($result[0]['cup']) ? (int)$result[0]['cup'] : 2; // По умолчанию два круга
-  
-  // Проверяем есть ли группы в турнире
-  $groups = []; // массив для название групп (['A', 'B' ...])
-  if (!empty($result) && isset($result[0]['team1_group'])) {
-    foreach($result as $row) {
-        if(!in_array($row['team1_group'], $groups)) {
-            $groups[] = $row['team1_group'];
-        }
-    }
-  }
-  
-  // Преобразуем результат запроса в массив
-  $rows = $result;
-  
-  $matches = [];
-  $teams = [];
-  $games_count = [];
-  $wins_count = [];
-  $draws_count = [];
-  $losses_count = [];
-  $goals_scored = [];  // Забитые мячи
-  $goals_conceded = []; // Пропущенные мячи
-  
-  foreach ($result as $row) {
-    $team1 = $row['team1_id'];
-    $team2 = $row['team2_id'];
-    $goals1 = isset($row['team1_goals']) ? (int)$row['team1_goals'] : null;
-    $goals2 = isset($row['team2_goals']) ? (int)$row['team2_goals'] : null;
-    
-  
-    // Если один круг, проверяем, был ли матч уже учтен
-    if ($cupMode === 0 && isset($matches[$team2][$team1])) {
-        continue; // Пропускаем повторный матч
-    }
-  
-    // Инициализируем команду в массиве, если её там нет
-    foreach ([$team1, $team2] as $team) {
-        if (!isset($games_count[$team])) {
-            $games_count[$team] = 0;
-            $wins_count[$team] = 0;
-            $draws_count[$team] = 0;
-            $losses_count[$team] = 0;
-            $goals_scored[$team] = 0;
-            $goals_conceded[$team] = 0;
-        }
-    }
-  
-    // Определяем результат матча
-    if( !is_null( $goals1 ) || !is_null( $goals2 ) ){
-  
-        // Увеличиваем счётчик игр
-        $games_count[$team1]++;
-        $games_count[$team2]++;
-        
-        if ($goals1 > $goals2) {
-        $wins_count[$team1]++;   // Победа team1
-        $losses_count[$team2]++; // Поражение team2
-        } elseif ($goals2 > $goals1) {
-        $wins_count[$team2]++;   // Победа team2
-        $losses_count[$team1]++; // Поражение team1
-        } else {
-        $draws_count[$team1]++;  // Ничья
-        $draws_count[$team2]++;
-        }
-    }
-  
-    // Записываем забитые и пропущенные мячи
-    $goals_scored[$team1] += $goals1;
-    $goals_conceded[$team1] += $goals2;
-  
-    $goals_scored[$team2] += $goals2;
-    $goals_conceded[$team2] += $goals1;
-  
-    // Заполняем данные о матчах для дома и гостя
-    if ($cupMode === 0 || $cupMode === 1) {
-        // Для одного круга и кубка: дублируем результат
-        $matches[$row['team1_id']][$row['team2_id']] = $goals1 || $goals2 ? "{$row['team1_goals']}:{$row['team2_goals']}" : "-";
-        $matches[$row['team2_id']][$row['team1_id']] = $goals1 || $goals2 ? "{$row['team2_goals']}:{$row['team1_goals']}" : "-";
-        $matchesHome[$row['team1_id']][$row['team2_id']] = $goals1 || $goals2 ? "{$row['team1_goals']}:{$row['team2_goals']}" : "-";
-        $matchesHome[$row['team2_id']][$row['team1_id']] = $goals1 || $goals2 ? "{$row['team2_goals']}:{$row['team1_goals']}" : "-";
-    } else {
-        // Для двух кругов - как обычно
-        $matches[$row['team1_id']][$row['team2_id']] = $goals1 || $goals2 ? "{$row['team1_goals']}:{$row['team2_goals']}" : "-";
-        $matches[$row['team2_id']][$row['team1_id']] = $goals1 || $goals2 ? "{$row['team2_goals']}:{$row['team1_goals']}" : "-";
-        $matchesHome[$row['team1_id']][$row['team2_id']] = $goals1 || $goals2 ? "{$row['team1_goals']}:{$row['team2_goals']}" : "-";
-    }
-  
-     // Заполняем данные о командах
-     $teams[$row['team1_id']] = [
-         'name' => $row['team1_name'], 
-         'logo' => $row['team1_logo'], 
-         'group' => $row['team1_group']
-     ];
-     $teams[$row['team2_id']] = [
-         'name' => $row['team2_name'], 
-         'logo' => $row['team2_logo'], 
-         'group' => $row['team2_group']
-     ];
-  }
-  
-  // Инициализация турнирной таблицы
-  $stats = [];
-  
-  foreach ($teams as $team_id => $team_data) {
-    $stats[$team_id] = [
-        'name' => $team_data['name'],
-        'logo' => $team_data['logo'],
-        'games' => $games_count[$team_id],
-        'wins' => $wins_count[$team_id],
-        'draws' => $draws_count[$team_id],
-        'losses' => $losses_count[$team_id],
-        'goals_scored' => $goals_scored[$team_id],
-        'goals_conceded' => $goals_conceded[$team_id],
-        'points' => $wins_count[$team_id] * 3 + $draws_count[$team_id],
-        'group' => $team_data['group'],
-        'matches_home' => $matchesHome[$team_id],
-        
+// Определяем количество кругов
+$cupMode = isset($teams[0]['cup']) ? (int)$teams[0]['cup'] : 2; // По умолчанию два круга
+
+$groupedTeams = [];
+$teamIndex = [];
+$index = 1;
+foreach ($teams as $team) {
+    $group = $team['grupa'] ?: ''; // Если группа пустая
+    $groupedTeams[$group][] = $team;
+    $teamIndex[$team['id']] = $index++;
+}
+
+// 2. Получаем результаты матчей
+$sql = "SELECT team1, team2, gols1, gols2 FROM v9ky_match 
+        WHERE turnir = :turnirId AND canseled = 1 AND cup_stage = 0";
+$matches = $dbF->query($sql, ['turnirId' => $turnir])->findAll();
+
+
+// 3. Формируем таблицу результатов
+$stats = [];
+$matchResults = [];
+foreach ($teams as $team) {
+    $stats[$team['id']] = [
+        'name' => $team['name'], 'games' => 0, 'wins' => 0, 'draws' => 0, 'losses' => 0, 'points' => 0, 'goals_for' => 0, 'goals_against' => 0
     ];
-  }
-  
-  /// Сортировка с учетом всех критериев
-  uasort($stats, function ($a, $b) {
-    // 1. Сортировка по очкам
-    if ($b['points'] !== $a['points']) {
-        return $b['points'] - $a['points'];
+    $matchResults[$team['id']] = array_fill(1, count($teams), '');
+}
+
+foreach ($matches as $match) {
+    if ($match['gols1'] !== null && $match['gols2'] !== null) {
+        $stats[$match['team1']]['games']++;
+        $stats[$match['team2']]['games']++;
+        $stats[$match['team1']]['goals_for'] += $match['gols1'];
+        $stats[$match['team1']]['goals_against'] += $match['gols2'];
+        $stats[$match['team2']]['goals_for'] += $match['gols2'];
+        $stats[$match['team2']]['goals_against'] += $match['gols1'];
+
+        if ($match['gols1'] > $match['gols2']) {
+            $stats[$match['team1']]['wins']++;
+            $stats[$match['team1']]['points'] += 3;
+            $stats[$match['team2']]['losses']++;
+        } elseif ($match['gols1'] < $match['gols2']) {
+            $stats[$match['team2']]['wins']++;
+            $stats[$match['team2']]['points'] += 3;
+            $stats[$match['team1']]['losses']++;
+        } else {
+            $stats[$match['team1']]['draws']++;
+            $stats[$match['team2']]['draws']++;
+            $stats[$match['team1']]['points'] += 1;
+            $stats[$match['team2']]['points'] += 1;
+        }
+        
+        // Заполняем таблицу матчей
+        if ($cupMode == 2) {
+          $matchResults[$match['team1']][$teamIndex[$match['team2']]] .= "{$match['gols1']}:{$match['gols2']} ";
+          // $matchResults[$match['team2']][$teamIndex[$match['team1']]] .= "Г:{$match['gols2']}:{$match['gols1']} ";
+        } else {
+            $matchResults[$match['team1']][$teamIndex[$match['team2']]] = "{$match['gols1']}:{$match['gols2']}";
+            $matchResults[$match['team2']][$teamIndex[$match['team1']]] = "{$match['gols2']}:{$match['gols1']}";
+        }
     }
-    
-    // 2. Сортировка по разнице мячей (забитые - пропущенные)
-    $goal_difference_a = $a['goals_scored'] - $a['goals_conceded'];
-    $goal_difference_b = $b['goals_scored'] - $b['goals_conceded'];
-    
-    if ($goal_difference_b !== $goal_difference_a) {
-        return $goal_difference_b - $goal_difference_a;
-    }
-  
-    // 3. Сортировка по количеству забитых мячей
-    return $b['goals_scored'] - $a['goals_scored'];
-  });
+}
+
+// Сортируем команды по очкам, разнице мячей, победам, забитым мячам
+foreach ($groupedTeams as $group => &$teams) {
+    usort($teams, function ($a, $b) use ($stats) {
+        $aStats = $stats[$a['id']];
+        $bStats = $stats[$b['id']];
+
+        if ($bStats['points'] !== $aStats['points']) {
+            return $bStats['points'] - $aStats['points'];
+        }
+        
+        if ($bStats['games'] !== $aStats['games']) {
+            return $bStats['games'] - $aStats['games'];
+        }
+
+        if (($bStats['goals_for'] - $bStats['goals_against']) !== ($aStats['goals_for'] - $aStats['goals_against'])) {
+            return ($bStats['goals_for'] - $bStats['goals_against']) - ($aStats['goals_for'] - $aStats['goals_against']);
+        }
+        if ($bStats['wins'] !== $aStats['wins']) {
+            return $bStats['wins'] - $aStats['wins'];
+        }
+        return $bStats['goals_for'] - $aStats['goals_for'];
+    });
+}
+
   
   // Данные кубка
   $cupData = getCupData($turnir);
