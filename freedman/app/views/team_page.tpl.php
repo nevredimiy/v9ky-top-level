@@ -340,15 +340,15 @@
 <?php } ?>
 <div class="team-page__players">
     <?php $idx = 0 ?>
-    <div style="display: none"><?php dump_arr_first($players) ?></div>
+    <div style="display: none"><?php dump_arr($players) ?></div>
     <?php foreach ($players as $player): ?>
 
       <?php          
           // Получение индивидуальной статистики. Player Card.
           if (isset($allStaticPlayers)) { $indStaticPlayer = getIndStaticPlayer($allStaticPlayers, $player['id']); }  
       ?>
-      <!-- Если тренер или менеджер, то не показываем карточку игрока -->
-      <?php if ( $player['amplua'] != 4 && $player['amplua'] != 5 )  :?>      
+      <!-- Если игрок не активен , то не показываем карточку игрока -->
+      <?php if ( $player['active'] != 0  )  :?>      
         
       <div data-player-id="<?=$player['id']?>" id="playerCard<?= $idx ?>" class="card-player-full content-image">
           <?php 

@@ -888,7 +888,6 @@ function getPlayersOfTeam($teamId, $kep=0)
         LEFT JOIN
         	`v9ky_man` m ON m.id = p.man
         WHERE p.`team` = :team_id 
-        ". $active ." 
         ORDER BY 
             `active` desc, 
             `vibuv`, 
@@ -2212,7 +2211,7 @@ function getTopGravtsi($allStaticPlayers, $dataAllPlayers, $lastTur){
       $countGoals = array_sum(array_column($matches, 'count_goals'));
       $countAsists = array_sum(array_column($matches, 'count_asists'));
       
-      $countGolevoypas = array_sum(array_column($matches, 'golevoypas'));
+    //   $countGolevoypas = array_sum(array_column($matches, 'golevoypas'));
       $countYellowCards = array_sum(array_column($matches, 'yellow_cards'));
       $countYellowRedCards = array_sum(array_column($matches, 'yellow_red_cards'));
       $countRed_cards = array_sum(array_column($matches, 'red_cards'));  
@@ -2222,7 +2221,7 @@ function getTopGravtsi($allStaticPlayers, $dataAllPlayers, $lastTur){
       $countBestPlayerOfMatch = isset($countBPM[$playerId]) ? $countBPM[$playerId] : 0;
 
       $totalGoals = array_sum(array_column($matches, 'count_goals'));
-      $totalGolevoypas = array_sum(array_column($matches, 'golevoypas'));
+    //   $totalGolevoypas = array_sum(array_column($matches, 'count_asists'));
       $totalZagostrennia = array_sum(array_column($matches, 'zagostrennia'));
       $totalPasplus = array_sum(array_column($matches, 'pasplus'));
       $totalPasminus= array_sum(array_column($matches, 'pasminus'));
@@ -2238,7 +2237,7 @@ function getTopGravtsi($allStaticPlayers, $dataAllPlayers, $lastTur){
       $totalSeyvmin = array_sum(array_column($matches, 'seyvmin'));
 
       $totalKeySort = $totalGoals * 15 
-          + $totalGolevoypas * 10 
+          + $countAsists * 10 
           + $totalZagostrennia * 10
           + $totalPasplus * 3 
           - $totalPasminus * 3 
@@ -2251,7 +2250,7 @@ function getTopGravtsi($allStaticPlayers, $dataAllPlayers, $lastTur){
           - $totalOtbormin * 5 
           + $totalBlok * 4 
           + $totalSeyv * 15 
-          - $totalSeyv * 7;
+          - $totalSeyvmin * 7;
 
       if(!is_array($totalKeySort)) {
   
@@ -2273,7 +2272,7 @@ function getTopGravtsi($allStaticPlayers, $dataAllPlayers, $lastTur){
   
               'count_goals' => $countGoals,
               'count_asists' => $countAsists,
-              'golevoypas' => $countGolevoypas, 
+            //   'golevoypas' => $countGolevoypas, 
               'yellow_cards' => $countYellowCards,
               'yellow_red_cards' => $countYellowRedCards,
               'red_cards' => $countRed_cards,

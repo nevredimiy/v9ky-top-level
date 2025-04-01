@@ -1,29 +1,76 @@
 <?php
 
+// Запросы построены так, что бы игроки были в списке исавалифицированных только один тур.
+// Запрос на игроков у которые красные карточки
+$sqlRedCard = "SELECT 
+        r.`player`,
+        p.`man`,
+        m.`name1` as lastname,
+        m.`name2` as firstname,
+        mf.`pict` as player_photo,
+        t.`pict` as team_photo,
+        t.`name` as team_name 
+    FROM v9ky_red r 
+    LEFT JOIN `v9ky_player` p
+            ON p.`id` = r.`player` 
+    LEFT JOIN `v9ky_man` m
+        ON m.`id` = p.`man` 
+    LEFT JOIN `v9ky_man_face` mf
+        ON mf.`id` = (
+            SELECT max(id)
+            FROM `v9ky_man_face` mff
+            WHERE mff.`man` = p.`man`
+        )
+    LEFT JOIN `v9ky_team` t
+        ON t.`id` = p.`team`  
+    WHERE matc = ( SELECT id 
+            FROM v9ky_match m 
+            WHERE canseled=1 
+            AND turnir=:turnir 
+            AND ( m.team1 = r.team OR m.team2 = r.team) 
+            ORDER BY m.date DESC LIMIT 1)";
+
 // Запрос на игроков которые "вибули"
-$queryGetVibuv = "SELECT
-	p.id,
-    t.name AS team_name,
-    t.pict AS team_photo,
-    m.name1 AS lastname, 
-    m.name2 AS firstname,
-    (SELECT mf.pict 
-     FROM v9ky_man_face mf 
-     WHERE mf.man = p.man 
-     ORDER BY mf.id DESC LIMIT 1) AS player_photo,
-    (SELECT COUNT(*) FROM v9ky_red r WHERE r.player = p.id) AS red_card_count,
-    (SELECT COUNT(*) FROM v9ky_yellow_red yr WHERE yr.player = p.id) AS yellow_red_card_count,
-    (SELECT COUNT(*) FROM v9ky_yellow y WHERE y.player = p.id) AS yellow_card_count
-FROM `v9ky_player` p 
-LEFT JOIN v9ky_team t ON t.id = p.team
-LEFT JOIN v9ky_man m ON m.id = p.man
+$disPlayers = $dbF->query($sqlRedCard, ['turnir' => $turnir])->findALl();
 
-WHERE p.`team` IN (SELECT id FROM v9ky_team WHERE turnir = :turnir) AND `vibuv` > 0 AND active > 0";
 
-// Делаем запрос в БД на игроков которые "вибули"
-$stmtDisPlayer = $mysqli->prepare($queryGetVibuv);
-$stmtDisPlayer->bindParam(':turnir', $turnir, PDO::PARAM_INT);
-$stmtDisPlayer->execute();
-$disPlayers = $stmtDisPlayer->fetchAll(PDO::FETCH_ASSOC);
+// игроки у которых больше трех желтых карточек за турнир
+$sqlYellowCard = "SELECT 
+        y.`player`,
+        p.`man`,
+        m.`name1` as lastname,
+        m.`name2` as firstname,
+        mf.`pict` as player_photo,
+        t.`pict` as team_photo,
+        t.`name` as team_name
+    FROM v9ky_yellow y
+    LEFT JOIN `v9ky_player` p
+            ON p.`id` = y.`player` 
+        LEFT JOIN `v9ky_man` m
+            ON m.`id` = p.`man` 
+        LEFT JOIN `v9ky_man_face` mf
+            ON mf.`id` = (
+                SELECT max(id)
+                FROM `v9ky_man_face` mff
+                WHERE mff.`man` = p.`man`
+            )
+        LEFT JOIN `v9ky_team` t
+            ON t.`id` = p.`team`  
+
+    WHERE  ( ( SELECT count(id) FROM v9ky_yellow WHERE player=y.player ) > 2 ) 
+    AND ( 
+            (SELECT MAX(tur) FROM v9ky_match WHERE id=y.matc AND canseled = 1 AND turnir=:turnir)
+                =
+            (SELECT max(tur) FROM v9ky_match WHERE canseled=1 AND turnir=:turnir)
+        ) 
+    AND player NOT IN (SELECT player FROM v9ky_red b WHERE (b.player=y.player) AND ((SELECT tur FROM v9ky_match WHERE id=b.matc) >= (SELECT min(tur) FROM v9ky_match WHERE id in (SELECT matc FROM v9ky_yellow WHERE player=b.player) AND canseled=1 AND turnir=:turnir AND (team1=team or team2=team) order by date desc limit 3))) 
+    AND matc in (SELECT id FROM v9ky_match WHERE canseled=1 AND turnir=:turnir) 
+    GROUP BY player";
+
+$disThreeYellowPlayer = $dbF->query($sqlYellowCard, ['turnir' => $turnir])->findALl();
+if(count($disThreeYellowPlayer) > 0){
+    $disPlayers = array_merge($disPlayers, $disThreeYellowPlayer);
+}
+
 
 require_once VIEWS . '/disqualification.tpl.php';

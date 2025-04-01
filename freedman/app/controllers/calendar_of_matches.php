@@ -62,7 +62,7 @@ $dateLastTurString = $selectedDate;
 $dateLastTur = new DateTime($dateLastTurString);
 
 // Добавляем 5 дней - это количество дней, когда админы должны внести все данные по последнему туру
-$dateLastTur->modify('+5 days');
+$dateLastTur->modify('+ 6days');
 
 $playerOfDateTur = getPlayersOfDateTur( $allStaticPlayers, $daysOfTur['first_day'], $daysOfTur['last_day'] );
 

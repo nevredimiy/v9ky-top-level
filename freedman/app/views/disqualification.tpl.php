@@ -18,10 +18,10 @@
                             <span>1 </span>
                         </div> -->
 
-                        <img class="player-card__right-icon" src="<?= $team_logo_path ?>/<?= $player['team_photo'] ?>"
+                        <img class="player-card__right-icon" src="<?= $team_logo_path ?><?= $player['team_photo'] ?>"
                             alt="Логотип команди">
 
-                        <img class="player-card__photo" src="<?= $player_face_path ?>/<?= $player['player_photo'] ?>"
+                        <img class="player-card__photo" src="<?= $player_face_path ?><?= $player['player_photo'] ?>"
                             alt="Фото гравця">
                     </div>
 
@@ -29,9 +29,9 @@
                     <div class="player-card__club"><?= $player['team_name'] ?></div>
                     <div class="player-card__name"><?= $player['firstname'] ?> <?= $player['lastname'] ?></div>
 
-                    <a href="#" class="player-card__link">
+                    <a href="<?= $site_url ?>/<?= $tournament ?>/disqualification_table " class="player-card__link">
                         <span>Таблиця</span>
-                        <img src="css/components/player-card/assets/images/arrow-icon.svg" alt="arrow">
+                        <img src="/css/components/player-card/assets/images/arrow-icon.svg" alt="arrow">
                     </a>
                 </div>
 
@@ -39,6 +39,10 @@
             <?php endforeach ?>
             <?php else :?>
             <h2>На даний момент в лізі немає дискваліфікованних гравців</h2>
+            <a href="<?= $site_url ?>/<?= $tournament ?>/disqualification_table " class="player-card__link">
+                        <span>Перейти до Таблиці</span>
+                        <img src="/css/components/player-card/assets/images/arrow-icon.svg" alt="arrow">
+                    </a>
             <?php endif ?>
         </div>
 

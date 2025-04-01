@@ -1,5 +1,4 @@
 <?php
-
 // Увімкнення відображення помилок
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -7,26 +6,24 @@ ini_set('display_startup_errors', 1);
 // Встановлення рівня звітності помилок
 error_reporting(E_ALL);
 
-include_once CONTROLLERS . "/head.php"; 
+
+include_once CONTROLLERS . "/head.php";
+
 include_once CONTROLLERS . "/leagues.php";
 include_once CONTROLLERS . "/rating_players.php";
 
+// Проверяем, задана ли переменная $turnir
+if (!isset($turnir)) {
+    die('Ошибка: переменная $turnir не задана.');
+}
 
 if(!isset($turnir) && !isset($tournament)) {
-  $turnir = getTurnir();
+    $turnir = getTurnir();
 }
 
 if(!isset($turnir)) {
-  $turnir = getTurnir($tournament);
+    $turnir = getTurnir($tournament);
 }
-
-// Проверяем, задана ли переменная $turnir
-if (!isset($turnir)) {
-  die('Ошибка: переменная $turnir не задана.');
-}
-
-
-
 
 
 // 1. Получаем команды и определяем группы
@@ -62,12 +59,27 @@ $sql = "SELECT team1, team2, gols1, gols2 FROM v9ky_match
 $matches = $dbF->query($sql, ['turnirId' => $turnir])->findAll();
 
 
+// получаем катрочки 
+$sql = "SELECT team, COUNT(*) AS red_cards FROM v9ky_red WHERE matc IN (SELECT id FROM `v9ky_match` WHERE turnir = :turnirId) GROUP BY team";
+$redCards = $dbF->query($sql, ['turnirId' => $turnir])->findAll();
+$sql = "SELECT team, COUNT(*) AS yellow_cards FROM v9ky_yellow WHERE matc IN (SELECT id FROM `v9ky_match` WHERE turnir = :turnirId) GROUP BY team";
+$yellowCards = $dbF->query($sql, ['turnirId' => $turnir])->findAll();
+
+foreach($redCards as $red){
+    $redCards[$red['team']] = $red['red_cards'];
+}
+
+foreach($yellowCards as $yellow){
+    $yellowCards[$yellow['team']] = $yellow['yellow_cards'];
+}
+
 // 3. Формируем таблицу результатов
 $stats = [];
 $matchResults = [];
 foreach ($teams as $team) {
     $stats[$team['id']] = [
-        'name' => $team['name'], 'games' => 0, 'wins' => 0, 'draws' => 0, 'losses' => 0, 'points' => 0, 'goals_for' => 0, 'goals_against' => 0
+        'name' => $team['name'], 'games' => 0, 'wins' => 0, 'draws' => 0, 'losses' => 0, 'points' => 0, 'goals_for' => 0, 'goals_against' => 0,
+        'red_cards' => isset($redCards[$team['id']]) ? $redCards[$team['id']] : 0, 'yellow_cards' => isset($yellowCards[$team['id']]) ? $yellowCards[$team['id']] : 0
     ];
     $matchResults[$team['id']] = array_fill(1, count($teams), '');
 }
@@ -104,56 +116,146 @@ foreach ($matches as $match) {
             $matchResults[$match['team1']][$teamIndex[$match['team2']]] = "{$match['gols1']}:{$match['gols2']}";
             $matchResults[$match['team2']][$teamIndex[$match['team1']]] = "{$match['gols2']}:{$match['gols1']}";
         }
+
+        
     }
 }
 
-// Сортируем команды по очкам, разнице мячей, победам, забитым мячам
+// dump($stats);
+// dump($teams);
+
+// function sortTeams(&$teams, $matches) {
+//     usort($teams, function ($a, $b) use ($matches, $teams) {
+//         // 1. Сортируем по очкам (по убыванию)
+//         if ($b['points'] != $a['points']) {
+//             return $b['points'] - $a['points'];
+//         }
+        
+//         // Найдем команды с одинаковыми очками
+//         $group = array();
+//         foreach ($teams as $id => $team) {
+//             if ($team['points'] == $a['points']) {
+//                 $group[$id] = $team;
+//             }
+//         }
+        
+//         // 2. Проверяем, играли ли команды друг с другом
+//         $headToHead = array();
+//         foreach ($matches as $match) {
+//             $t1 = (int)$match['team1'];
+//             $t2 = (int)$match['team2'];
+//             if (isset($group[$t1]) && isset($group[$t2])) {
+//                 $headToHead["$t1-$t2"] = array((int)$match['gols1'], (int)$match['gols2']);
+//             }
+//         }
+        
+//         // Если есть личные встречи - сортируем по ним
+//         if (isset($headToHead["$a-$b"])) {
+//             list($goalsA, $goalsB) = $headToHead["$a-$b"];
+//             if ($goalsA != $goalsB) {
+//                 return $goalsB - $goalsA; // Победитель выше
+//             }
+            
+//             // 3. Если очки в личных встречах равны - разница мячей в этих матчах
+//             $diffA = $goalsA - $goalsB;
+//             $diffB = $goalsB - $goalsA;
+//             return $diffB - $diffA;
+//         }
+        
+//         // 4. Если нет личных встреч - разница забитых и пропущенных мячей
+//         $goalDiffA = $a['goals_for'] - $a['goals_against'];
+//         $goalDiffB = $b['goals_for'] - $b['goals_against'];
+//         return $goalDiffB - $goalDiffA;
+//     });
+// }
+
+
+
+// // Сортируем
+// foreach ($groupedTeams as $group => &$teams) {
+    // sortTeams($stats, $matches);
+// }
+// // Вывод отсортированного массива
+// print_r($teams);
+
+
+
+// 5. Сортируем команды
 foreach ($groupedTeams as $group => &$teams) {
-  usort($teams, function ($a, $b) use ($stats) {
-      $aStats = $stats[$a['id']];
-      $bStats = $stats[$b['id']];
+    usort($teams, function ($a, $b) use ($stats, $matches) {
+        $aStats = $stats[$a['id']];
+        $bStats = $stats[$b['id']];
 
-      if ($bStats['points'] !== $aStats['points']) {
-          return $bStats['points'] - $aStats['points'];
-      }
-      if ($bStats['games'] !== $aStats['games']) {
-        return $bStats['games'] - $aStats['games'];
-    }
-      if (($bStats['goals_for'] - $bStats['goals_against']) !== ($aStats['goals_for'] - $aStats['goals_against'])) {
-          return ($bStats['goals_for'] - $bStats['goals_against']) - ($aStats['goals_for'] - $aStats['goals_against']);
-      }
-      if ($bStats['wins'] !== $aStats['wins']) {
-          return $bStats['wins'] - $aStats['wins'];
-      }
-      return $bStats['goals_for'] - $aStats['goals_for'];
-  });
+        // 1. Сортировка по очкам в турнире
+        if ($bStats['points'] !== $aStats['points']) {
+            return $bStats['points'] - $aStats['points'];
+        }
+
+        // 2. Группировка команд с одинаковыми очками
+        $samePointsTeams = [];
+        foreach ($stats as $teamId => $teamStats) {
+            if ($teamStats['points'] === $aStats['points']) {
+                $samePointsTeams[$teamId] = [
+                    'id' => $teamId,
+                    'points' => 0, // Виртуальные очки за очные встречи
+                    'goal_difference' => $teamStats['goals_for'] - $teamStats['goals_against'],
+                    'goals_for' => $teamStats['goals_for'],
+                    'red_cards' => $teamStats['red_cards'],
+                    'yellow_cards' => $teamStats['yellow_cards']
+                ];
+            }
+        }
+
+        // 3. Подсчет очков за очные встречи
+        foreach ($matches as $match) {
+            $t1 = $match['team1'];
+            $t2 = $match['team2'];
+
+            if (isset($samePointsTeams[$t1]) && isset($samePointsTeams[$t2])) {
+                if ($match['gols1'] > $match['gols2']) {
+                    $samePointsTeams[$t1]['points'] += 3;
+                } elseif ($match['gols1'] < $match['gols2']) {
+                    $samePointsTeams[$t2]['points'] += 3;
+                } else {
+                    $samePointsTeams[$t1]['points'] += 1;
+                    $samePointsTeams[$t2]['points'] += 1;
+                }
+            }
+        }
+
+        // 4. Сортировка по очным встречам
+        if ($samePointsTeams[$b['id']]['points'] !== $samePointsTeams[$a['id']]['points']) {
+            return $samePointsTeams[$b['id']]['points'] - $samePointsTeams[$a['id']]['points'];
+        }
+
+        // 5. Разница забитых и пропущенных мячей в турнире
+        if ($samePointsTeams[$b['id']]['goal_difference'] !== $samePointsTeams[$a['id']]['goal_difference']) {
+            return $samePointsTeams[$b['id']]['goal_difference'] - $samePointsTeams[$a['id']]['goal_difference'];
+        }
+
+        // 6. Количество забитых мячей (чем больше, тем выше)
+        if ($samePointsTeams[$b['id']]['goals_for'] !== $samePointsTeams[$a['id']]['goals_for']) {
+            return $samePointsTeams[$b['id']]['goals_for'] - $samePointsTeams[$a['id']]['goals_for'];
+        }
+
+        // 7. Красные карточки (чем меньше, тем выше)
+        if ($samePointsTeams[$a['id']]['red_cards'] !== $samePointsTeams[$b['id']]['red_cards']) {
+            return $samePointsTeams[$a['id']]['red_cards'] - $samePointsTeams[$b['id']]['red_cards'];
+        }
+
+        // 8. Желтые карточки (чем меньше, тем выше)
+        return $samePointsTeams[$a['id']]['yellow_cards'] - $samePointsTeams[$b['id']]['yellow_cards'];
+    });
 }
 
 
 
-/// Выводим турнирную таблицу
-foreach ($groupedTeams as $group => $teams) {
-  echo "<h2>Группа $group</h2>";
-  echo "<table border='1'><tr><th>#</th><th>Команда</th><th>И</th><th>В</th><th>Н</th><th>П</th><th>Очки</th><th>Мячи</th>";
-  foreach ($teams as $t) echo "<th>{$teamIndex[$t['id']]}</th>";
-  echo "</tr>";
   
-  foreach ($teams as $i => $team) {
-      $id = $team['id'];
-      echo "<tr><td>" . ($i + 1) . "</td><td>{$stats[$id]['name']}</td><td>{$stats[$id]['games']}</td><td>{$stats[$id]['wins']}</td><td>{$stats[$id]['draws']}</td><td>{$stats[$id]['losses']}</td><td>{$stats[$id]['points']}</td><td>{$stats[$id]['goals_for']}:{$stats[$id]['goals_against']}</td>";
-      foreach ($teams as $t) echo "<td>{$matchResults[$id][$teamIndex[$t['id']]]}</td>";
-      echo "</tr>";
-  }
-  echo "</table>";
-}
-
-
-
-// Данные кубка
-$cupData = getCupData($turnir);
-
-// require_once VIEWS . '/table.tpl.php';
+  // Данные кубка
+  $cupData = getCupData($turnir);
 ?>
+
+
 
 <section data-cup-mode="<?= $cupMode ?>" class="table-league">
 
@@ -212,6 +314,8 @@ $cupData = getCupData($turnir);
                                 <th><span class="cell cell--draw">Н</span></th>
                                 <th><span class="cell cell--defeat">П</span></th>
                                 <th class="td-scored"><span class="cell cell--scored">Г</span></th>
+                                <th class="td-scored"><span class="cell cell--scored">ЧК</span></th>
+                                <th class="td-scored"><span class="cell cell--scored">ЖК</span></th>
                                 <th><span class="cell cell--total">О</span></th>
                             </tr>
 
@@ -223,15 +327,11 @@ $cupData = getCupData($turnir);
                                     <td><img width="18" height="18" class="cell--team-logo" src="<?= $team_logo_path ?>/<?= $team['logo'] ?>"></td>
                                     <td><a href="<?= $site_url . '/' . $tournament .'/team_page/id/' . $team_id ?>"><span class="cell--team"><?= $stats[$id]['name']?></span></a></td>
 
-                                    <?php foreach ($teams as $t): ?>   
-                                        <td>
-                                            <?php if($t['id'] == $team_id): ?>                                                         
-                                                <span class="cell--score cell--own"></span>
-                                            <?php else :?>
-                                                <span class="cell--score<?= $t['id'] == $team_id ? ' cell--own' : '' ?>">
-                                                    <?= empty( $matchResults[$id][$teamIndex[$t['id']]] ) ? '-' : $matchResults[$id][$teamIndex[$t['id']]] ?>
-                                                </span>
-                                            <?php endif?>
+                                    <?php foreach ($teams as $t): ?>                                                            
+                                      <td>
+                                        <span class="cell--score<?= $t['id'] == $team_id ? ' cell--own' : '' ?>">
+                                          <?= empty( $matchResults[$id][$teamIndex[$t['id']]] ) ? '-' : $matchResults[$id][$teamIndex[$t['id']]] ?>
+                                        </span>
                                       </td>                                        
                                     <?php endforeach ?>
 
@@ -240,6 +340,8 @@ $cupData = getCupData($turnir);
                                     <td><span class="cell cell--draw"><?= $stats[$id]['draws']?></span></td>
                                     <td><span class="cell cell--defeat"><?= $stats[$id]['losses']?></span></td>
                                     <td class="td-scored"><span class="cell cell--scored"><?= $stats[$id]['goals_for']?> - <?= $stats[$id]['goals_against'] ?> </span></td>
+                                    <td class="td-scored"><span class="cell cell--scored"><?= $stats[$id]['red_cards']?></span></td>
+                                    <td class="td-scored"><span class="cell cell--scored"><?= $stats[$id]['yellow_cards']?></span></td>
                                     <td><span class="cell cell--total"><?= $stats[$id]['points']?></span></td>
                                 </tr>
                             <?php endforeach ?>
@@ -252,13 +354,17 @@ $cupData = getCupData($turnir);
     <?php endforeach; ?>
 </section>
 
+
+
+
+
 <?php 
+
+
+
+
 
 include_once CONTROLLERS . "/calendar_of_matches.php";
 include_once CONTROLLERS . "/controls.php";
 include_once CONTROLLERS . "/disqualification.php";
-
-require_once CONTROLLERS . '/footer.php';
-
-
-
+include_once CONTROLLERS . "/footer.php";

@@ -680,7 +680,7 @@ if (isset($params['id'])) {
 </article>
 
 
-<?
+<?php
   function faceupload($man, $team, $tour){
     echo '<form method="post" action="http://v9ky.in.ua/capitan/crop/" enctype="multipart/form-data">
       <input type="file" name="rule_picture" value="Загрузить новую" onchange="this.form.submit();">

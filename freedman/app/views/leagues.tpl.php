@@ -9,10 +9,10 @@
 			<div class="swiper-slide">
 				<div class="leagues__item<?= $active ?>">
 				<a data-tournament="<?=$league['slug']?>" data-turnir="<?= $league['id'] ?>" href="<?=$site_url?>/<?=$league['link']?>">
-					<span class="leagues__item-title"><?=$league['name']?></span>
+				<span class="leagues__item-title"><?= empty($league['name']) ? $league['full_name'] : $league['name']?></span>
 					<div class="leagues__item-location">
 						<img src="/css/components/leagues/assets/images/location-icon.svg" alt="location">
-						<span><?= $league['locale_name'] ?></span>              
+						<span><?= empty($league['locale_name']) ? $league['city_name'] : $league['locale_name'] ?></span>                
 					</div>
 				</a>
 				</div>

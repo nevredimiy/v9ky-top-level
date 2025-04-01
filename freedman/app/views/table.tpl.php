@@ -56,6 +56,8 @@
                                 <th><span class="cell cell--draw">Н</span></th>
                                 <th><span class="cell cell--defeat">П</span></th>
                                 <th class="td-scored"><span class="cell cell--scored">Г</span></th>
+                                <th class="td-scored"><span class="cell cell--scored">ЧК</span></th>
+                                <th class="td-scored"><span class="cell cell--scored">ЖК</span></th>
                                 <th><span class="cell cell--total">О</span></th>
                             </tr>
 
@@ -80,6 +82,8 @@
                                     <td><span class="cell cell--draw"><?= $stats[$id]['draws']?></span></td>
                                     <td><span class="cell cell--defeat"><?= $stats[$id]['losses']?></span></td>
                                     <td class="td-scored"><span class="cell cell--scored"><?= $stats[$id]['goals_for']?> - <?= $stats[$id]['goals_against'] ?> </span></td>
+                                    <td class="td-scored"><span class="cell cell--scored"><?= $stats[$id]['red_cards']?></span></td>
+                                    <td class="td-scored"><span class="cell cell--scored"><?= $stats[$id]['yellow_cards']?></span></td>
                                     <td><span class="cell cell--total"><?= $stats[$id]['points']?></span></td>
                                 </tr>
                             <?php endforeach ?>
