@@ -100,6 +100,11 @@
   padding: 2px;
 }
 
+.statistic table.width-auto tr th,
+.statistic table.width-auto tr td {
+  padding: 2px 10px;
+}
+
 .statistic table tr th:nth-child(4),
 .statistic table tr td:nth-child(4) {
   text-align: right;
@@ -113,12 +118,20 @@
   text-align: center;
 }
 
+.statistic table.width-auto tr td:has(img) {
+  text-align: left;
+}
+
 .statistic table tr td img {
   height: 100%;
   text-align: center;
   vertical-align: middle;
   width: 100%;
   max-width: 40px;
+}
+
+.statistic table.width-auto tr td img {
+   max-width: max-content;
 }
 
 .statistic table tr td img:nth-child(3) {

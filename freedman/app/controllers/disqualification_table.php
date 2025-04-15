@@ -199,7 +199,7 @@ foreach($violationTable as $item) {
 <div class="statistic">
     <div class="container">
         <?php if(count($disPlayers) > 0) : ?>
-            <table id="top-pas" class="draggable-container">
+            <table id="top-pas" class="draggable-container width-auto">
                 <caption>
                     Дискваліфікація
                 </caption>
@@ -224,7 +224,7 @@ foreach($violationTable as $item) {
                                 <img src="<?=$team_logo_path?>/<?= $player['team_logo'] ?>" alt="team-logo">
                                 <?= $player['team'] ?>
                             </td>
-                            <td class="name-cell">
+                            <td>
                                 <img src="<?= IMAGES . '/red-card-icon.png' ?>" alt="">
                                 <?= $player['tur'] ?> тур
                             </td>
@@ -242,7 +242,7 @@ foreach($violationTable as $item) {
                                     <img src="<?=$team_logo_path?>/<?= $player['team_logo'] ?>" alt="team-logo">
                                     <?= $player['team'] ?>
                                 </td>
-                                <td class="name-cell">
+                                <td >
                                     <img src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
                                     <?= $player['tur'] ?> тур
                                 </td>
@@ -253,7 +253,7 @@ foreach($violationTable as $item) {
             </table>
         <?php endif ?>
         
-        <table id="top-pas" class="draggable-container">
+        <table id="top-pas" class="draggable-container width-auto">
             <caption>
                 Порушення
             </caption>
@@ -278,7 +278,7 @@ foreach($violationTable as $item) {
                             <img src="<?=$team_logo_path?>/<?= $player['team_logo'] ?>" alt="team-logo">
                             <?= $player['team'] ?>
                         </td>
-                        <td class="name-cell">
+                        <td >
                              <?php foreach( $dataCards[$player['pl_id']] as $card):?>
                                 <?php if($card['vid'] == 1): ?>
                                     <img src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">

@@ -41,8 +41,8 @@
 
 .table-league__table tr th,
 .table-league__table tr td {
-  padding: 3px;
-  width: 34px;
+  padding: 2px;
+  width: 29px;
   font-family: 'Roboto';
   font-style: normal;
   font-weight: 500;
@@ -59,12 +59,22 @@
 
 .table-league__table tr td.td-scored,
 .table-league__table tr th.td-scored {
-  width: 66px;
+  width: 60px;
 }
 
 .table-league__table tr th .cell--scored,
 .table-league__table tr td .cell--scored {
-  width: 66px;
+  width: 60px;
+}
+
+.table-league__table tr td.td-card,
+.table-league__table tr th.td-card {
+  width: 22px;
+}
+
+.table-league__table tr th .cell--card,
+.table-league__table tr td .cell--card {
+  width: 22px;
 }
 
 .table-league__table tr th:nth-child(3),
@@ -128,6 +138,7 @@
   border-radius: var(--border-radius-s);
   display: block;
   margin: 0 auto;
+  color: #C9C9C9;
 }
 
 .cell--team {
@@ -176,6 +187,8 @@ td .cell--team-logo {
     text-overflow: ellipsis;
     width: 140px;
   }
+
+
 }
 
 @media screen and (min-width: 1260px) {
@@ -333,6 +346,7 @@ td .cell--team-logo {
   .table__live td {
     font-size: 14px;
   }
+
 }
 
 @media screen and (min-width: 1240px) {

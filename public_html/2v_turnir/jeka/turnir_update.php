@@ -39,6 +39,20 @@ if ((!empty($_GET))){
 	$record["field"] = $field;
     $record["niz_turnirki"] = $niz_turnirki;
 
+    $colors_place = [];
+    for($i = 1; $i <= 10; $i++){
+        if(isset($_GET['color_place_' . $i])) {
+            $colors_place[] = $_GET['color_place_' . $i] ? $_GET['color_place_' . $i] : ''; 
+        }
+    }
+
+    if(!empty($colors_place)){
+        $record["color_place"] = implode("-", $colors_place);    
+    } else 
+    {
+        $record["color_place"] = ''; 
+    }
+
     //запись турнира в базу
     if (isset($_GET['red'])) {$redatirovat_or_else=intval($_GET['red']);
     } ELSE {$redatirovat_or_else=0;}
@@ -148,6 +162,51 @@ if ((!empty($_GET))){
          echo" value='1'>Кубок</option>
          
               </select><br><br>";
+            
+                  
+        if( isset( $_GET['id'] ) ){
+
+          $colors_place = $recordSet1->fields['color_place'] ? explode("-", $recordSet1->fields['color_place']) : 0;
+                      
+          $turnir = intval($_GET['id']);
+          $teamCount = $db->Execute("SELECT COUNT(*) FROM `v9ky_team` WHERE `turnir` = '". $turnir ."'");
+
+          $teamCount = intval($teamCount->fields[0]);
+          if($teamCount > 0){
+            echo "<h3>Кольори команд у турнірній таблиці</h3>";
+            echo "<p style='font-size:10px'>Якщо ніде не виберати колір, то за замовченням буде 1-золото, 2-срібло, 3-бронза</p>";
+            echo "<div style='display: flex; gap: 5px; justify-content:center'>";
+
+            $color_options = [
+              'empty' => 'Прозорий',
+              'gold' => 'Золотий',
+              'silver' => 'Срібний',
+              'bronze' => 'Бронзовий',
+              'red' => 'Червоний'
+            ];
+
+            for($i = 1; $i <= $teamCount; $i++) {
+              $selected_color = isset($colors_place[$i - 1]) ? $colors_place[$i - 1] : '0';
+              echo "<div style='display:flex; flex-direction: column'>";
+              echo "<label>{$i} місце</label>";
+              echo "<select name='color_place_{$i}'>";
+              echo "<option value='0'" . ($selected_color === '0' || $selected_color === '' ? " selected" : "") . ">Виберіть колір</option>";
+      
+              foreach ($color_options as $value => $label) {
+                  $selected = ($selected_color === $value) ? " selected" : "";
+                  echo "<option value='{$value}'{$selected}>{$label}</option>";
+              }
+      
+              echo "</select>";
+              echo "</div>";
+            }   
+
+            echo "</div>";
+          }
+        }  
+
+
+
      echo"<br> <br><input type='submit' value='  Изменить  '><input type='radio' name='red' value='1' checked>
 	   Внести изменения в турнир ".$name."<input type='radio' name='red' value='0'>
 	   Добавить как новую";
@@ -159,7 +218,7 @@ if ((!empty($_GET))){
   if (isset($_GET['red'])){ echo "Турнир: <H2> ".$name." </H2> изменения приняты";}
    //@header("Location: $_SERVER[РНР_SELF]" ) ;
 
-}else {
+} else {
    echo"Название полное: <input type='text' name='ru' size='100' ><br><br>";
    echo"Название символьное: <input type='text' name='name' size='100' ><br><br>";
 

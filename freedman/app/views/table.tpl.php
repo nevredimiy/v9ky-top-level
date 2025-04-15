@@ -56,8 +56,8 @@
                                 <th><span class="cell cell--draw">Н</span></th>
                                 <th><span class="cell cell--defeat">П</span></th>
                                 <th class="td-scored"><span class="cell cell--scored">Г</span></th>
-                                <th class="td-scored"><span class="cell cell--scored">ЧК</span></th>
-                                <th class="td-scored"><span class="cell cell--scored">ЖК</span></th>
+                                <th class="td-card"><span class="cell cell--card">ЧК</span></th>
+                                <th class="td-card"><span class="cell cell--card">ЖК</span></th>
                                 <th><span class="cell cell--total">О</span></th>
                             </tr>
 
@@ -65,7 +65,7 @@
                                 <?php $id = $team['id']; ?>
                                 <?php $team_id = $team['id']; ?>
                                 <tr>
-                                    <td><span class="cell"><?= $i + 1 ?></span></td>
+                                    <td><span <?= isset($teamColorPlace[$i]) && !empty($teamColorPlace[$i]) ? "style='{$colorStyles[$teamColorPlace[$i]]}'" : '' ?> class="cell" data-color="<?= $teamColorPlace[$i] ?>"><?= $i + 1 ?></span></td>
                                     <td><img width="18" height="18" class="cell--team-logo" src="<?= $team_logo_path ?>/<?= $team['logo'] ?>"></td>
                                     <td><a href="<?= $site_url . '/' . $tournament .'/team_page/id/' . $team_id ?>"><span class="cell--team"><?= $stats[$id]['name']?></span></a></td>
 
@@ -82,8 +82,8 @@
                                     <td><span class="cell cell--draw"><?= $stats[$id]['draws']?></span></td>
                                     <td><span class="cell cell--defeat"><?= $stats[$id]['losses']?></span></td>
                                     <td class="td-scored"><span class="cell cell--scored"><?= $stats[$id]['goals_for']?> - <?= $stats[$id]['goals_against'] ?> </span></td>
-                                    <td class="td-scored"><span class="cell cell--scored"><?= $stats[$id]['red_cards']?></span></td>
-                                    <td class="td-scored"><span class="cell cell--scored"><?= $stats[$id]['yellow_cards']?></span></td>
+                                    <td class="td-card"><span class="cell cell--card"><?= $stats[$id]['red_cards']?></span></td>
+                                    <td class="td-card"><span class="cell cell--card"><?= $stats[$id]['yellow_cards']?></span></td>
                                     <td><span class="cell cell--total"><?= $stats[$id]['points']?></span></td>
                                 </tr>
                             <?php endforeach ?>

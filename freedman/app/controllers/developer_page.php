@@ -9,6 +9,7 @@ error_reporting(E_ALL);
 
 include_once CONTROLLERS . "/head.php";
 
+
 include_once CONTROLLERS . "/leagues.php";
 include_once CONTROLLERS . "/rating_players.php";
 
@@ -33,7 +34,8 @@ $sql = "SELECT
         tm.`grupa`,
         tm.pict AS logo,
         t.ru AS turnir_name,
-        t.cup
+        t.cup,
+        t.color_place
       FROM `v9ky_team` tm
       LEFT JOIN 
         v9ky_turnir t ON t.id = tm.turnir
@@ -48,10 +50,21 @@ $groupedTeams = [];
 $teamIndex = [];
 $index = 1;
 foreach ($teams as $team) {
-    $group = $team['grupa'] ?: ''; // Если группа пустая
+    $group = $team['grupa'] ? $team['grupa'] : ''; // Если группа пустая
     $groupedTeams[$group][] = $team;
     $teamIndex[$team['id']] = $index++;
+    $teamColorPlace = $team['color_place'] ? explode("-", $team['color_place']) : '';
 }
+
+$colorStyles = [
+    'silver' => 'background: linear-gradient(180deg, #B9B9B9 0%, #E2E2E2 100%)',
+    'gold' => 'background-color: #FDBE11',
+    'bronze' => 'background-color: #CD7F32', 
+    'red' => 'background-color: #FF3B3B', 
+    'empty' => 'background-color: transporant', 
+];
+
+
 
 // 2. Получаем результаты матчей
 $sql = "SELECT team1, team2, gols1, gols2 FROM v9ky_match 
@@ -314,8 +327,8 @@ foreach ($groupedTeams as $group => &$teams) {
                                 <th><span class="cell cell--draw">Н</span></th>
                                 <th><span class="cell cell--defeat">П</span></th>
                                 <th class="td-scored"><span class="cell cell--scored">Г</span></th>
-                                <th class="td-scored"><span class="cell cell--scored">ЧК</span></th>
-                                <th class="td-scored"><span class="cell cell--scored">ЖК</span></th>
+                                <th class="td-card"><span class="cell cell--card">ЧК</span></th>
+                                <th class="td-card"><span class="cell cell--card">ЖК</span></th>
                                 <th><span class="cell cell--total">О</span></th>
                             </tr>
 
@@ -323,7 +336,7 @@ foreach ($groupedTeams as $group => &$teams) {
                                 <?php $id = $team['id']; ?>
                                 <?php $team_id = $team['id']; ?>
                                 <tr>
-                                    <td><span class="cell"><?= $i + 1 ?></span></td>
+                                    <td><span <?= isset($teamColorPlace[$i]) && !empty($teamColorPlace[$i]) ? "style='{$colorStyles[$teamColorPlace[$i]]}'" : '' ?> class="cell" data-color="<?= $teamColorPlace[$i] ?>"><?= $i + 1 ?></span></td>
                                     <td><img width="18" height="18" class="cell--team-logo" src="<?= $team_logo_path ?>/<?= $team['logo'] ?>"></td>
                                     <td><a href="<?= $site_url . '/' . $tournament .'/team_page/id/' . $team_id ?>"><span class="cell--team"><?= $stats[$id]['name']?></span></a></td>
 
@@ -340,8 +353,8 @@ foreach ($groupedTeams as $group => &$teams) {
                                     <td><span class="cell cell--draw"><?= $stats[$id]['draws']?></span></td>
                                     <td><span class="cell cell--defeat"><?= $stats[$id]['losses']?></span></td>
                                     <td class="td-scored"><span class="cell cell--scored"><?= $stats[$id]['goals_for']?> - <?= $stats[$id]['goals_against'] ?> </span></td>
-                                    <td class="td-scored"><span class="cell cell--scored"><?= $stats[$id]['red_cards']?></span></td>
-                                    <td class="td-scored"><span class="cell cell--scored"><?= $stats[$id]['yellow_cards']?></span></td>
+                                    <td class="td-card"><span class="cell cell--card"><?= $stats[$id]['red_cards']?></span></td>
+                                    <td class="td-card"><span class="cell cell--card"><?= $stats[$id]['yellow_cards']?></span></td>
                                     <td><span class="cell cell--total"><?= $stats[$id]['points']?></span></td>
                                 </tr>
                             <?php endforeach ?>
@@ -368,3 +381,5 @@ include_once CONTROLLERS . "/calendar_of_matches.php";
 include_once CONTROLLERS . "/controls.php";
 include_once CONTROLLERS . "/disqualification.php";
 include_once CONTROLLERS . "/footer.php";
+
+

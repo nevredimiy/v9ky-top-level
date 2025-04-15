@@ -107,19 +107,19 @@ foreach ($dataCurrentTur as $item) {
 
 
 $tshirtImages = [
-    0 => IMAGES . "/t-shirt/azure-shirt.png",
+    0 => IMAGES . "/t-shirt/gray-manish.png",
     1 => IMAGES . "/t-shirt/yellow-shirt.png",
     2 => IMAGES . "/t-shirt/white-shirt.png",
-    3 => IMAGES . "/t-shirt/azure-shirt.png",
-    4 => IMAGES . "/t-shirt/blue-shirt.png",
+    3 => IMAGES . "/t-shirt/black-shirt.png",
+    4 => IMAGES . "/t-shirt/light-blue-shirt.png",
     5 => IMAGES . "/t-shirt/red-shirt.png",
-    6 => IMAGES . "/t-shirt/azure-shirt.png",
+    6 => IMAGES . "/t-shirt/green-shirt.png",
     7 => IMAGES . "/t-shirt/orange-shirt.png",
-    8 => IMAGES . "/t-shirt/rose-shirt.png",
-    9 => IMAGES . "/t-shirt/azure-shirt.png",
-    10 => IMAGES . "/t-shirt/azure-shirt.png",
-    11 => IMAGES . "/t-shirt/azure-shirt.png",
-    12 => IMAGES . "/t-shirt/azure-shirt.png",
+    8 => IMAGES . "/t-shirt/purpur-shirt.png",
+    9 => IMAGES . "/t-shirt/gray-shirt.png",
+    10 => IMAGES . "/t-shirt/blue-shirt.png",
+    11 => IMAGES . "/t-shirt/brown-shirt.png",
+    12 => IMAGES . "/t-shirt/light-green-shirt.png",
 ];
 
 

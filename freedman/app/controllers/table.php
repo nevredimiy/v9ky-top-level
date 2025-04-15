@@ -21,7 +21,8 @@ $sql = "SELECT
         tm.`grupa`,
         tm.pict AS logo,
         t.ru AS turnir_name,
-        t.cup
+        t.cup,
+        t.color_place
       FROM `v9ky_team` tm
       LEFT JOIN 
         v9ky_turnir t ON t.id = tm.turnir
@@ -36,10 +37,19 @@ $groupedTeams = [];
 $teamIndex = [];
 $index = 1;
 foreach ($teams as $team) {
-    $group = $team['grupa'] ?: ''; // Если группа пустая
+    $group = $team['grupa'] ? $team['grupa'] : ''; // Если группа пустая
     $groupedTeams[$group][] = $team;
     $teamIndex[$team['id']] = $index++;
+    $teamColorPlace = $team['color_place'] ? explode("-", $team['color_place']) : '';
 }
+
+$colorStyles = [
+    'silver' => 'background: linear-gradient(180deg, #B9B9B9 0%, #E2E2E2 100%)',
+    'gold' => 'background: #FDBE11',
+    'bronze' => 'background: #CD7F32', 
+    'red' => 'background: #FF3B3B', 
+    'empty' => 'background: transporant', 
+];
 
 // 2. Получаем результаты матчей
 $sql = "SELECT team1, team2, gols1, gols2 FROM v9ky_match 
