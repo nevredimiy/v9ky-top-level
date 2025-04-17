@@ -69,6 +69,7 @@ $_SESSION['upload_errors'] = $errors;
 $_SESSION['upload_success'] = $success;
 
 // Переадресація назад
-header("Location: team_update.php?id=" . intval($_POST['team_id']));
+$team_id = isset($_POST['team_id']) ? intval($_POST['team_id']) : 0;
+header("Location: team_update.php?id=" . $team_id);
 exit;
 ?>

@@ -289,19 +289,18 @@ if ((!empty($_GET))){
     $checked = ($recordSet1->fields['tshirt'] == $relativePath) ? 'checked' : '';
   
       echo '<li style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px;">';
-      echo '<label style="display: flex; align-items: center;">';
+      echo '<label style="display:flex; flex-direction: column; align-items: center; justify-content: center;">';
       echo '<input type="radio" name="tshirt_select" value="' . $relativePath . '" ' . $checked . ' style="margin-right: 10px;">';
       echo '<img src="/img/t-shirt/' . $relativePath . '" style="width: 30px; height: auto; border:1px solid #ccc; padding:4px; margin-right:10px;">';
+      echo '<div style="font-size: 10px">' .$relativePath .'</div>';
       echo '</label>';
+      // Кнопка удаления
+  echo '<button type="button" onclick="deleteTshirt(\'' . htmlspecialchars($relativePath) . '\')" style="font-size:10px; margin-left: 10px; background:red; color:white; border:none; padding:4px 8px; cursor:pointer;">Видалити</button>';
       echo '</li>';
   }  
   echo '</ul>';
 
-  // include_once('add_tshirt.tpl.php');
-  
-
-
-        
+          
               
 	 echo"Посилання на фото команди: <input type='text' name='photo' size='100' value='".($recordSet1->fields['photo'])."'>";
 	 echo "<br><br>";
@@ -365,6 +364,12 @@ if (!empty($_SESSION['upload_success'])) {
   <input type="hidden" name="team_id" value="<?=$_GET['id']?>">
   <input type="submit" value="  Завантажити футблоку  ">
 </form>
+
+<form id="deleteForm" method="POST" action="delete_tshirt.php" style="display:none;">
+  <input type="hidden" name="filename" id="deleteFilename">
+  <input type="hidden" name="team_id" value="<?=$_GET['id']?>">
+</form>
+
 <?
   $dir = $pict_path; // Папка с изображениями
   $cols = 8; // Количество столбцов в будущей таблице с картинками
@@ -407,6 +412,16 @@ if (!empty($_SESSION['upload_success'])) {
   echo "</table>"; // Закрываем таблицу
 
 ?>
+
+<script>
+function deleteTshirt(filename) {
+  if (confirm("Видалити футболку: " + filename + "?")) {
+    document.getElementById("deleteFilename").value = filename;
+    document.getElementById("deleteForm").submit();
+  }
+}
+</script>
+
 </center>
 </body>
 </html>
