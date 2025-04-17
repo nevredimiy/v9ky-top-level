@@ -47,11 +47,13 @@ function getDataMatchesUnplayed(){
         m.tur, 
         m.team1,
         m.tcolor1 as color_tshirt1,
+        m.tshirt1 as tshirt1,
         t1.id AS team1_id,
         t1.name AS team1_name,
         t1.pict AS team1_photo,
         m.team2,    
         m.tcolor2 as color_tshirt2,
+        m.tshirt2 as tshirt2,
         t2.id AS team2_id,
         t2.name AS team2_name,
         t2.pict AS team2_photo,
@@ -105,6 +107,7 @@ foreach ($dataCurrentTur as $item) {
     $groupedData[$dateWithoutTime][] = $item;
 }
 
+// dump_arr_first($groupedData);
 
 $tshirtImages = [
     0 => IMAGES . "/t-shirt/gray-manish.png",

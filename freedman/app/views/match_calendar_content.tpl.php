@@ -10,9 +10,9 @@
             <a data-target="matchCalendar<?= $i.$j ?>" title="Зберегти матч" class="card-of-matches__share-button save-image" href="#">
                 <img src="<?= $site_url?>/freedman/assets/images/button-share-icon.svg" alt="share">
             </a>
-            <div class="card-of-matches__title-match">
-                <img data-shirt="<?= $v['color_tshirt1'] ?>" class=" card-of-matches__shirt
-                        card-of-matches__shirt--left" src="<?= $tshirtImages[$v['color_tshirt1']] ?>" alt="yellow">
+            <div data-matchid="<?= $v['id'] ?>" class="card-of-matches__title-match">
+                <img data-shirt="<?= $v['tshirt1'] ?>" class=" card-of-matches__shirt
+                        card-of-matches__shirt--left" src="/img/t-shirt/<?= $v['tshirt1'] ?>" alt="color t-shirt">
 
                 <img class="card-of-matches__team-logo card-of-matches__team-logo--left"
                     src="<?= $team_logo_path?><?= $v['team1_photo']?>" alt="Logo Team <?= $v['team1_name'] ?>">
@@ -42,9 +42,9 @@
 
                 <p class="card-of-matches__team card-of-matches__team--right"><?= $v['team2_name'] ?></p>
 
-                <img data-shirt="<?= $v['color_tshirt2'] ?>"
+                <img data-shirt="<?= $v['tshirt2'] ?>"
                     class="card-of-matches__shirt card-of-matches__shirt--right"
-                    src="<?= $tshirtImages[$v['color_tshirt2']] ?>" alt="blue">
+                    src="/img/t-shirt/<?= $v['tshirt2'] ?>" alt="Колір форми">
 
                 <div class="card-of-matches__marks">
                     <a class="card-of-matches__mark"><span><?= $v['season'] ?></span></a>

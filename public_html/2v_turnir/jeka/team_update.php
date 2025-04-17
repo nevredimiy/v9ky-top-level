@@ -2,6 +2,7 @@
 define('READFILE', true);
 require_once ("menu.php");
 require_once('ajax_forms/PHPLiveX.php');
+session_start();
 
 
 
@@ -66,7 +67,7 @@ if ((!empty($_GET))){
 	//копирование команды
    if (isset($_GET['copy'])){
 	   if (isset($_GET['id'])) {$team_id=intval($_GET['id']);
-	 $recor = $db->Execute("select teams, date, name, pict, capitan, tel1, photo, email from v9ky_team where id='".$team_id."'");
+	 $recor = $db->Execute("select teams, date, name, pict, capitan, tel1, photo, email, tshirt from v9ky_team where id='".$team_id."'");
 	 $db->AutoExecute('v9ky_team',$recor->fields,'INSERT');
 	 $recordSet10 = $db->Execute("select * from v9ky_team where id=(SELECT LAST_INSERT_ID())");
      $id_to=$recordSet10->fields['id'];
@@ -119,6 +120,7 @@ if ((!empty($_GET))){
     if (isset($_GET['last_call1'])) {$last_call1=($_GET['last_call1']); } ELSE {$last_call1="";}
     if (isset($_GET['last_call2'])) {$last_call2=($_GET['last_call2']); } ELSE {$last_call2="";}
     if (isset($_GET['last_call3'])) {$last_call3=($_GET['last_call3']); } ELSE {$last_call3="";}
+    if (isset($_GET['tshirt_select'])) {$tshirt_select=($_GET['tshirt_select']); } ELSE {$tshirt_select="";}
 
     $record["name"] = $name;
     $record["email"] = $email;
@@ -139,6 +141,7 @@ if ((!empty($_GET))){
     $record["last_call1"] = $last_call1;
     $record["last_call2"] = $last_call2;
     $record["last_call3"] = $last_call3;
+    $record["tshirt"] = $tshirt_select;
 
 	//запись в базу
 	if (isset($_GET['red'])) {$redatirovat_or_else=intval($_GET['red']);
@@ -245,34 +248,60 @@ if ((!empty($_GET))){
            $colors[$i]="";
            if($recordSet1->fields['tcolor']==$i) $colors[$i]=" checked";
          }
-         echo'<input id="img1" type="radio" name="tcolor" value="1"'.$colors[1].'>
-              <label for="img1"><img width=30px src="picts/1t.jpg" ></label>
-              <input id="img2" type="radio" name="tcolor" value="2"'.$colors[2].'>
-              <label for="img2"><img width=30px src="picts/2t.jpg" ></label>
-              <input id="img3" type="radio" name="tcolor" value="3"'.$colors[3].'>
-              <label for="img3"><img width=30px src="picts/3t.jpg" ></label>
-              <input id="img4" type="radio" name="tcolor" value="4"'.$colors[4].'>
-              <label for="img4"><img width=30px src="picts/4t.jpg" ></label>
-              <input id="img5" type="radio" name="tcolor" value="5"'.$colors[5].'>
-              <label for="img5"><img width=30px src="picts/5t.jpg" ></label>
-              <input id="img6" type="radio" name="tcolor" value="6"'.$colors[6].'>
-              <label for="img6"><img width=30px src="picts/6t.jpg" ></label>
-              <input id="img7" type="radio" name="tcolor" value="7"'.$colors[7].'>
-              <label for="img7"><img width=30px src="picts/7t.jpg" ></label>
-              <input id="img8" type="radio" name="tcolor" value="8"'.$colors[8].'>
-              <label for="img8"><img width=30px src="picts/8t.jpg" ></label>
-              <input id="img9" type="radio" name="tcolor" value="9"'.$colors[9].'>
-              <label for="img9"><img width=30px src="picts/9t.jpg" ></label>
-              <input id="img10" type="radio" name="tcolor" value="10"'.$colors[10].'>
-              <label for="img10"><img width=30px src="picts/10t.jpg" ></label>
-              <input id="img11" type="radio" name="tcolor" value="11"'.$colors[11].'>
-              <label for="img11"><img width=30px src="picts/11t.jpg" ></label>
-              <input id="img12" type="radio" name="tcolor" value="12"'.$colors[12].'>
-              <label for="img12"><img width=30px src="picts/12t.jpg" ></label>
-              <input id="img13" type="radio" name="tcolor" value="0"'.$colors[0].'>
-              <label for="img13"><img width=30px src="picts/0m.jpg" ></label>
+        //  echo'<input id="img1" type="radio" name="tcolor" value="1"'.$colors[1].'>
+        //       <label for="img1"><img width=30px src="picts/1t.jpg" ></label>
+        //       <input id="img2" type="radio" name="tcolor" value="2"'.$colors[2].'>
+        //       <label for="img2"><img width=30px src="picts/2t.jpg" ></label>
+        //       <input id="img3" type="radio" name="tcolor" value="3"'.$colors[3].'>
+        //       <label for="img3"><img width=30px src="picts/3t.jpg" ></label>
+        //       <input id="img4" type="radio" name="tcolor" value="4"'.$colors[4].'>
+        //       <label for="img4"><img width=30px src="picts/4t.jpg" ></label>
+        //       <input id="img5" type="radio" name="tcolor" value="5"'.$colors[5].'>
+        //       <label for="img5"><img width=30px src="picts/5t.jpg" ></label>
+        //       <input id="img6" type="radio" name="tcolor" value="6"'.$colors[6].'>
+        //       <label for="img6"><img width=30px src="picts/6t.jpg" ></label>
+        //       <input id="img7" type="radio" name="tcolor" value="7"'.$colors[7].'>
+        //       <label for="img7"><img width=30px src="picts/7t.jpg" ></label>
+        //       <input id="img8" type="radio" name="tcolor" value="8"'.$colors[8].'>
+        //       <label for="img8"><img width=30px src="picts/8t.jpg" ></label>
+        //       <input id="img9" type="radio" name="tcolor" value="9"'.$colors[9].'>
+        //       <label for="img9"><img width=30px src="picts/9t.jpg" ></label>
+        //       <input id="img10" type="radio" name="tcolor" value="10"'.$colors[10].'>
+        //       <label for="img10"><img width=30px src="picts/10t.jpg" ></label>
+        //       <input id="img11" type="radio" name="tcolor" value="11"'.$colors[11].'>
+        //       <label for="img11"><img width=30px src="picts/11t.jpg" ></label>
+        //       <input id="img12" type="radio" name="tcolor" value="12"'.$colors[12].'>
+        //       <label for="img12"><img width=30px src="picts/12t.jpg" ></label>
+        //       <input id="img13" type="radio" name="tcolor" value="0"'.$colors[0].'>
+        //       <label for="img13"><img width=30px src="picts/0m.jpg" ></label>
               
-              <br><br>';
+        //       <br><br>';
+
+  $tshirtDir = '../../img/t-shirt/';
+  $tshirtFiles = glob($tshirtDir . '*.png'); 
+  // var_dump($tshirtFiles);
+  echo '<ul style="list-style: none; display:flex; flex-wrap:wrap; gap: 10px; padding: 0; margin: 0;">';
+  foreach ($tshirtFiles as $file) {
+    // Отримуємо тільки частину шляху від /img...
+    // $relativePath = str_replace('../..', '', $file);  
+    $relativePath = basename($file);  
+    
+    $checked = ($recordSet1->fields['tshirt'] == $relativePath) ? 'checked' : '';
+  
+      echo '<li style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px;">';
+      echo '<label style="display: flex; align-items: center;">';
+      echo '<input type="radio" name="tshirt_select" value="' . $relativePath . '" ' . $checked . ' style="margin-right: 10px;">';
+      echo '<img src="/img/t-shirt/' . $relativePath . '" style="width: 30px; height: auto; border:1px solid #ccc; padding:4px; margin-right:10px;">';
+      echo '</label>';
+      echo '</li>';
+  }  
+  echo '</ul>';
+
+  // include_once('add_tshirt.tpl.php');
+  
+
+
+        
               
 	 echo"Посилання на фото команди: <input type='text' name='photo' size='100' value='".($recordSet1->fields['photo'])."'>";
 	 echo "<br><br>";
@@ -311,6 +340,30 @@ function putpict(name) {
 <form action="add_pict.php" method="POST" onSubmit="return sendForm(this);" ENCTYPE='multipart/form-data'>
   Добавить картинку: <input type="file" name="rule_picture" size="50" >
   <input type="submit" value="  Загрузить картинку  ">
+</form>
+
+
+<?php
+// Повідомлення валідації
+if (!empty($_SESSION['upload_errors'])) {
+  echo '<div style="color: red; margin-bottom: 10px;">';
+  foreach ($_SESSION['upload_errors'] as $error) {
+      echo htmlspecialchars($error) . "<br>";
+  }
+  echo '</div>';
+  unset($_SESSION['upload_errors']);
+}
+if (!empty($_SESSION['upload_success'])) {
+  echo '<div style="color: green; margin-bottom: 10px;">' . htmlspecialchars($_SESSION['upload_success']) . '</div>';
+  unset($_SESSION['upload_success']);
+}
+?>
+<form action="add_tshirt.php" method="POST" ENCTYPE='multipart/form-data'>
+  <h2 style="margin-bottom: 0">Додати футболку</h2>
+  <p style="font-size: 10px">тільки png, розміром до 1 Мб</p>
+  <input type="file" name="tshirt_upload" size="50" id="tshirt_upload" >  
+  <input type="hidden" name="team_id" value="<?=$_GET['id']?>">
+  <input type="submit" value="  Завантажити футблоку  ">
 </form>
 <?
   $dir = $pict_path; // Папка с изображениями
