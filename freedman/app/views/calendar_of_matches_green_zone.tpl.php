@@ -1,4 +1,7 @@
-<div class="green-zone__current">
+<div class="green-zone__current content-to-capture">
+    <button id="captureAndShare" class="anons__share-btn">
+		<img src="<?= IMAGES . '/button-share-icon.svg' ?>" alt="Зберегти зображення">
+	</button>
     <h2 class="green-zone__title title">ЗБІРНА ТУРУ</h2>
     <div class=" <?= $currentTur <= $lastTur ? 'green-zone__players' : '' ?>">
     
@@ -52,6 +55,16 @@
                 alt="v9ku-logo">
         </div>
 
+    </div>
+
+     <!-- Модальное окно с ссылками -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <p>Виберіть месенджер для надсилання скріншоту:</p>
+            <a id="shareViber" href="#" class="share-btn viber"><img src="<?= IMAGES . '/viber-logo-icon.svg' ?>" alt="Відправити у Viber"> Відправити у Viber</a>
+            <a id="shareTelegram" href="#" class="share-btn telegram"><img src="<?= IMAGES . '/telegram-logo-icon.svg' ?>" alt="Відправити у Telegram"> Відправити у Telegram</a>
+            <button id="closeModal" class="close-btn">Закрити</button>
+        </div>
     </div>
 
 </div>

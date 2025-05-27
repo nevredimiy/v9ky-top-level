@@ -1,8 +1,10 @@
 <section class="anons">
-    <div class="anons__container">
-        <div class="anons__share">
-            <button class="anons__share-btn"><img src="css/components/card-of-matches/assets/images/share-icon.svg" alt="Зберегти зображення"></button>
-        </div>
+    
+    <button id="captureAndShare" class="anons__share-btn">
+        <img src="<?= IMAGES . '/button-share-icon.svg' ?>" alt="Зберегти зображення">
+    </button>
+    
+    <div class="anons__container content-to-capture">
         <div class="anons__head">
             <div class="anons__teams">
                 <div class="anons__teams-content">
@@ -96,6 +98,16 @@
                     <div class="totalizator__item percent"><?= round($percentages['team2Win']) ?>%</div>
                 </div>
             </div>
+        </div>
+    </div>
+
+     <!-- Модальное окно с ссылками -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <p>Виберіть месенджер для надсилання скріншоту:</p>
+            <a id="shareViber" href="#" class="share-btn viber"><img src="<?= IMAGES . '/viber-logo-icon.svg' ?>" alt="Відправити у Viber"> Відправити у Viber</a>
+            <a id="shareTelegram" href="#" class="share-btn telegram"><img src="<?= IMAGES . '/telegram-logo-icon.svg' ?>" alt="Відправити у Telegram"> Відправити у Telegram</a>
+            <button id="closeModal" class="close-btn">Закрити</button>
         </div>
     </div>
 </section>

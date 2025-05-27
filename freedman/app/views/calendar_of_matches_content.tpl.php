@@ -188,15 +188,15 @@
 </div><!-- calendar-of-matches__head-nav -->
 
 <div class="calendar-of-matches__dynamic-content">
-        <section class="green-zone content-to-capture">
+        <section class="green-zone">
             <?php if($dateLastTur <= $dateNow) : ?>
-            <div id="capture" class="green-zone__current">
+                <button id="captureAndShare" class="anons__share-btn">
+                    <img src="<?= IMAGES . '/button-share-icon.svg' ?>" alt="Зберегти зображення">
+                </button>
+            <div id="capture" class="green-zone__current content-to-capture">
                 <h2 class="green-zone__title title">ЗБІРНА ТУРУ</h2>
-                <div class="controls__share">
-                    <button id="captureAndShare" class="controls__share-btn capture-btn">
-                        <img src="<?= $site_url ?>/css/components/match-stats/assets/images/button-share-icon.svg" alt="Зберегти зображення">
-                    </button>
-                </div>
+                
+                
                 <div class=" <?= $currentTur <= $lastTur ? 'green-zone__players' : '' ?>">
 
                         <?php if(!empty($bestPlayersForTable)):?>

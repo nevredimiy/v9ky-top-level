@@ -393,7 +393,7 @@
                   <?php elseif ($player['dubler']): ?>
                   <img src="/css/components/team-page/assets/images/dubler-icon.png" alt="Дублер">
                   <?php elseif ($player['vibuv']): ?>
-                  <img class="vibuv" src="/css/components/team-page/assets/images/vibuv.png" alt="Вибув">
+                  <img class="vibuv" src="<?= IMAGES .  '/vibuv.png'?>" alt="Вибув">
                 <?php endif ?>
                                   
               </div>

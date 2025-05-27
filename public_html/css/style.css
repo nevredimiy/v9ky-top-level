@@ -67,6 +67,10 @@ pre {
 	text-align: center;
 }
 
+.text-green {
+	color: #6ddb80;
+}
+
 
 .danger-info {
 	text-transform: uppercase;
@@ -281,7 +285,7 @@ pre {
 }
 
 .capture-btn:disabled {
-	background-color: gray;
+	background-color: #6ddb80;
 	cursor: not-allowed;
 }
 

@@ -1,10 +1,8 @@
 <section class="controls">
-	<div id="kkd-players" class="controls__container">
-		<div class="controls__share">
-			<button class="controls__share-btn save-image" data-target="kkd-players">
-				<img src="css/components/match-stats/assets/images/button-share-icon.svg" alt="Зберегти зображення">
-			</button>
-		</div>
+	<button id="captureAndShare" class="anons__share-btn">
+		<img src="<?= IMAGES . '/button-share-icon.svg' ?>" alt="Зберегти зображення">
+	</button>
+	<div id="kkd-players" class="controls__container content-to-capture">		
 		<div class="controls__head">
 			<div class="controls__head-title">ККД Гравців</div>
 			<div class="controls__head-info">
@@ -174,7 +172,7 @@
 			<ul class="kkd__list">
 				<li class="kkd__item"><span class="text-green">Г</span> - Гол</li>
 				<li class="kkd__item"><span class="text-green">ГП</span> - Гольова передача</li>
-				<li class="kkd__item"><span class="text-green">ЗП</span> - Загостючий пас</li>
+				<li class="kkd__item"><span class="text-green">ЗП</span> - Загострюючий пас</li>
 				<li class="kkd__item"><span class="text-green">П</span> - Вдалий пас</li>
 				<li class="kkd__item"><span class="text-red">П</span> - Невдалий пас</li>
 				<li class="kkd__item"><span class="text-red">ВМ</span> - Втрата м'яча</li>
@@ -190,8 +188,17 @@
 				<li class="kkd__item"><span>Т</span> - Сумарний тотал</li>
 			</ul>
 		</div>
-
 	</div>
+
+     <!-- Модальное окно с ссылками -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <p>Виберіть месенджер для надсилання скріншоту:</p>
+            <a id="shareViber" href="#" class="share-btn viber"><img src="<?= IMAGES . '/viber-logo-icon.svg' ?>" alt="Відправити у Viber"> Відправити у Viber</a>
+            <a id="shareTelegram" href="#" class="share-btn telegram"><img src="<?= IMAGES . '/telegram-logo-icon.svg' ?>" alt="Відправити у Telegram"> Відправити у Telegram</a>
+            <button id="closeModal" class="close-btn">Закрити</button>
+        </div>
+    </div>
 </section>
 
 <script>

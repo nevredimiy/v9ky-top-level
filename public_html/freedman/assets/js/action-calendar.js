@@ -1,7 +1,7 @@
 
 $(document).ready(function () {
 
-     // ВЕРХНИЙ СЛАЙДЕР С ДАТАМИ МАТЧЕЙ
+    // ВЕРХНИЙ СЛАЙДЕР С ДАТАМИ МАТЧЕЙ
     $('.calendar-of-matches__grid-container').on('click', '[data-first-day]', function (e) {
 
         e.preventDefault();
@@ -21,11 +21,11 @@ $(document).ready(function () {
             $.ajax({
                 type: "post",
                 url: "../freedman/actions/actions.php",
-                data: JSON.stringify({ 
-                    turnir: turnir, 
-                    lasttur: lastTur, 
-                    action: 'calendar_of_matches', 
-                    selected_date: selectedDate,  
+                data: JSON.stringify({
+                    turnir: turnir,
+                    lasttur: lastTur,
+                    action: 'calendar_of_matches',
+                    selected_date: selectedDate,
                     first_day: firstDay,
                     last_day: lastDay
                 }),
@@ -46,7 +46,7 @@ $(document).ready(function () {
                             }
                         });
                     });
-   
+
 
                     swiperMonthControls = new Swiper('.swiper-month-controls', {
                         enabled: true,
@@ -101,12 +101,12 @@ $(document).ready(function () {
                     } else {
                         console.warn('Слайд с указанным дочерним классом не найден.');
                     }
-                    
+
                     function toggleScrollbar(swiper) {
                         const scrollbar = document.querySelector('.swiper-scrollbar');
-                        
+
                         if (!scrollbar) return; // Проверяем, есть ли скроллбар
-                    
+
                         if (swiper.isLocked) {
                             scrollbar.style.display = 'none'; // Скрываем скроллбар
                         } else {
@@ -115,6 +115,8 @@ $(document).ready(function () {
                     }
 
                     $("#controls").html(response.section2);
+
+                    createScreenshot();
 
                 },
                 error: function (xhr, status, error) {
@@ -162,6 +164,7 @@ $(document).ready(function () {
                 data: JSON.stringify({ match_id: matchId, tur: tur, turnir: turnir, action: 'anons' }),
                 success: function (response) {
                     $('.green-zone').html(response);
+                    createScreenshot();
                 }, // Привязываем контекст к функции 
                 error: function (xhr, status, error) {
                     console.error('Ошибка AJAX:', error); // Логируем ошибку
@@ -210,6 +213,7 @@ $(document).ready(function () {
                 data: JSON.stringify({ match_id: matchId, tur: tur, turnir: turnir, action: 'match_stats', team1_id: team1Id, team2_id: team2Id }),
                 success: function (response) {
                     $('.green-zone').html(response);
+                    createScreenshot();
                 }, // Привязываем контекст к функции 
                 error: function (xhr, status, error) {
                     console.error('Ошибка AJAX:', error); // Логируем ошибку
@@ -255,6 +259,7 @@ $(document).ready(function () {
                 data: JSON.stringify({ match_id: matchId, tur: tur, turnir: turnir, action: 'kkd' }),
                 success: function (response) {
                     $('.green-zone').html(response);
+                    createScreenshot();
                 }, // Привязываем контекст к функции 
                 error: function (xhr, status, error) {
                     console.error('Ошибка AJAX:', error); // Логируем ошибку
@@ -390,6 +395,7 @@ $(document).ready(function () {
                 data: JSON.stringify({ match_id: matchId, tur: tur, turnir: turnir, action: 'photo' }),
                 success: function (response) {
                     $('.green-zone').html(response);
+                    createScreenshot();
                 }, // Привязываем контекст к функции 
                 error: function (xhr, status, error) {
                     console.error('Ошибка AJAX:', error); // Логируем ошибку
@@ -462,15 +468,12 @@ $(document).ready(function () {
         }
     });
 
+    // Кнопка внизу - включает лучшего игрока тура
     $('#controls').on('click', '[data-turid]', function (e) {
 
         e.preventDefault();
 
-
-
         $('.card-of-matches__controls-link').css('background', '');
-        console.log($('.card-of-matches__controls-link'));
-
 
         // Инициализация: записываем GET-параметр в data-атрибут
         const turId = getUrlParameter('tur');
@@ -489,6 +492,7 @@ $(document).ready(function () {
                 data: JSON.stringify({ tur: tur, turnir: turnir, lasttur: lastTur, action: 'green_zone' }),
                 success: function (response) {
                     $('.green-zone').html(response);
+                    createScreenshot();
                 },
                 error: function (xhr, status, error) {
                     console.error('Ошибка AJAX:', error); // Логируем ошибку
@@ -589,6 +593,85 @@ function colorRedBtnCurrent() {
 function getUrlParameter(name) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.get(name);
+}
+
+function createScreenshot() {
+    let captureBtn = $("#captureAndShare");
+    let modal = $("#shareModal");
+    let closeModalBtn = $("#closeModal");
+    let shareViber = $("#shareViber");
+    let shareTelegram = $("#shareTelegram");
+
+    captureBtn.on("click", function () {
+        let captureElement = $(".content-to-capture");
+
+        if (captureElement.length === 0) {
+            alert("Помилка: елемент для скріншоту не знайдено!");
+            return;
+        }
+
+        // Отключаем кнопку, чтобы предотвратить двойные клики
+        // captureBtn.prop("disabled", true).text("Створення скриншоту...");
+        captureBtn.prop("disabled", true).css("oppacity", "0.5");
+
+        // Создание скриншота
+        html2canvas(captureElement[0]).then(canvas => {
+            canvas.toBlob(blob => {
+                let formData = new FormData();
+                formData.append("image", blob, "screenshot.png");
+
+                // Отправка скриншота на сервер
+                $.ajax({
+                    url: "../freedman/actions/uploads1.php",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        // captureBtn.prop("disabled", false).html("<img src='https://v9ky.in.ua/css/components/match-stats/assets/images/button-share-icon.svg' alt='Зберегти зображення'>");
+                        captureBtn.prop("disabled", false).css("opacity", "0.9");
+
+                        try {
+                            let data = JSON.parse(response);
+                            if (data.success) {
+                                let imageUrl = encodeURIComponent(data.link);
+
+                                // Устанавливаем ссылки на Viber и Telegram
+                                shareViber.attr("href", `viber://forward?text=${imageUrl}`);
+                                shareTelegram.attr("href", `https://t.me/share/url?url=${imageUrl}`);
+
+                                // Показываем модальное окно
+                                modal.show();
+                            } else {
+                                alert("Помилка завантаження зображення!");
+                            }
+                        } catch (e) {
+                            alert("Помилка обробки даних!");
+                            console.error("Помилка:", e);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        captureBtn.prop("disabled", false).html("<img src='https://v9ky.in.ua/css/components/match-stats/assets/images/button-share-icon.svg' alt='Зберегти зображення'>");
+                        console.error("Помилка:", error);
+                        alert("Помилка завантаження даних!");
+                    }
+                });
+            });
+        });
+    });
+
+    // Закрытие модального окна
+    closeModalBtn.on("click", function () {
+        modal.hide();
+    });
+
+    // Закрытие при клике вне окна
+    $(window).on("click", function (event) {
+        if ($(event.target).is(modal)) {
+            modal.hide();
+        }
+    });
+
 }
 
 

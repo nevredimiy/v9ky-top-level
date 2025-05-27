@@ -4,7 +4,7 @@
 
         <div class="transfer__cards">
             <?php foreach($transfers as $transfer) : ?>
-            <?php if($transfer['action']) : ?>
+            <?php if($transfer['real_action']) : ?>
             <div class="transfer-card transfer-card--arrival">
                 <a class="transfer-card__player">
                     <img src="<?= $player_face_path ?><?= $transfer['photo'] ?>"

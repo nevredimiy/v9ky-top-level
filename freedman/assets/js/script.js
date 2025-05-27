@@ -170,6 +170,7 @@ container?.addEventListener('mouseleave', () => {
 
 // Делимся скриншотом в телеграме и вайбере
 $(document).ready(function () {
+    console.log('222')
     let captureBtn = $("#captureAndShare");
     let modal = $("#shareModal");
     let closeModalBtn = $("#closeModal");

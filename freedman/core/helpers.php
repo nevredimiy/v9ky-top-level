@@ -1221,31 +1221,35 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
     }
 
     if($playerRole == 'golkiper') {
-      
-      // Шаг 1: Вычисляем тотал для каждого элемента
-      foreach ($playerOfTur as $key => $item) {
-          $total[$key] = $item['seyv'] + $item['seyvmin'] == 0 ? 0 : ( 100 / ( $item['seyv'] + $item['seyvmin'] ) ) * $item['seyv'];
-      }
-  
-      // Шаг 2: Находим максимальное значение тотала
-      if(empty($total)){
-        $maxTotal = 0;
-      } else {
-        $maxTotal = max($total);
-      }
-  
-      // Шаг 3: Отбираем все элементы, у которых сумма равна максимальной
-      $result = array_filter($playerOfTur, function ($item) use ($maxTotal) {
-          return ( $item['seyv'] + $item['seyvmin'] == 0 ? 0 : ( 100 / ( $item['seyv'] + $item['seyvmin'] ) ) * $item['seyv'] ) == $maxTotal;
-      });
-  
-      // Добавляем игроку ключ что он лучший в туре
-      foreach($result as $key => $res){
-        $result[$key]['best_player'] = 'golkiper';
-        $result[$key]['count_points'] = round($maxTotal, 0);
-      }
 
-    }
+      // Фильтруем только тех голкиперов, у которых минимум 3 сэйва
+      $filtered = array_filter($playerOfTur, function ($item) {
+          return $item['seyv'] >= 4;
+      });
+
+      // Шаг 1: Вычисляем тотал для каждого элемента
+      foreach ($filtered as $key => $item) {
+          $total[$key] = ($item['seyv'] + $item['seyvmin'] == 0) ? 0 : (100 / ($item['seyv'] + $item['seyvmin'])) * $item['seyv'];
+      }
+      
+
+      // Шаг 2: Находим максимальное значение тотала
+      $maxTotal = empty($total) ? 0 : max($total);
+
+      // dump($maxTotal);
+
+      // Шаг 3: Отбираем все элементы, у которых сумма равна максимальной
+      $result = array_filter($filtered, function ($item) use ($maxTotal) {
+          return ($item['seyv'] + $item['seyvmin'] == 0 ? 0 : (100 / ($item['seyv'] + $item['seyvmin'])) * $item['seyv']) == $maxTotal;
+      });
+
+      // Добавляем игроку ключ что он лучший в туре
+      foreach ($result as $key => $res) {
+          $result[$key]['best_player'] = 'golkiper';
+          $result[$key]['count_points'] = round($maxTotal, 0);
+      }
+  }
+
 
 
 

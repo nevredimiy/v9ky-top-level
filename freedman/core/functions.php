@@ -1242,6 +1242,7 @@ function getTime($date)
             $transfers[$key]['firstname'] = $arr[2];
             $transfers[$key]['photo'] = $playerData['photo'] ? $playerData['photo'] : 'avatar1.jpg';
             $transfers[$key]['action'] = $field['del_id'] ?  0 : 1; // если в $field['del_id'] = 0 - это добавление игрока в команду. Иначе удаление.
+            $transfers[$key]['real_action'] = $arr[3] == 'додано' ? 0 : 1;
                                 
         } else {
             $sql_man = "SELECT 
@@ -1251,7 +1252,10 @@ function getTime($date)
                 FROM `v9ky_man_face` mf
                 LEFT JOIN `v9ky_man` m ON m.`id` = mf.`man`
                 WHERE `man` = :man_id";
-            $playerData = $dbF->query( $sql_man, [ ":man_id" => $field['man_id'] ] )->find();   
+            $playerData = $dbF->query( $sql_man, [ ":man_id" => $field['man_id'] ] )->find();  
+            
+            $arr = explode(" ", $field['log']);
+
             // Создаем объект DateTime
             $date = new DateTime($field['date']);
             // Преобразуем дату в формат дд.мм.гггг
@@ -1261,6 +1265,7 @@ function getTime($date)
             $transfers[$key]['firstname'] = $playerData['firstname'];
             $transfers[$key]['photo'] = $playerData['photo'] ? $playerData['photo'] : 'avatar1.jpg';
             $transfers[$key]['action'] = $field['del_id'] ?  0 : 1; // если в $field['del_id'] = 0 - это добавление игрока в команду. Иначе удаление.         
+             $transfers[$key]['real_action'] = $arr[3] == 'додано' ? 0 : 1;
         }
 
         if( array_key_exists('team_id', $field) && $field['team_id'] === NULL ){
@@ -1916,6 +1921,7 @@ function getPlayersOfDateTur( $allStaticPlayers, $firstDay, $lastDay ){
     // --- Голкипер ---
     // Получаем массив лучших 
     $golkipers = getBestPlayers($playerOfTur, 'golkiper');
+    // dump($golkipers);
 
     // Находим максимальное значение player_total среди отобранных бомбардиров
     if (!empty($golkipers)) {
@@ -2094,7 +2100,7 @@ function getPlayersOfDateTur( $allStaticPlayers, $firstDay, $lastDay ){
         return $item['player_total'] == $maxPlayerTotal;
     });
 
-    // берем только первого ассиста
+    // берем только первого 
     $udars = array_slice($udars, 0, 1);
 
     // Результат записываем в основной массив
@@ -2121,7 +2127,7 @@ function getPlayersOfDateTur( $allStaticPlayers, $firstDay, $lastDay ){
         return $item['player_total'] == $maxPlayerTotal;
     });
 
-    // берем только первого ассиста
+    // берем только первого 
     $pases = array_slice($pases, 0, 1);
 
     // Результат записываем в основной массив

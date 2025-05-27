@@ -1,11 +1,11 @@
 
 <section class="controls">
-    <div id="match-static" class="controls__container">
-        <div class="controls__share">
-            <button class="controls__share-btn save-image" data-target="match-static">
-                <img src="css/components/match-stats/assets/images/button-share-icon.svg" alt="Зберегти зображення">
-            </button>
-        </div>
+    
+    <button id="captureAndShare" class="anons__share-btn">
+        <img src="<?= IMAGES . '/button-share-icon.svg' ?>" alt="Зберегти зображення">
+    </button>
+    
+    <div id="match-static" class="controls__container content-to-capture">
         <div class="controls__head">
             <div class="controls__head-title">Статистика матчу</div>
             <div class="controls__head-info">
@@ -219,6 +219,15 @@
             </div>
         </div>
     </div>
+     <!-- Модальное окно с ссылками -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <p>Виберіть месенджер для надсилання скріншоту:</p>
+            <a id="shareViber" href="#" class="share-btn viber"><img src="<?= IMAGES . '/viber-logo-icon.svg' ?>" alt="Відправити у Viber"> Відправити у Viber</a>
+            <a id="shareTelegram" href="#" class="share-btn telegram"><img src="<?= IMAGES . '/telegram-logo-icon.svg' ?>" alt="Відправити у Telegram"> Відправити у Telegram</a>
+            <button id="closeModal" class="close-btn">Закрити</button>
+        </div>
+    </div>
 </section>
 
 <script>
@@ -247,25 +256,25 @@ $(document).ready(function() {
         }
     });
     
-    // -- Save image
-    $(".save-image").click(function (e) {
-        e.preventDefault(); // Отключаем переход по ссылке
+    // // -- Save image
+    // $(".save-image").click(function (e) {
+    //     e.preventDefault(); // Отключаем переход по ссылке
 
-        // Получаем ID блока из атрибута data-target
-        var targetId = $(this).data("target");
-        var content = $("#" + targetId); // Находим блок по ID
+    //     // Получаем ID блока из атрибута data-target
+    //     var targetId = $(this).data("target");
+    //     var content = $("#" + targetId); // Находим блок по ID
 
-        // Сохраняем блок в изображение
-        html2canvas(content[0]).then(function (canvas) {
-            // Создаем ссылку для скачивания изображения
-            var link = document.createElement("a");
-            link.download = targetId + ".png"; // Название файла совпадает с ID блока
-            link.href = canvas.toDataURL("image/png");
-            link.click(); // Автоматически кликаем по ссылке для загрузки
-        }).catch(function (error) {
-            console.error("Ошибка при сохранении изображения:", error);
-        });
-    });
+    //     // Сохраняем блок в изображение
+    //     html2canvas(content[0]).then(function (canvas) {
+    //         // Создаем ссылку для скачивания изображения
+    //         var link = document.createElement("a");
+    //         link.download = targetId + ".png"; // Название файла совпадает с ID блока
+    //         link.href = canvas.toDataURL("image/png");
+    //         link.click(); // Автоматически кликаем по ссылке для загрузки
+    //     }).catch(function (error) {
+    //         console.error("Ошибка при сохранении изображения:", error);
+    //     });
+    // });
 
 });
 </script>

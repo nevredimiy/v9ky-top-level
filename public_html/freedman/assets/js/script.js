@@ -194,79 +194,82 @@ container?.addEventListener('mouseleave', () => {
 
 // Делимся скриншотом в телеграме и вайбере
 $(document).ready(function () {
-    let captureBtn = $("#captureAndShare");
-    let modal = $("#shareModal");
-    let closeModalBtn = $("#closeModal");
-    let shareViber = $("#shareViber");
-    let shareTelegram = $("#shareTelegram");
 
-    captureBtn.on("click", function () {
-        let captureElement = $(".content-to-capture");
+let captureBtn = $("#captureAndShare");
+let modal = $("#shareModal");
+let closeModalBtn = $("#closeModal");
+let shareViber = $("#shareViber");
+let shareTelegram = $("#shareTelegram");
 
-        if (captureElement.length === 0) {
-            alert("Помилка: елемент для скріншоту не знайдено!");
-            return;
-        }
+captureBtn.on("click", function () {
+    let captureElement = $(".content-to-capture");
 
-        // Отключаем кнопку, чтобы предотвратить двойные клики
-        // captureBtn.prop("disabled", true).text("Створення скриншоту...");
-        captureBtn.prop("disabled", true).css("oppacity", "0.5");
+    if (captureElement.length === 0) {
+        alert("Помилка: елемент для скріншоту не знайдено!");
+        return;
+    }
 
-        // Создание скриншота
-        html2canvas(captureElement[0]).then(canvas => {
-            canvas.toBlob(blob => {
-                let formData = new FormData();
-                formData.append("image", blob, "screenshot.png");
+    // Отключаем кнопку, чтобы предотвратить двойные клики
+    // captureBtn.prop("disabled", true).text("Створення скриншоту...");
+    captureBtn.prop("disabled", true).css("opacity", "0.1");
 
-                // Отправка скриншота на сервер
-                $.ajax({
-                    url: "../freedman/actions/uploads1.php",
-                    type: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        // captureBtn.prop("disabled", false).html("<img src='https://v9ky.in.ua/css/components/match-stats/assets/images/button-share-icon.svg' alt='Зберегти зображення'>");
-                        captureBtn.prop("disabled", false).css("opacity", "0.9");
+    // Создание скриншота
+    html2canvas(captureElement[0]).then(canvas => {
+        canvas.toBlob(blob => {
+            let formData = new FormData();
+            formData.append("image", blob, "screenshot.png");
 
-                        try {
-                            let data = JSON.parse(response);
-                            if (data.success) {
-                                let imageUrl = encodeURIComponent(data.link);
+            // Отправка скриншота на сервер
+            $.ajax({
+                url: "../freedman/actions/uploads1.php",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    // captureBtn.prop("disabled", false).html("<img src='https://v9ky.in.ua/css/components/match-stats/assets/images/button-share-icon.svg' alt='Зберегти зображення'>");
+                    captureBtn.prop("disabled", false).css("opacity", "0.9");
 
-                                // Устанавливаем ссылки на Viber и Telegram
-                                shareViber.attr("href", `viber://forward?text=${imageUrl}`);
-                                shareTelegram.attr("href", `https://t.me/share/url?url=${imageUrl}`);
+                    try {
+                        let data = JSON.parse(response);
+                        if (data.success) {
+                            let imageUrl = encodeURIComponent(data.link);
 
-                                // Показываем модальное окно
-                                modal.show();
-                            } else {
-                                alert("Помилка завантаження зображення!");
-                            }
-                        } catch (e) {
-                            alert("Помилка обробки даних!");
-                            console.error("Помилка:", e);
+                            // Устанавливаем ссылки на Viber и Telegram
+                            shareViber.attr("href", `viber://forward?text=${imageUrl}`);
+                            shareTelegram.attr("href", `https://t.me/share/url?url=${imageUrl}`);
+
+                            // Показываем модальное окно
+                            modal.show();
+                        } else {
+                            alert("Помилка завантаження зображення!");
                         }
-                    },
-                    error: function (xhr, status, error) {
-                        captureBtn.prop("disabled", false).html("<img src='https://v9ky.in.ua/css/components/match-stats/assets/images/button-share-icon.svg' alt='Зберегти зображення'>");
-                        console.error("Помилка:", error);
-                        alert("Помилка завантаження даних!");
+                    } catch (e) {
+                        alert("Помилка обробки даних!");
+                        console.error("Помилка:", e);
                     }
-                });
+                },
+                error: function (xhr, status, error) {
+                    captureBtn.prop("disabled", false).html("<img src='https://v9ky.in.ua/css/components/match-stats/assets/images/button-share-icon.svg' alt='Зберегти зображення'>");
+                    console.error("Помилка:", error);
+                    alert("Помилка завантаження даних!");
+                }
             });
         });
     });
+});
 
-    // Закрытие модального окна
-    closeModalBtn.on("click", function () {
+// Закрытие модального окна
+closeModalBtn.on("click", function () {
+    modal.hide();
+});
+
+// Закрытие при клике вне окна
+$(window).on("click", function (event) {
+    if ($(event.target).is(modal)) {
         modal.hide();
-    });
+    }
+});
 
-    // Закрытие при клике вне окна
-    $(window).on("click", function (event) {
-        if ($(event.target).is(modal)) {
-            modal.hide();
-        }
-    });
+
 });

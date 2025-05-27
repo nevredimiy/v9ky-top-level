@@ -15,7 +15,7 @@ include_once CONTROLLERS . "/head.php";
 include_once CONTROLLERS . "/leagues.php";
 
 
-
+// Красные карточки и данные игроков и их команд
 $sqlRedCard = "SELECT 
         r.`player` as pl_id,
         p.`man`,
@@ -48,10 +48,15 @@ $sqlRedCard = "SELECT
             ORDER BY mt.date DESC LIMIT 1)";
 
 // Запрос на игроков которые "вибули"
-$disPlayers = $dbF->query($sqlRedCard, ['turnir' => $turnir])->findALl();
+$disPlayers = $dbF->query($sqlRedCard, ['turnir' => $turnir])->findAll();
 
 
-// игроки у которых больше трех желтых карточек за турнир
+// игроки у которых больше двух (три и более) желтых карточек за турнир
+// 1 условие. Выбираем только тех игроков, у кого больше двух жёлтых карточек (то есть минимум 3 карточки).
+// 2 условие. Берутся карточки только из последнего сыгранного тура турнира (не из любого матча).
+// 3 условие. Игрок не должен быть дисквалифицирован (то есть не должен иметь красную карточку) в этом же туре.
+// 4 условие. Игрок должен быть активен (то есть иметь статус "1") в таблице игроков.
+// 5 условие. Игрок должен быть в команде, которая участвует в турнире (то есть его команда должна быть в таблице команд турнира).
 $sqlYellowCard = "SELECT 
         y.`player` as pl_id,
         p.`man`,
@@ -80,16 +85,23 @@ $sqlYellowCard = "SELECT
 
     WHERE  ( ( SELECT count(id) FROM v9ky_yellow WHERE player=y.player ) > 2 ) 
     AND ( 
-            (SELECT MAX(tur) FROM v9ky_match WHERE id=y.matc AND canseled = 1 AND turnir=:turnir)
-                =
-            (SELECT max(tur) FROM v9ky_match WHERE canseled=1 AND turnir=:turnir)
+            -- (SELECT MAX(tur) FROM v9ky_match WHERE id=y.matc AND canseled = 1 AND turnir=:turnir)
+            --     =
+            -- (SELECT max(tur) FROM v9ky_match WHERE canseled=1 AND turnir=:turnir)
+            (SELECT MAX(tur) 
+            FROM v9ky_match 
+            WHERE canseled=1 
+            AND turnir=:turnir 
+            AND (team1 = p.team OR team2 = p.team)
+            )
+            =
+            (SELECT tur FROM v9ky_match WHERE id = y.matc)
         ) 
     AND player NOT IN (SELECT player FROM v9ky_red b WHERE (b.player=y.player) AND ((SELECT tur FROM v9ky_match WHERE id=b.matc) >= (SELECT min(tur) FROM v9ky_match WHERE id in (SELECT matc FROM v9ky_yellow WHERE player=b.player) AND canseled=1 AND turnir=:turnir AND (team1=team or team2=team) order by date desc limit 3))) 
     AND matc in (SELECT id FROM v9ky_match WHERE canseled=1 AND turnir=:turnir) 
     GROUP BY player";
 
-$disThreeYellowPlayer = $dbF->query($sqlYellowCard, ['turnir' => $turnir])->findALl();
-
+$disThreeYellowPlayer = $dbF->query($sqlYellowCard, ['turnir' => $turnir])->findAll();
 
 
 $sqlTable = "SELECT 
@@ -198,7 +210,7 @@ foreach($violationTable as $item) {
 
 <div class="statistic">
     <div class="container">
-        <?php if(count($disPlayers) > 0) : ?>
+        <?php if(count($disPlayers) > 0 || count($disThreeYellowPlayer) > 0 ) : ?>
             <table id="top-pas" class="draggable-container width-auto">
                 <caption>
                     Дискваліфікація
@@ -231,7 +243,7 @@ foreach($violationTable as $item) {
                         </tr>                
                     <?php endforeach ?>
                     <?php if(count($disThreeYellowPlayer) > 0):?>
-                        <?php foreach($disPlayers as $player): ?>
+                        <?php foreach($disThreeYellowPlayer as $player): ?>
                             <tr>
                                 <td><?= $key +1  ?></td>
                                 <td>

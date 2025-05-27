@@ -59,9 +59,17 @@ $sqlYellowCard = "SELECT
 
     WHERE  ( ( SELECT count(id) FROM v9ky_yellow WHERE player=y.player ) > 2 ) 
     AND ( 
-            (SELECT MAX(tur) FROM v9ky_match WHERE id=y.matc AND canseled = 1 AND turnir=:turnir)
-                =
-            (SELECT max(tur) FROM v9ky_match WHERE canseled=1 AND turnir=:turnir)
+             -- (SELECT MAX(tur) FROM v9ky_match WHERE id=y.matc AND canseled = 1 AND turnir=:turnir)
+            --     =
+            -- (SELECT max(tur) FROM v9ky_match WHERE canseled=1 AND turnir=:turnir)
+            (SELECT MAX(tur) 
+            FROM v9ky_match 
+            WHERE canseled=1 
+            AND turnir=:turnir 
+            AND (team1 = p.team OR team2 = p.team)
+            )
+            =
+            (SELECT tur FROM v9ky_match WHERE id = y.matc)
         ) 
     AND player NOT IN (SELECT player FROM v9ky_red b WHERE (b.player=y.player) AND ((SELECT tur FROM v9ky_match WHERE id=b.matc) >= (SELECT min(tur) FROM v9ky_match WHERE id in (SELECT matc FROM v9ky_yellow WHERE player=b.player) AND canseled=1 AND turnir=:turnir AND (team1=team or team2=team) order by date desc limit 3))) 
     AND matc in (SELECT id FROM v9ky_match WHERE canseled=1 AND turnir=:turnir) 

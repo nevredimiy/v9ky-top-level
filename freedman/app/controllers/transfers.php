@@ -17,6 +17,7 @@ if(!isset($turnir)){
 
 
 $transfers = getTransfers($turnir);
+// dump($transfers);
 
 require_once CONTROLLERS . "/head.php";
 require_once CONTROLLERS . "/leagues.php";
