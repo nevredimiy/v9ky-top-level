@@ -2329,7 +2329,7 @@ function getTopGravtsi($allStaticPlayers, $dataAllPlayers, $lastTur){
 
       // 2. Сортировка по «Матчів» (count_matches)
       if ($a['match_count'] != $b['match_count']) {
-          return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
+          return ($b['match_count'] < $a['match_count']) ? 1 : -1; // По убыванию
       }
       // 3. Сортировка по последнему сыгранному матчу (total_3_match)
       if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
@@ -2580,7 +2580,7 @@ function getTopDriblings($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur 
    
        // 2. Сортировка по «Матчів» (count_matches)
        if ($a['match_count'] != $b['match_count']) {
-           return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
+           return ($b['match_count'] < $a['match_count']) ? 1 : -1; // По убыванию
        }
        // 3. Сортировка по последнему сыгранному матчу (total_3_match)
        if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
@@ -2844,7 +2844,7 @@ function getTopBombardir($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur 
   
      // 2. Сортировка по «Матчів» (count_matches)
      if ($a['match_count'] != $b['match_count']) {
-         return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
+         return ($b['match_count'] < $a['match_count']) ? 1 : -1; // По убыванию
      }
      // 3. Сортировка по последнему сыгранному матчу (total_3_match)
      if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
@@ -2983,7 +2983,7 @@ function getTopAsists($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur = 0
   
      // 2. Сортировка по «Матчів» (count_matches)
      if ($a['match_count'] != $b['match_count']) {
-         return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
+         return ($b['match_count'] < $a['match_count']) ? 1 : -1; // По убыванию
      }
      // 3. Сортировка по последнему сыгранному матчу (total_3_match)
      if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
@@ -3116,7 +3116,7 @@ function getTopZhusnuks($allStaticPlayers, $dataAllPlayers, $keySort, $lastTur =
   
       // 2. Сортировка по «Матчів» (count_matches)
       if ($a['match_count'] != $b['match_count']) {
-          return ($b['match_count'] > $a['match_count']) ? 1 : -1; // По убыванию
+          return ($b['match_count'] < $a['match_count']) ? 1 : -1; // По убыванию
       }
       // 3. Сортировка по последнему сыгранному матчу (total_3_match)
       if(isset($a["match_{$lastTur}_key"]) && isset($b["match_{$lastTur}_key"])) {
@@ -3430,5 +3430,180 @@ function getCupData($turnir){
     } 
 
     return $cupData;
-    
 }
+
+/**
+ * Проверяет, является ли текущий тур кубковым.
+ */
+function isCupCurrentTur($turnir, $currentTur) {
+    global $dbF;
+    $sql = "SELECT cup_stage FROM v9ky_match WHERE turnir = :turnir AND tur = :tur LIMIT 1";
+    $result = $dbF->query($sql, ['turnir' => $turnir, 'tur' => $currentTur])->find();
+    return isset($result['cup_stage']) && $result['cup_stage'] > 0;
+}
+
+/**
+ * Получает карточки по типу (красные/желтые).
+ */
+function getCardsByType($dbF, $turnir, $cardType, $currentTur, $cupStage = 0) {
+    $tableName = $cardType === 'red' ? 'v9ky_red' : 'v9ky_yellow';
+    $cupStageCondition = $cupStage > 0 ? "AND mtc.cup_stage > 0" : "AND mtc.cup_stage = 0";
+    
+    $sql = "
+        SELECT 
+            c.`player` as player_id,
+            p.`man`,
+            m.`name1` as lastname,
+            m.`name2` as firstname,
+            mf.`pict` as player_photo,
+            t.`pict` as team_logo,
+            t.`name` as team,
+            mtc.`tur`
+        FROM $tableName c
+        LEFT JOIN `v9ky_player` p ON p.`id` = c.`player`
+        LEFT JOIN `v9ky_man` m ON m.`id` = p.`man`
+        LEFT JOIN `v9ky_man_face` mf ON mf.`id` = (
+            SELECT MAX(id) FROM `v9ky_man_face` mff WHERE mff.`man` = p.`man`
+        )
+        LEFT JOIN `v9ky_team` t ON t.`id` = p.`team`
+        LEFT JOIN `v9ky_match` mtc ON mtc.`id` = c.`matc`
+        WHERE mtc.`turnir` = :turnir
+        $cupStageCondition
+        ORDER BY mtc.`tur`, mtc.`date`
+    ";
+
+    $cards = $dbF->query($sql, ['turnir' => $turnir])->findAll();
+    $result = [];
+
+    foreach ($cards as $player) {
+        $id = $player['player_id'];
+        if (!isset($result[$id])) {
+            $result[$id] = [
+                'player_id' => $id,
+                'lastname' => $player['lastname'],
+                'firstname' => $player['firstname'],
+                'team_logo' => $player['team_logo'],
+                'team' => $player['team'],
+                'player_photo' => $player['player_photo'],
+                'red' => [],
+                'yellow' => []
+            ];
+        }
+
+        if ($player['tur'] <= $currentTur) {
+            $result[$id][$cardType][] = $player['tur'];
+        }
+    }
+
+    return $result;
+}
+
+/**
+ * Получаем табличные дянные по дисквалификации - игроки с ЖК и КК 
+ */
+function getTableCards($redCards, $yellowCards) {
+    $tableCards = [];
+
+    foreach ([$redCards, $yellowCards] as $source) {
+        foreach ($source as $id => $data) {
+            if (!isset($tableCards[$id])) {
+                $tableCards[$id] = [
+                    'player_id' => $data['player_id'],
+                    'lastname' => $data['lastname'],
+                    'firstname' => $data['firstname'],
+                    'team_logo' => $data['team_logo'],
+                    'team' => $data['team'],
+                    'player_photo' => $data['player_photo'],
+                    'red' => [],
+                    'yellow' => [],
+                    'tur' => []
+                ];
+            }
+
+            $tableCards[$id]['red'] = array_merge($tableCards[$id]['red'], $data['red']);
+            $tableCards[$id]['yellow'] = array_merge($tableCards[$id]['yellow'], $data['yellow']);
+            $tableCards[$id]['tur'] = array_merge($tableCards[$id]['tur'], $data['red'], $data['yellow']);
+        }
+    }
+
+
+    // Сортировка по количеству карточек (общая)
+    usort($tableCards, function($a, $b) {
+        return count($b['tur']) - count($a['tur']);
+    });
+
+    return $tableCards;
+}
+
+/**
+ * Получаем дисквалифицированных игроков по красным и желтым карточкам.
+ * 
+ * @param array $tableCards - Табличные данные игроков с карточками.
+ * @param int $currentTur - Текущий тур.
+ * @param int $countCards - Количество желтых карточек для дисквалификации.
+ * @return array - Список дисквалифицированных игроков.
+ */
+function getDisqualifiedPlayers($tableCards, $currentTur, $countCards = 3) {
+    $disqualifiedPlayers = [];
+
+    foreach ($tableCards as $playerId => &$player) {
+        $player['yellow_red'] = 0;
+        $turYellowCounts = [];
+
+        // Считаем количество жёлтых в каждом туре
+        foreach ($player['yellow'] as $turNum) {
+            if (!isset($turYellowCounts[$turNum])) {
+                $turYellowCounts[$turNum] = 0;
+            }
+            $turYellowCounts[$turNum]++;
+        }
+
+        // Если в одном туре >=2 жёлтых — прибавляем 1 к yellow_red
+        foreach ($turYellowCounts as $count) {
+            if ($count >= 2) {
+                $player['yellow_red'] += 1;
+            }
+        }
+    }
+
+    foreach ($tableCards as $playerId => $player) {
+        // Проверка красной карточки
+        if (!empty($player['red'])) {
+            $lastRedTur = end($player['red']);
+            if ($lastRedTur == $currentTur) {
+                $disqualifiedPlayers[$player['player_id']] = [
+                    'player_id' => $player['player_id'],
+                    'lastname' => $player['lastname'],
+                    'firstname' => $player['firstname'],
+                    'team_logo' => $player['team_logo'],
+                    'team' => $player['team'],
+                    'player_photo' => $player['player_photo'],
+                    'red' => $player['red'],
+                    'yellow' => $player['yellow'],
+                ];
+            }
+        }
+
+        // Проверка желтых карточек
+        $yellowTotal = count($player['yellow']) + $player['yellow_red'];
+        if ($yellowTotal > 0 && $yellowTotal % $countCards == 0) {
+            $lastYellowTur = end($player['yellow']);
+            if ($lastYellowTur == $currentTur) {
+                $disqualifiedPlayers[$player['player_id']] = [
+                    'player_id' => $player['player_id'],
+                    'lastname' => $player['lastname'],
+                    'firstname' => $player['firstname'],
+                    'team_logo' => $player['team_logo'],
+                    'team' => $player['team'],
+                    'player_photo' => $player['player_photo'],
+                    'red' => $player['red'],
+                    'yellow' => $player['yellow'],
+                    
+                ];
+            }
+        }
+    }
+
+    return array_values($disqualifiedPlayers);
+}
+

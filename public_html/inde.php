@@ -1,7 +1,7 @@
 <?php
 $nenadacss = 1;
 
-if($_GET['foo']) {
+if(isset($_GET['foo'])) {
     
     include_once "head.php";
     include_once "slider_spons.php";
@@ -14,6 +14,6 @@ if($_GET['foo']) {
 } 
 
 
-if(!$_GET['foo']) {    
+if(!isset($_GET['foo'])) {    
     include_once CONTROLLERS . "/main.php";
 }

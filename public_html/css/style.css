@@ -266,9 +266,10 @@ pre {
 	padding: 0.5rem;
 }
 
-.bg-green{
+.bg-green {
 	background-color: #6ddb80;
 }
+
 /* ---------------------------- */
 /*  для сохранения в соц сетях  */
 /* ---------------------------- */
@@ -353,4 +354,8 @@ pre {
 .no-scroll {
 	overflow: hidden;
 	height: 100vh;
+}
+
+.uppercase {
+	text-transform: uppercase;
 }

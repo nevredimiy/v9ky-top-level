@@ -185,6 +185,7 @@ foreach ($groupedTeams as $group => &$teams) {
     });
 }
 
+
   
   // Данные кубка
   $cupData = getCupData($turnir);
