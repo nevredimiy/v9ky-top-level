@@ -110,6 +110,10 @@
   background-color: #C79417;
 }
 
+.table-league__table a {
+  display: contents;
+}
+
 
 .cell--gold {
   background-color: #FDBE11;
@@ -245,6 +249,10 @@ td .cell--team-logo {
     line-height: 36px;
   }
 
+  .table-league__table a {
+    display: block;
+  }
+
   td .cell--team-logo {
     min-width: 30px;
     min-height: 30px;
@@ -261,11 +269,12 @@ td .cell--team-logo {
 
   .cell--team {
     display: block;
-    margin-right: 50px;
+    margin-right: 10px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 115px;
+    width: 180px;
+    font-size: 14px;
   }
 
   .cell--own {
@@ -293,6 +302,11 @@ td .cell--team-logo {
 
   .cell--scored {
     width: 66px;
+  }
+
+  .table-league__table tr th:nth-child(3),
+  .table-league__table tr td:nth-child(3){
+    width: auto;
   }
 }
 

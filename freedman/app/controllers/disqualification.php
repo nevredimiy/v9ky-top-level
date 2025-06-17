@@ -9,6 +9,10 @@ if(!isset($currentTur)){
 $isCupCurrentTur = isCupCurrentTur($turnir, $currentTur);
 
 $redCards = getCardsByType($dbF, $turnir, 'red', $currentTur);
+// dump($currentTur);
+// dump($turnir);
+// dump($currentTur);
+// dump($currentTur);
 $yellowCards = getCardsByType($dbF, $turnir, 'yellow', $currentTur);
 
 $tableCards = getTableCards($redCards, $yellowCards);

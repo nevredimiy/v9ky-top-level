@@ -1,16 +1,11 @@
 <?php
 
-// Проверяем, задана ли переменная $turnir
 if (!isset($turnir)) {
-    die('Ошибка: переменная $turnir не задана.');
+    $turnir = isset($tournament) ? getTurnir($tournament) : getTurnir();
 }
 
-if(!isset($turnir) && !isset($tournament)) {
-    $turnir = getTurnir();
-}
-
-if(!isset($turnir)) {
-    $turnir = getTurnir($tournament);
+if (!$turnir) {
+    die('Ошибка: не удалось определить турнир.');
 }
 
 
@@ -58,18 +53,23 @@ $matches = $dbF->query($sql, ['turnirId' => $turnir])->findAll();
 
 
 // получаем катрочки 
-$sql = "SELECT team, COUNT(*) AS red_cards FROM v9ky_red WHERE matc IN (SELECT id FROM `v9ky_match` WHERE turnir = :turnirId) GROUP BY team";
-$redCards = $dbF->query($sql, ['turnirId' => $turnir])->findAll();
-$sql = "SELECT team, COUNT(*) AS yellow_cards FROM v9ky_yellow WHERE matc IN (SELECT id FROM `v9ky_match` WHERE turnir = :turnirId) GROUP BY team";
-$yellowCards = $dbF->query($sql, ['turnirId' => $turnir])->findAll();
-
-foreach($redCards as $red){
-    $redCards[$red['team']] = $red['red_cards'];
+function fetchCardCounts($db, $table, $turnirId) {
+    $sql = "SELECT team, COUNT(*) AS count 
+            FROM {$table} 
+            WHERE matc IN (SELECT id FROM v9ky_match WHERE turnir = :turnirId AND cup_stage = 0)
+            GROUP BY team";
+    $result = $db->query($sql, ['turnirId' => $turnirId])->findAll();
+    
+    $counts = [];
+    foreach ($result as $row) {
+        $counts[$row['team']] = $row['count'];
+    }
+    return $counts;
 }
 
-foreach($yellowCards as $yellow){
-    $yellowCards[$yellow['team']] = $yellow['yellow_cards'];
-}
+$redCards = fetchCardCounts($dbF, 'v9ky_red', $turnir);
+$yellowCards = fetchCardCounts($dbF, 'v9ky_yellow', $turnir);
+
 
 // 3. Формируем таблицу результатов
 $stats = [];
@@ -83,7 +83,9 @@ foreach ($teams as $team) {
 }
 
 foreach ($matches as $match) {
-    if ($match['gols1'] !== null && $match['gols2'] !== null) {
+    // if ($match['gols1'] !== null && $match['gols2'] !== null) {
+    if (is_numeric($match['gols1']) && is_numeric($match['gols2'])) {
+
         $stats[$match['team1']]['games']++;
         $stats[$match['team2']]['games']++;
         $stats[$match['team1']]['goals_for'] += $match['gols1'];
@@ -116,6 +118,8 @@ foreach ($matches as $match) {
         }
     }
 }
+
+// dump($matchResults);
 
 // 5. Сортируем команды
 foreach ($groupedTeams as $group => &$teams) {
@@ -185,6 +189,8 @@ foreach ($groupedTeams as $group => &$teams) {
     });
 }
 
+
+// dump($groupedTeams);
 
   
   // Данные кубка

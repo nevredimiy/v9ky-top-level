@@ -1707,6 +1707,7 @@ function formatMatchDates($dates)
     $current_month_name = $months[$current_month]; // Назва місяця
 
     // Проходимо по всіх датах, починаючи з другої
+    $last_day = $first_day; // Ініціалізуємо $last_day перед циклом
     for ($i = 1; $i < count($dates); $i++) {
         $prev_date = $dates[$i - 1]; // Попередня дата
         $current_date = $dates[$i];  // Поточна дата
@@ -3502,6 +3503,8 @@ function getCardsByType($dbF, $turnir, $cardType, $currentTur, $cupStage = 0) {
  * Получаем табличные дянные по дисквалификации - игроки с ЖК и КК 
  */
 function getTableCards($redCards, $yellowCards) {
+
+    // dump($redCards);
     $tableCards = [];
 
     foreach ([$redCards, $yellowCards] as $source) {
@@ -3544,6 +3547,9 @@ function getTableCards($redCards, $yellowCards) {
  * @return array - Список дисквалифицированных игроков.
  */
 function getDisqualifiedPlayers($tableCards, $currentTur, $countCards = 3) {
+
+    // dump($tableCards);
+    // dump($currentTur);
     $disqualifiedPlayers = [];
 
     foreach ($tableCards as $playerId => &$player) {
@@ -3566,10 +3572,13 @@ function getDisqualifiedPlayers($tableCards, $currentTur, $countCards = 3) {
         }
     }
 
-    foreach ($tableCards as $playerId => $player) {
+    foreach ($tableCards as $playerId => &$player) {
+        // dump($player['red']);
         // Проверка красной карточки
         if (!empty($player['red'])) {
             $lastRedTur = end($player['red']);
+            // dump($currentTur);
+            // dump($player);
             if ($lastRedTur == $currentTur) {
                 $disqualifiedPlayers[$player['player_id']] = [
                     'player_id' => $player['player_id'],
