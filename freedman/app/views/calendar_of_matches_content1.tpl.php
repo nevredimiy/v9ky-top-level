@@ -203,7 +203,7 @@
                         <?php if(!empty($bestPlayersForTable)):?>
                             <?php foreach($bestPlayersForTable as $player) : ?>
 
-                                <div class="player-card">
+                                <div data-player="<?= $player['player'] ?>" class="player-card">
                                     <div class="player-card__photo-container">
                                         <div class="player-card__left-icon">
                                             <img src="/css/components/player-card/assets/images/<?= $labels[$player['best_player']]['icon'] ?>"

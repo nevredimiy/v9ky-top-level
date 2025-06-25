@@ -68,7 +68,7 @@ $playerOfDateTur = getPlayersOfDateTur( $allStaticPlayers, $daysOfTur['first_day
 
 // Лучшие игроки - отфильтрованные
 $bestPlayersForTable = mergeStaticAndData($playerOfDateTur, $dataAllPlayers);
-
+// dump($bestPlayersForTable);
 
 $labels = [
     'topgravetc' => ['icon' => 'star-icon.png', 'role' => 'Топ-Гравець'], 

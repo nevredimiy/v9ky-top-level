@@ -2063,6 +2063,10 @@ function getPlayersOfDateTur( $allStaticPlayers, $firstDay, $lastDay ){
     // --- Дриблинг ---
     // Получаем массив лучших 
     $driblings = getBestPlayers($playerOfTur, 'dribling');
+    // if(isset($_GET['test'])){
+    //     dump($driblings);
+    
+    // }
 
         // Находим максимальное значение player_total среди отобранных бомбардиров
         if (!empty($driblings)) {

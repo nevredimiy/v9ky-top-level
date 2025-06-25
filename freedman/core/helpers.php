@@ -1248,10 +1248,7 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
           $result[$key]['best_player'] = 'golkiper';
           $result[$key]['count_points'] = round($maxTotal, 0);
       }
-  }
-
-
-
+    }
 
     if($playerRole == 'zahusnuk') {
       
@@ -1284,9 +1281,9 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
       
       // Шаг 1: Вычисляем тотал для каждого элемента
       foreach ($playerOfTur as $key => $item) {
-          $total[$key] = $item['otbor'] - $item['otbormin'];
+          $total[$key] = $item['obvodkaplus'] - $item['obvodkaminus'];
       }
-  
+  //obvodkaplus obvodkaminus
       // Шаг 2: Находим максимальное значение тотала
       if(empty($total)){
         $maxTotal = 0;
@@ -1296,7 +1293,7 @@ function checkingCurrentTur( $indexIteration, $lastTur=0, $totalValue=0, $sufix=
   
       // Шаг 3: Отбираем все элементы, у которых сумма равна максимальной
       $result = array_filter($playerOfTur, function ($item) use ($maxTotal) {
-          return ($item['otbor'] - $item['otbormin']) == $maxTotal;
+          return ($item['obvodkaplus'] - $item['obvodkaminus']) == $maxTotal;
       });
   
       // Добавляем игроку ключ что он лучший в туре
