@@ -13,336 +13,309 @@ error_reporting(E_ALL);
 // 4 условие. Игрок должен быть активен (то есть иметь статус "1") в таблице игроков.
 // 5 условие. Игрок должен быть в команде, которая участвует в турнире (то есть его команда должна быть в таблице команд турнира).
 
-$turnir = getTurnir($tournament); 
+$turnir = getTurnir($tournament);
 
 $currentTur = getLasttur($turnir);
 
-function isCupCurrentTur($turnir, $currentTur) {
-    global $dbF;
-    $sql = "SELECT cup_stage FROM v9ky_match WHERE turnir = :turnir AND tur = :tur LIMIT 1";
-    $result = $dbF->query($sql, ['turnir' => $turnir, 'tur' => $currentTur])->find();
-    return isset($result['cup_stage']) && $result['cup_stage'] > 0;
+$dateLastTur = getDateLastTur($turnir);
+
+$matchesLastTur = getMatchesLastTurTurByDate($turnir, $dateLastTur);
+
+$matchesLastTurIds = [];
+foreach ($matchesLastTur as $match) {
+    $matchesLastTurIds[] = $match['id'];
 }
 
 // true - турнір кубка (плей-офф), false - ліга (групповой турнир)
 $isCupCurrentTur = isCupCurrentTur($turnir, $currentTur);
 
+$redCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'red');
+$yellowCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow');
+
 include_once CONTROLLERS . "/head.php";
 include_once CONTROLLERS . "/leagues.php";
 
-function getCardsByType($dbF, $turnir, $cardType, $currentTur, $cupStage = 0) {
-    $tableName = $cardType === 'red' ? 'v9ky_red' : 'v9ky_yellow';
-    $cupStageCondition = $cupStage > 0 ? "AND mtc.cup_stage > 0" : "AND mtc.cup_stage = 0";
-    
-    $sql = "
-        SELECT 
-            c.`player` as player_id,
-            p.`man`,
-            m.`name1` as lastname,
-            m.`name2` as firstname,
-            mf.`pict` as player_photo,
-            t.`pict` as team_logo,
-            t.`name` as team,
-            mtc.`tur`
-        FROM $tableName c
-        LEFT JOIN `v9ky_player` p ON p.`id` = c.`player`
-        LEFT JOIN `v9ky_man` m ON m.`id` = p.`man`
-        LEFT JOIN `v9ky_man_face` mf ON mf.`id` = (
-            SELECT MAX(id) FROM `v9ky_man_face` mff WHERE mff.`man` = p.`man`
-        )
-        LEFT JOIN `v9ky_team` t ON t.`id` = p.`team`
-        LEFT JOIN `v9ky_match` mtc ON mtc.`id` = c.`matc`
-        WHERE mtc.`turnir` = :turnir
-        $cupStageCondition
-        ORDER BY mtc.`tur`, mtc.`date`
-    ";
-
-    $cards = $dbF->query($sql, ['turnir' => $turnir])->findAll();
-    $result = [];
-
-    foreach ($cards as $player) {
-        $id = $player['player_id'];
-        if (!isset($result[$id])) {
-            $result[$id] = [
-                'player_id' => $id,
-                'lastname' => $player['lastname'],
-                'firstname' => $player['firstname'],
-                'team_logo' => $player['team_logo'],
-                'team' => $player['team'],
-                'player_photo' => $player['player_photo'],
-                'red' => [],
-                'yellow' => []
-            ];
-        }
-
-        if ($player['tur'] <= $currentTur) {
-            $result[$id][$cardType][] = $player['tur'];
-        }
-    }
-
-    return $result;
-}
-$redCards = getCardsByType($dbF, $turnir, 'red', $currentTur);
-$yellowCards = getCardsByType($dbF, $turnir, 'yellow', $currentTur);
-
-function getTableCards($redCards, $yellowCards) {
-    $tableCards = [];
-
-    foreach ([$redCards, $yellowCards] as $source) {
-        foreach ($source as $id => $data) {
-            if (!isset($tableCards[$id])) {
-                $tableCards[$id] = [
-                    'player_id' => $data['player_id'],
-                    'lastname' => $data['lastname'],
-                    'firstname' => $data['firstname'],
-                    'team_logo' => $data['team_logo'],
-                    'team' => $data['team'],
-                    'player_photo' => $data['player_photo'],
-                    'red' => [],
-                    'yellow' => [],
-                    'tur' => []
-                ];
-            }
-
-            $tableCards[$id]['red'] = array_merge($tableCards[$id]['red'], $data['red']);
-            $tableCards[$id]['yellow'] = array_merge($tableCards[$id]['yellow'], $data['yellow']);
-            $tableCards[$id]['tur'] = array_merge($tableCards[$id]['tur'], $data['red'], $data['yellow']);
-        }
-    }
+$tableCardsByDate = getTableCards($redCardsByTypeAndDate, $yellowCardsByTypeAndDate);
 
 
-    // Сортировка по количеству карточек (общая)
-    usort($tableCards, function($a, $b) {
-        return count($b['tur']) - count($a['tur']);
-    });
 
-    return $tableCards;
-}
-
-$tableCards = getTableCards($redCards, $yellowCards);
-
-
-function getDisqualifiedPlayers($tableCards, $currentTur) {
+function getDisqualifiedPlayersByDate1($tableCardsByDate, $turnir, $dateLastTur, $countCards = 3)
+{
     $disqualifiedPlayers = [];
 
-    foreach ($tableCards as $playerId => $player) {
-        // Проверяем на красные карточки
-        if (count($player['red']) > 0) {
-            $lastRedTur = end($player['red']);
+    foreach ($tableCardsByDate as $player) {
 
-            if ($lastRedTur == $currentTur || $lastRedTur == $currentTur - 1) {
-                $disqualifiedPlayers[] = [
+        // $lastTur = date('Y-m-d', strtotime($dateLastTur));
+        $dateLastTur1 = getDateLastTur($turnir, $player['team_id']);
+
+        // dd($dateLastTur1);
+        $lastTur1 = date('Y-m-d H:i:s', strtotime($dateLastTur1));
+
+        if (isset($player['red_date']) && count($player['red_date']) > 0) {
+            $lastRedTur = end($player['red_date']);
+            $lastRedTur = date('Y-m-d H:i:s', strtotime($lastRedTur));            
+
+            // $upcomingTur = date('Y-m-d H:i:s', strtotime($dateUpcomingTur));
+
+            // Перевірка, чи гравець дискваліфікований
+            if ($lastRedTur == $lastTur1) {
+
+                $disqualifiedPlayers[$player['player_id']] = [
                     'player_id' => $player['player_id'],
                     'lastname' => $player['lastname'],
                     'firstname' => $player['firstname'],
                     'team_logo' => $player['team_logo'],
                     'team' => $player['team'],
                     'player_photo' => $player['player_photo'],
-                    // 'tur' => implode(', ', $player['red'])
+                    'red' => $player['red'],
+                    'yellow' => $player['yellow'],
+                    'red_date' => $player['red_date'],
+                    'yellow_date' => $player['yellow_date']
                 ];
             }
-            // unset($tableCards[$playerId]); // Удаляем игрока из общего списка
         }
 
-        // Проверяем на желтые карточки
-        if (count($player['yellow']) % 3 == 0 && count($player['yellow']) > 0) {
-            $yellowCardLastTur = end($player['yellow']);
-            
-            if ($yellowCardLastTur == $currentTur) {
-                
-                $disqualifiedPlayers[] = [
-                    'player_id' => $player['player_id'],
-                    'lastname' => $player['lastname'],
-                    'firstname' => $player['firstname'],
-                    'team_logo' => $player['team_logo'],
-                    'team' => $player['team'],
-                    'player_photo' => $player['player_photo'],
-                    // 'tur' => implode(', ', $player['yellow'])
-                ];
-            }
-        }        
-    }
-    // Удаляем дубликаты игроков из списка дисквалифицированных
-    $disqualifiedPlayers = array_unique($disqualifiedPlayers, SORT_REGULAR);
+        // Перевірка на кількість жовтих карток
 
-    return $disqualifiedPlayers;
+        // Желто-красная карточка - когда две желтіе в одном туре
+        $yellowAndRed = 0;
+        $doubleYellowInMatch = [];
+        foreach ($player['yellow'] as $yellow) {
+            if (in_array($yellow, $doubleYellowInMatch)) {
+                $yellowAndRed++;
+            }
+            $doubleYellowInMatch[] = $yellow;
+        }
+
+        $yellowTotal = count($player['yellow_date']) + $yellowAndRed;
+
+        if ($yellowTotal > 0 && $yellowTotal % $countCards == 0) {
+            $lastYellowTur = end($player['yellow_date']);
+            $lastYellowTur = date('Y-m-d H:i:s', strtotime($lastYellowTur));
+
+            if ($lastYellowTur == $lastTur1) {
+                if (!isset($disqualifiedPlayers[$player['player_id']])) {
+                    $disqualifiedPlayers[$player['player_id']] = [
+                        'player_id' => $player['player_id'],
+                        'lastname' => $player['lastname'],
+                        'firstname' => $player['firstname'],
+                        'team_logo' => $player['team_logo'],
+                        'team' => $player['team'],
+                        'player_photo' => $player['player_photo'],
+                        'red' => [],
+                        'yellow' => $player['yellow'],
+                        'red_date' => [],
+                        'yellow_date' => $player['yellow_date']
+                    ];
+                } elseif (empty($disqualifiedPlayers[$player['player_id']]['yellow'])) {
+                    // Только если в массиве ещё не добавлены жёлтые карточки — добавляем
+                    $disqualifiedPlayers[$player['player_id']]['yellow'] = $player['yellow'];
+                    $disqualifiedPlayers[$player['player_id']]['yellow_date'] = $player['yellow_date'];
+                }
+            }
+        }
+    }
+    
+    return array_values($disqualifiedPlayers);
 }
 
-$disqualifiedPlayers = getDisqualifiedPlayers($tableCards, $currentTur);
+// dd($tableCardsByDate);
 
-if($isCupCurrentTur){
+$disqualifiedPlayers = getDisqualifiedPlayersByDate1($tableCardsByDate, $turnir,  $dateLastTur);
 
-    $redCardsCup = getCardsByType($dbF, $turnir, 'red', $currentTur, 1);
+// dump($disqualifiedPlayers);
+if ($isCupCurrentTur) {
 
-    $yellowCardsCup = getCardsByType($dbF, $turnir, 'yellow', $currentTur, 1);
+    $redCardsCup = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'red', 1);
+
+    $yellowCardsCup = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow', 1);
 
     $tableCardsCupTurnir = getTableCards($redCardsCup, $yellowCardsCup);
 
-    $disqualifiedPlayersCup = getDisqualifiedPlayers($tableCardsCupTurnir, $currentTur);
+    $disqualifiedPlayersCup = getDisqualifiedPlayersByDate($tableCardsCupTurnir, $dateLastTur, 2);
 }
-
-
 
 ?>
 
-
-
 <div class="statistic">
     <div class="container">
-        <?php if(isset($tableCardsCupTurnir) && count($tableCardsCupTurnir) > 0):?>
-            
+        <?php if (isset($tableCardsCupTurnir) && count($tableCardsCupTurnir) > 0): ?>
+
             <div class="">
                 <h2 class="text-center uppercase">Плей-Офф</h2>
-                <?php if(isset($disqualifiedPlayersCup) && count($disqualifiedPlayersCup) > 0) : ?>
+                <?php if (isset($disqualifiedPlayersCup) && count($disqualifiedPlayersCup) > 0) : ?>
                     <table id="top-pas" class="draggable-container width-auto">
                         <caption>
                             Дискваліфікація
                         </caption>
-            
+
                         <thead>
                             <tr>
                                 <th>№</th>
                                 <th class="th_s" data-label="Г">ГРАВЕЦЬ</th>
                                 <th class="th_s" data-label="К">КОМАНДА</th>
-                                <th class="th_s" data-label="Д" >Дані</th>
+                                <th class="th_s" data-label="Д">Дані</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach($disqualifiedPlayersCup as $key => $player): ?>
-                                <tr data-playerid="<?= $player['player_id'] ?>">
-                                    <td><?= $key +1  ?></td>
+                            <?php foreach ($disqualifiedPlayersCup as $key => $player): ?>
+                                <tr>
+                                    <td><?= $key + 1  ?></td>
                                     <td>
-                                        <img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo">
+                                        <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= $player_face_path ?>/<?= $player['player_photo'] ?>" alt="team-logo">
                                         <?= $player['lastname'] ?> <?= $player['firstname'] ?>
                                     </td>
                                     <td>
-                                        <img src="<?=$team_logo_path?>/<?= $player['team_logo'] ?>" alt="team-logo">
+                                        <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= $team_logo_path ?>/<?= $player['team_logo'] ?>" alt="team-logo">
                                         <?= $player['team'] ?>
                                     </td>
                                     <td>
-                                        
+
+                                        <?php foreach ($player['red'] as $tur): ?>
+                                            <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/red-card-icon.png' ?>" alt="">
+                                            <?= $tur ?> тур
+                                        <?php endforeach ?>
+                                        <?php foreach ($player['yellow'] as $tur): ?>
+                                            <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
+                                            <?= $tur ?> тур
+                                        <?php endforeach ?>
+
                                     </td>
-                                </tr>                
+                                </tr>
                             <?php endforeach ?>
                     </table>
-                <?php endif ?>        
+                <?php endif ?>
                 <table id="top-pas" class="draggable-container width-auto">
                     <caption>
                         Порушення
                     </caption>
-            
+
                     <thead>
                         <tr>
                             <th>№</th>
                             <th class="th_s" data-label="Г">ГРАВЕЦЬ</th>
                             <th class="th_s" data-label="К">КОМАНДА</th>
-                            <th class="th_s" data-label="Д" >Дані</th>
+                            <th class="th_s" data-label="Д">Дані</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach($tableCardsCupTurnir as $key => $player): ?>
+                        <?php foreach ($tableCardsCupTurnir as $key => $player): ?>
                             <tr>
-                                <td><?= $key +1  ?></td>
+                                <td><?= $key + 1  ?></td>
                                 <td>
-                                    <img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo">
+
+                                    <?php if (isset($player['player_photo']) && !empty($player['player_photo'])): ?>
+                                        <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= $player_face_path ?><?= $player['player_photo'] ?>" alt="Фото гравця">
+                                    <?php else: ?>
+                                        <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/no-image.jpeg' ?>" alt="Фото гравця">
+                                    <?php endif ?>
                                     <?= $player['lastname'] ?> <?= $player['firstname'] ?>
                                 </td>
                                 <td>
-                                    <img src="<?=$team_logo_path?>/<?= $player['team_logo'] ?>" alt="team-logo">
+                                    <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= $team_logo_path ?>/<?= $player['team_logo'] ?>" alt="team-logo">
                                     <?= $player['team'] ?>
                                 </td>
-                                <td >
-                                    <?php foreach($player['red'] as $tur):?>
-                                        <img width="20" height="30" src="<?= IMAGES . '/red-card-icon.png' ?>" alt="">
-                                        <?=$tur?> тур
-                                    <?php endforeach?>
-                                    <?php foreach($player['yellow'] as $tur):?>
-                                        <img width="20" height="30" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
-                                        <?=$tur?> тур
-                                    <?php endforeach?>
-            
+                                <td>
+                                    <?php foreach ($player['red'] as $tur): ?>
+                                        <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/red-card-icon.png' ?>" alt="">
+                                        <?= $tur ?> тур
+                                    <?php endforeach ?>
+                                    <?php foreach ($player['yellow'] as $tur): ?>
+                                        <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
+                                        <?= $tur ?> тур
+                                    <?php endforeach ?>
+
                                 </td>
                             </tr>
-                        
+
                         <?php endforeach ?>
                     </tbody>
                 </table>
             </div>
 
-        <?php endif?>
+        <?php endif ?>
+
         <div class="">
             <h2 class="text-center uppercase">Груповий Етап</h2>
-            <?php if(isset($disqualifiedPlayers) && count($disqualifiedPlayers) > 0) : ?>
+            <?php if (isset($disqualifiedPlayers) && count($disqualifiedPlayers) > 0) : ?>
                 <table id="top-pas" class="draggable-container width-auto">
                     <caption>
                         Дискваліфікація
                     </caption>
-        
+
                     <thead>
                         <tr>
                             <th>№</th>
                             <th class="th_s" data-label="Г">ГРАВЕЦЬ</th>
                             <th class="th_s" data-label="К">КОМАНДА</th>
-                            <th class="th_s" data-label="Д" >Дані</th>
+                            <th class="th_s" data-label="Д">Дані</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach($disqualifiedPlayers as $key => $player): ?>
-                            <tr>
-                                <td><?= $key +1  ?></td>
+                        <?php foreach ($disqualifiedPlayers as $key => $player): ?>
+                            <tr data-player-id="<?= $player['player_id'] ?>" >
+                                <td><?= $key + 1  ?></td>
                                 <td>
-                                    <img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo">
+                                    <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= $player_face_path ?>/<?= $player['player_photo'] ?>" alt="team-logo">
                                     <?= $player['lastname'] ?> <?= $player['firstname'] ?>
                                 </td>
                                 <td>
-                                    <img src="<?=$team_logo_path?>/<?= $player['team_logo'] ?>" alt="team-logo">
+                                    <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= $team_logo_path ?>/<?= $player['team_logo'] ?>" alt="team-logo">
                                     <?= $player['team'] ?>
                                 </td>
                                 <td>
-                                   
+                                    <?php foreach ($player['red'] as $tur): ?>
+                                        <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/red-card-icon.png' ?>" alt="">
+                                        <?= $tur ?> тур
+                                    <?php endforeach ?>
+                                    <?php foreach ($player['yellow'] as $tur): ?>
+                                        <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
+                                        <?= $tur ?> тур
+                                    <?php endforeach ?>
+
                                 </td>
-                            </tr>                
+                            </tr>
                         <?php endforeach ?>
                 </table>
-            <?php endif ?>        
+            <?php endif ?>
             <table id="top-pas" class="draggable-container width-auto">
                 <caption>
                     Порушення
                 </caption>
-        
+
                 <thead>
                     <tr>
                         <th>№</th>
                         <th class="th_s" data-label="Г">ГРАВЕЦЬ</th>
                         <th class="th_s" data-label="К">КОМАНДА</th>
-                        <th class="th_s" data-label="Д" >Дані</th>
+                        <th class="th_s" data-label="Д">Дані</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach($tableCards as $key => $player): ?>
-                        <tr>
-                            <td><?= $key +1  ?></td>
+                    <?php foreach ($tableCardsByDate as $key => $player): ?>
+                        <tr data-player-id="<?= $player['player_id'] ?>" >
+                            <td><?= $key + 1  ?></td>
                             <td>
-                                <img src="<?=$player_face_path?>/<?= $player['player_photo'] ?>" alt="team-logo">
+                                <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= $player_face_path ?>/<?= $player['player_photo'] ?>" alt="team-logo">
                                 <?= $player['lastname'] ?> <?= $player['firstname'] ?>
                             </td>
                             <td>
-                                <img src="<?=$team_logo_path?>/<?= $player['team_logo'] ?>" alt="team-logo">
+                                <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= $team_logo_path ?>/<?= $player['team_logo'] ?>" alt="team-logo">
                                 <?= $player['team'] ?>
                             </td>
-                            <td >
-                                <?php foreach($player['red'] as $tur):?>
-                                    <img width="20" height="30" src="<?= IMAGES . '/red-card-icon.png' ?>" alt="">
-                                    <?=$tur?> тур
-                                <?php endforeach?>
-                                <?php foreach($player['yellow'] as $tur):?>
-                                    <img width="20" height="30" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
-                                    <?=$tur?> тур
-                                <?php endforeach?>
-        
+                            <td>
+                                <?php foreach ($player['red'] as $tur): ?>
+                                    <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/red-card-icon.png' ?>" alt="">
+                                    <?= $tur ?> тур
+                                <?php endforeach ?>
+                                <?php foreach ($player['yellow'] as $tur): ?>
+                                    <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
+                                    <?= $tur ?> тур
+                                <?php endforeach ?>
+
                             </td>
                         </tr>
-                    
+
                     <?php endforeach ?>
                 </tbody>
             </table>
@@ -353,4 +326,3 @@ if($isCupCurrentTur){
 
 
 <?php include_once  CONTROLLERS . "/footer.php" ?>
-

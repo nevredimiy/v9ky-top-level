@@ -17,31 +17,41 @@ $turnir = getTurnir($tournament);
 
 $currentTur = getLasttur($turnir);
 
+$dateLastTur = getDateLastTur($turnir);
+
+$matchesLastTur = getMatchesLastTurTurByDate($turnir, $dateLastTur);
+
+$matchesLastTurIds = [];
+foreach ($matchesLastTur as $match) {
+    $matchesLastTurIds[] = $match['id'];
+}
+
 // true - турнір кубка (плей-офф), false - ліга (групповой турнир)
 $isCupCurrentTur = isCupCurrentTur($turnir, $currentTur);
+
+$redCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'red');
+$yellowCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow');
 
 include_once CONTROLLERS . "/head.php";
 include_once CONTROLLERS . "/leagues.php";
 
-$redCards = getCardsByType($dbF, $turnir, 'red', $currentTur);
-$yellowCards = getCardsByType($dbF, $turnir, 'yellow', $currentTur);
-$tableCards = getTableCards($redCards, $yellowCards);
+$tableCardsByDate = getTableCards($redCardsByTypeAndDate, $yellowCardsByTypeAndDate);
 
-// dump($tableCards);
-// dump($currentTur);
 
-$disqualifiedPlayers = getDisqualifiedPlayers($tableCards, $currentTur);
+// dump($tableCardsByDate);
+
+$disqualifiedPlayers = getDisqualifiedPlayersByDate($tableCardsByDate, $turnir,  $dateLastTur);
+
 // dump($disqualifiedPlayers);
-
 if ($isCupCurrentTur) {
 
-    $redCardsCup = getCardsByType($dbF, $turnir, 'red', $currentTur, 1);
+    $redCardsCup = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'red', 1);
 
-    $yellowCardsCup = getCardsByType($dbF, $turnir, 'yellow', $currentTur, 1);
+    $yellowCardsCup = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow', 1);
 
     $tableCardsCupTurnir = getTableCards($redCardsCup, $yellowCardsCup);
 
-    $disqualifiedPlayersCup = getDisqualifiedPlayers($tableCardsCupTurnir, $currentTur);
+    $disqualifiedPlayersCup = getDisqualifiedPlayersByDate($tableCardsCupTurnir, $dateLastTur, 2);
 }
 
 ?>
@@ -68,7 +78,7 @@ if ($isCupCurrentTur) {
                         </thead>
                         <tbody>
                             <?php foreach ($disqualifiedPlayersCup as $key => $player): ?>
-                                <tr>
+                                <tr">
                                     <td><?= $key + 1  ?></td>
                                     <td>
                                         <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= $player_face_path ?>/<?= $player['player_photo'] ?>" alt="team-logo">
@@ -109,7 +119,7 @@ if ($isCupCurrentTur) {
                     </thead>
                     <tbody>
                         <?php foreach ($tableCardsCupTurnir as $key => $player): ?>
-                            <tr>
+                            <tr data-player-id="<?= $player['player_id'] ?>" >
                                 <td><?= $key + 1  ?></td>
                                 <td>
 
@@ -201,8 +211,8 @@ if ($isCupCurrentTur) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($tableCards as $key => $player): ?>
-                        <tr>
+                    <?php foreach ($tableCardsByDate as $key => $player): ?>
+                        <tr data-player-id="<?= $player['player_id'] ?>" >
                             <td><?= $key + 1  ?></td>
                             <td>
                                 <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= $player_face_path ?>/<?= $player['player_photo'] ?>" alt="team-logo">

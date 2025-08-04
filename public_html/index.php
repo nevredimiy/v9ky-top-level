@@ -236,7 +236,7 @@ switch($tournament) {
 			case "news": $title="Експрес-підсумки"; require_once(CONTROLLERS . "/news/news.php"); break;
 			case "news_show": $title="Експрес-підсумки"; require_once(CONTROLLERS . "/news/news_show.php"); break;
 			case "developer_page": $title="Сторінка розробника"; require_once(CONTROLLERS . "/developer_page.php"); break;
-			case "dev_page": $title="Сторінка розробника2"; require_once(CONTROLLERS . "/dev_page.php"); break;
+			case "dev_page": $title="Сторінка розробника2"; require(CONTROLLERS . "/dev_page.php"); break;
 			case "archive": $title="Архів турнірів V9KY"; require_once(CONTROLLERS . "/archive.php"); break;
 			case "archived": $title="Архів турнірів V9KY"; require_once(CONTROLLERS . "/archived.php"); break;
 			case "addteam1": $title="Заявити команду"; require_once(CONTROLLERS . "/addteam1.php"); break;
