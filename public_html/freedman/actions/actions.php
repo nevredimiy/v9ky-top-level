@@ -143,6 +143,11 @@ if(isset($data['action']) && $data['action'] == 'calendar_of_matches' ) {
     // Добавляем два элемента в массивы - форматированная дата и время матча.
     $dataCurrentTurWithDate = getArrayWithFormattedDate($matchesOfTurAndDate);
 
+    // if(isset($_GET['dev'])) 
+    // {
+    //  dump($dataCurrentTurWithDate);
+    // }
+
     $dataMatch = [];
         
     foreach ($dataCurrentTurWithDate as $match) {
@@ -154,6 +159,7 @@ if(isset($data['action']) && $data['action'] == 'calendar_of_matches' ) {
             $dataMatch['anons'] = $match['anons'];
             $dataMatch['goals1'] = $match['goals1'];
             $dataMatch['goals2'] = $match['goals2'];
+            $dataMatch['canseled'] = $match['canseled'];
             break;
         }
     }
@@ -257,7 +263,7 @@ if(isset($data['action']) && $data['action'] == 'calendar_of_matches' ) {
         require_once VIEWS . '/calendar_of_matches_content.tpl.php';
         $section1Content = ob_get_clean();
     } catch (Exception $e) {
-        $section1Content = '<p>Ошибка загрузки данных</p>';
+        $section1Content = '<p>Помилка завантаження даних!</p>';
     }
 
     if($currentTur <= $lastTur && $dateLastTur <= $dateNow){
@@ -266,7 +272,7 @@ if(isset($data['action']) && $data['action'] == 'calendar_of_matches' ) {
             require VIEWS . '/controls_content.tpl.php';
             $section2Content = ob_get_clean();
         } catch (Exception $e) {
-            $section2Content = '<p>Ошибка загрузки данных</p>';
+            $section2Content = '<p>Помилка завантаження даних!!</p>';
         }
     } else {
         $section2Content = "";
@@ -305,6 +311,7 @@ if(isset($data['action']) && $data['action'] == 'anons' ) {
                 $dataMatch['anons'] = $match['anons'];
                 $dataMatch['goals1'] = $match['goals1'];
                 $dataMatch['goals2'] = $match['goals2'];
+                $dataMatch['canseled'] = $match['canseled'];
                 break;
             }
         }
@@ -415,6 +422,7 @@ if(isset($data['action']) && $data['action'] == 'match_stats' ) {
                 $dataMatch['team1_id'] = $match['team1_id'];
                 // $dataMatch['team1_id'] = isset($match['team1_id']) ? $match['team1_id'] : '5331';
                 $dataMatch['team2_id'] = $match['team2_id'];
+                $dataMatch['canseled'] = $match['canseled'];
                 // $dataMatch['team2_id'] = isset($match['team2_id']) ? $match['team2_id'] : '5332';
                 break;
             }
@@ -509,13 +517,13 @@ if(isset($data['action']) && $data['action'] == 'match_stats' ) {
             $matchDate = new DateTime($staticMatch['team1']['data']['match_date']);
 
             // Добавляем 5 дней - это количество дней, когда админы должны внести все данные по последнему туру
-            $matchDate->modify('+5 days');
+            $matchDate->modify('+4 days 21 hours');
             
         } else {
             $matchDateSql = $dbF->query("SELECT `date` FROM `v9ky_match` WHERE `id` = :id", [":id" => $data['match_id']])->find();
             
             $matchDate = new DateTime($matchDateSql['date']);
-            $matchDate->modify('+5 days');
+            $matchDate->modify('+4 days 21 hours');
         }
 
         // Текущая дата и время
@@ -553,6 +561,7 @@ if( isset($data['action']) && $data['action'] == 'kkd' ) {
                 $dataMatch['match_time'] = $match['match_time'];
                 $dataMatch['team1_id'] = $match['team1_id'];
                 $dataMatch['team2_id'] = $match['team2_id'];
+                $dataMatch['canseled'] = $match['canseled'];
                 break;
             }
         }
@@ -593,6 +602,7 @@ if( isset($data['action']) && $data['action'] == 'preview' ) {
                 $dataMatch['match_time'] = $match['match_time'];
                 $dataMatch['team1_id'] = $match['team1_id'];
                 $dataMatch['team2_id'] = $match['team2_id'];
+                $dataMatch['canseled'] = $match['canseled'];
                 break;
             }
         }
@@ -632,6 +642,7 @@ if( isset($data['action']) && $data['action'] == 'video' ) {
                 $dataMatch['match_time'] = $match['match_time'];
                 $dataMatch['team1_id'] = $match['team1_id'];
                 $dataMatch['team2_id'] = $match['team2_id'];
+                $dataMatch['canseled'] = $match['canseled'];
                 break;
             }
         }
@@ -671,6 +682,7 @@ if( isset($data['action']) && $data['action'] == 'photo' ) {
                 $dataMatch['match_time'] = $match['match_time'];
                 $dataMatch['team1_id'] = $match['team1_id'];
                 $dataMatch['team2_id'] = $match['team2_id'];
+                $dataMatch['canseled'] = $match['canseled'];
                 break;
             }
         }

@@ -64,7 +64,7 @@
                             <?php  foreach ($teams as $i => $team) : ?>
                                 <?php $id = $team['id']; ?>
                                 <?php $team_id = $team['id']; ?>
-                                <tr>
+                                <tr data-team-id="<?= $team['id'] ?>">
                                     <td><span <?= isset($teamColorPlace[$i]) && !empty($teamColorPlace[$i]) ? "style='{$colorStyles[$teamColorPlace[$i]]}'" : '' ?> class="cell" data-color="<?= $teamColorPlace[$i] ?>"><?= $i + 1 ?></span></td>
                                     <td><img width="18" height="18" class="cell--team-logo" src="<?= $team_logo_path ?>/<?= $team['logo'] ?>"></td>
                                     <td><a href="<?= $site_url . '/' . $tournament .'/team_page/id/' . $team_id ?>"><span class="cell--team"><?= $stats[$id]['name']?></span></a></td>

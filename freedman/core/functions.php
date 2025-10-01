@@ -3513,47 +3513,113 @@ function getCardsByType($dbF, $turnir, $cardType, $currentTur, $cupStage = 0)
 /**
  * Получаем табличные дянные по дисквалификации - игроки с ЖК и КК 
  */
-function getTableCards($redCards, $yellowCards)
+// function getTableCards($redCards, $yellowCards)
+// {
+
+//     // dump($redCards);
+//     $tableCards = [];
+
+//     foreach ([$redCards, $yellowCards] as $source) {
+//         foreach ($source as $id => $data) {
+//             if (!isset($tableCards[$id])) {
+//                 $tableCards[$id] = [
+//                     'player_id' => $data['player_id'],
+//                     'lastname' => $data['lastname'],
+//                     'firstname' => $data['firstname'],
+//                     'team_logo' => $data['team_logo'],
+//                     'team' => $data['team'],
+//                     'team_id' => $data['team_id'],
+//                     'player_photo' => $data['player_photo'],
+//                     'red' => [],
+//                     'yellow' => [],
+//                     'red_date' => [],
+//                     'yellow_date' => [],
+//                     'tur' => []
+//                 ];
+//             }
+
+//             $tableCards[$id]['red'] = array_merge($tableCards[$id]['red'], $data['red']);
+//             $tableCards[$id]['yellow'] = array_merge($tableCards[$id]['yellow'], $data['yellow']);
+//             $tableCards[$id]['red_date'] = array_merge($tableCards[$id]['red_date'], $data['red_date']);
+//             $tableCards[$id]['yellow_date'] = array_merge($tableCards[$id]['yellow_date'], $data['yellow_date']);
+//             $tableCards[$id]['tur'] = array_merge($tableCards[$id]['tur'], $data['red'], $data['yellow']);
+//         }
+//     }
+
+
+//     // Сортировка по количеству карточек (общая)
+//     usort($tableCards, function ($a, $b) {
+//         return count($b['tur']) - count($a['tur']);
+//     });
+
+//     return $tableCards;
+// }
+
+function getTableCards($redCards, $yellowCards, $yellowRedCards= [])
 {
+    $tableCards = array();
 
-    // dump($redCards);
-    $tableCards = [];
-
-    foreach ([$redCards, $yellowCards] as $source) {
+    foreach (array($redCards, $yellowCards, $yellowRedCards) as $source) {
         foreach ($source as $id => $data) {
             if (!isset($tableCards[$id])) {
-                $tableCards[$id] = [
-                    'player_id' => $data['player_id'],
-                    'lastname' => $data['lastname'],
-                    'firstname' => $data['firstname'],
-                    'team_logo' => $data['team_logo'],
-                    'team' => $data['team'],
-                    'team_id' => $data['team_id'],
-                    'player_photo' => $data['player_photo'],
-                    'red' => [],
-                    'yellow' => [],
-                    'red_date' => [],
-                    'yellow_date' => [],
-                    'tur' => []
-                ];
+                $tableCards[$id] = array(
+                    'player_id'      => $data['player_id'],
+                    'lastname'       => $data['lastname'],
+                    'firstname'      => $data['firstname'],
+                    'team_logo'      => $data['team_logo'],
+                    'team'           => $data['team'],
+                    'team_id'        => $data['team_id'],
+                    'player_photo'   => $data['player_photo'],
+                    'red'            => array(),
+                    'yellow'         => array(),
+                    'yellow_red'     => array(),
+                    'red_date'       => array(),
+                    'yellow_date'    => array(),
+                    'yellow_red_date'=> array(),
+                    'tur'            => array()
+                );
             }
 
-            $tableCards[$id]['red'] = array_merge($tableCards[$id]['red'], $data['red']);
-            $tableCards[$id]['yellow'] = array_merge($tableCards[$id]['yellow'], $data['yellow']);
-            $tableCards[$id]['red_date'] = array_merge($tableCards[$id]['red_date'], $data['red_date']);
-            $tableCards[$id]['yellow_date'] = array_merge($tableCards[$id]['yellow_date'], $data['yellow_date']);
-            $tableCards[$id]['tur'] = array_merge($tableCards[$id]['tur'], $data['red'], $data['yellow']);
+            // объединяем карточки
+            if (isset($data['red'])) {
+                $tableCards[$id]['red'] = array_merge($tableCards[$id]['red'], $data['red']);
+            }
+            if (isset($data['yellow'])) {
+                $tableCards[$id]['yellow'] = array_merge($tableCards[$id]['yellow'], $data['yellow']);
+            }
+            if (isset($data['yellow_red'])) {
+                $tableCards[$id]['yellow_red'] = array_merge($tableCards[$id]['yellow_red'], $data['yellow_red']);
+            }
+
+            // объединяем даты
+            if (isset($data['red_date'])) {
+                $tableCards[$id]['red_date'] = array_merge($tableCards[$id]['red_date'], $data['red_date']);
+            }
+            if (isset($data['yellow_date'])) {
+                $tableCards[$id]['yellow_date'] = array_merge($tableCards[$id]['yellow_date'], $data['yellow_date']);
+            }
+            if (isset($data['yellow_red_date'])) {
+                $tableCards[$id]['yellow_red_date'] = array_merge($tableCards[$id]['yellow_red_date'], $data['yellow_red_date']);
+            }
+
+            // туры (общая статистика)
+            $tableCards[$id]['tur'] = array_merge(
+                $tableCards[$id]['tur'],
+                isset($data['red']) ? $data['red'] : array(),
+                isset($data['yellow']) ? $data['yellow'] : array(),
+                isset($data['yellow_red']) ? $data['yellow_red'] : array()
+            );
         }
     }
 
-
-    // Сортировка по количеству карточек (общая)
+    // Сортировка по количеству карточек
     usort($tableCards, function ($a, $b) {
         return count($b['tur']) - count($a['tur']);
     });
 
     return $tableCards;
 }
+
 
 /**
  * Получаем дисквалифицированных игроков по красным и желтым карточкам.
@@ -3686,7 +3752,26 @@ function getMatchesLastTurTurByDate($turnir, $dateLastTur)
 
 function getCardsByTypeAndDate($dbF, $matchesLastTurIds, $cardType, $cupStage = 0)
 {
-    $tableName = $cardType === 'red' ? 'v9ky_red' : 'v9ky_yellow';
+    if (empty($matchesLastTurIds)) {
+        return []; // Если нет матчей, сразу возвращаем пустой массив
+    }
+
+    // $tableName = $cardType === 'red' ? 'v9ky_red' : 'v9ky_yellow';
+   switch ($cardType) {
+        case 'red':
+            $tableName = 'v9ky_red';
+            break;
+        case 'yellow':
+            $tableName = 'v9ky_yellow';
+            break;
+        case 'yellow_red':
+            $tableName = 'v9ky_yellow_red';
+            break;
+        default:
+            $tableName = null; // если вдруг неизвестный тип
+    }
+
+
     $cupStageCondition = $cupStage > 0 ? "AND mtc.cup_stage > 0" : "AND mtc.cup_stage = 0";
 
     $sql = "
@@ -3733,14 +3818,19 @@ function getCardsByTypeAndDate($dbF, $matchesLastTurIds, $cardType, $cupStage = 
                 'team' => $player['team'],
                 'team_id' => $player['team_id'],
                 'player_photo' => $player['player_photo'],
-                'red' => [],
-                'yellow' => [],
-                'red_date' => [],
-                'yellow_date' => []
+                // карточки и даты по видам
+                'red'         => array(),
+                'yellow'      => array(),
+                'yellow_red'  => array(),
+                'red_date'    => array(),
+                'yellow_date' => array(),
+                'yellow_red_date' => array()
             ];
         }
-        $cardType = $cardType === 'red' ? 'red' : 'yellow';
-        $cardDate = $cardType === 'red' ? 'red_date' : 'yellow_date';
+        // $cardType = $cardType === 'red' ? 'red' : 'yellow';
+        // $cardDate = $cardType === 'red' ? 'red_date' : 'yellow_date';
+        $cardDate = $cardType . '_date';
+
 
         if (!isset($result[$id][$cardType])) {
             $result[$id][$cardType] = [];
@@ -3801,15 +3891,17 @@ function getDisqualifiedPlayersByDate($tableCardsByDate, $turnir, $dateLastTur, 
                     'player_photo' => $player['player_photo'],
                     'red' => $player['red'],
                     'yellow' => $player['yellow'],
+                    'yellow_red' => $player['yellow_red'],
                     'red_date' => $player['red_date'],
-                    'yellow_date' => $player['yellow_date']
+                    'yellow_date' => $player['yellow_date'],
+                    'yellow_red_date' => $player['yellow_red_date']
                 ];
             }
         }
 
         // Перевірка на кількість жовтих карток
 
-        // Желто-красная карточка - когда две желтіе в одном туре
+        // Когда две желтые в одном туре - приравнивается к красной
         $yellowAndRed = 0;
         $doubleYellowInMatch = [];
         foreach ($player['yellow'] as $yellow) {
@@ -3819,7 +3911,7 @@ function getDisqualifiedPlayersByDate($tableCardsByDate, $turnir, $dateLastTur, 
             $doubleYellowInMatch[] = $yellow;
         }
 
-        $yellowTotal = count($player['yellow_date']) + $yellowAndRed;
+        $yellowTotal = count($player['yellow_date']) + $yellowAndRed + count($player['yellow_red_date']);
 
         if ($yellowTotal > 0 && $yellowTotal % $countCards == 0) {
             $lastYellowTur = end($player['yellow_date']);
@@ -3836,16 +3928,47 @@ function getDisqualifiedPlayersByDate($tableCardsByDate, $turnir, $dateLastTur, 
                         'player_photo' => $player['player_photo'],
                         'red' => [],
                         'yellow' => $player['yellow'],
+                        'yellow_red' => $player['yellow_red'],
                         'red_date' => [],
-                        'yellow_date' => $player['yellow_date']
+                        'yellow_date' => $player['yellow_date'],
+                        'yellow_red_date' => $player['yellow_red_date'],
                     ];
                 } elseif (empty($disqualifiedPlayers[$player['player_id']]['yellow'])) {
                     // Только если в массиве ещё не добавлены жёлтые карточки — добавляем
                     $disqualifiedPlayers[$player['player_id']]['yellow'] = $player['yellow'];
                     $disqualifiedPlayers[$player['player_id']]['yellow_date'] = $player['yellow_date'];
+                    $disqualifiedPlayers[$player['player_id']]['yellow_red_date'] = $player['yellow_red_date'];
                 }
             }
         }
+
+        //Желто-красная карточка - это также когда показывается две желтые карточки за матч - приравненвается к красной
+         if (isset($player['yellow_red_date']) && count($player['yellow_red_date']) > 0) {
+            $lastRedTur = end($player['yellow_red_date']);
+            $lastRedTur = date('Y-m-d H:i:s', strtotime($lastRedTur));            
+
+            // $upcomingTur = date('Y-m-d H:i:s', strtotime($dateUpcomingTur));
+
+            // Перевірка, чи гравець дискваліфікований
+            if ($lastRedTur == $lastTur1) {
+
+                $disqualifiedPlayers[$player['player_id']] = [
+                    'player_id' => $player['player_id'],
+                    'lastname' => $player['lastname'],
+                    'firstname' => $player['firstname'],
+                    'team_logo' => $player['team_logo'],
+                    'team' => $player['team'],
+                    'player_photo' => $player['player_photo'],
+                    'red' => $player['red'],
+                    'yellow' => $player['yellow'],
+                    'yellow_red' => $player['yellow_red'],
+                    'red_date' => $player['red_date'],
+                    'yellow_date' => $player['yellow_date'],
+                    'yellow_red_date' => $player['yellow_red_date']
+                ];
+            }
+        }
+
     }
     
     return array_values($disqualifiedPlayers);

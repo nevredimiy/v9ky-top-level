@@ -27,6 +27,10 @@ if ((!empty($_GET))){
     $record["name"] = $name;
     $record["ru"] = $ru;
     $recordsez = $db->Execute("select * from v9ky_seasons where id=$seasons");
+
+    // echo '<pre>';
+    // var_dump($recordsez);
+    // echo '</pre>';
     $record["season"] = $recordsez->fields['name'];
     $record["seasons"] = $seasons;
     $record["active"] = $active;
@@ -40,7 +44,7 @@ if ((!empty($_GET))){
     $record["niz_turnirki"] = $niz_turnirki;
 
     $colors_place = [];
-    for($i = 1; $i <= 10; $i++){
+    for($i = 1; $i <= 20; $i++){
         if(isset($_GET['color_place_' . $i])) {
             $colors_place[] = $_GET['color_place_' . $i] ? $_GET['color_place_' . $i] : ''; 
         }

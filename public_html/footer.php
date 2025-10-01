@@ -59,8 +59,6 @@ printf("Страница сгенерирована за %f секунд",$time)
 <script src="/libs/owl-carousel/owl.carousel.js"></script>
 <script src="/js/jquery00.js"></script>
 <script src="/libs/slick/slick.min.js"></script>
-
-
 <script src="/js/common.js"></script>
 
 <script>

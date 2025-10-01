@@ -7,6 +7,7 @@
 // error_reporting(E_ALL);
 
  include_once CONTROLLERS . "/head.php";
+
  
  include_once CONTROLLERS . "/leagues.php";
  include_once CONTROLLERS . "/banner.php";

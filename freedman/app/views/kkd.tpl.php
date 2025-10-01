@@ -33,7 +33,21 @@
 					</div>
                 </div>
                 <?php if($dataMatch['goals1'] != null) :?>
-                <div class="state__text">Матч завершено</div>
+                	<div data-match-canseled="<?=$dataMatch['canseled']  ?>" class="state__text">
+                        
+                        <?php if($dataMatch['canseled'] != null)  :?>
+                            <?php if($dataMatch['canseled'] == 1) :?>
+                                Матч завершено
+                            <?php elseif($dataMatch['canseled'] == 2) :?>
+                                Матч у прямому ефірі
+                            <?php else :?>   
+                                Матч очікується
+                            <?php endif ?>
+                        <?php else :?>   
+                            Матч завершено
+                        <?php endif ?>
+
+                    </div>
                 <?php endif ?>
             </div>
 		</div>

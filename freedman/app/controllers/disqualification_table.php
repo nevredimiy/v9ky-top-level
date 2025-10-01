@@ -31,12 +31,12 @@ $isCupCurrentTur = isCupCurrentTur($turnir, $currentTur);
 
 $redCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'red');
 $yellowCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow');
+$yellowRedCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow_red');
 
 include_once CONTROLLERS . "/head.php";
 include_once CONTROLLERS . "/leagues.php";
 
-$tableCardsByDate = getTableCards($redCardsByTypeAndDate, $yellowCardsByTypeAndDate);
-
+$tableCardsByDate = getTableCards($redCardsByTypeAndDate, $yellowCardsByTypeAndDate, $yellowRedCardsByTypeAndDate);
 
 // dump($tableCardsByDate);
 
@@ -49,7 +49,9 @@ if ($isCupCurrentTur) {
 
     $yellowCardsCup = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow', 1);
 
-    $tableCardsCupTurnir = getTableCards($redCardsCup, $yellowCardsCup);
+    $yellowRedCardsCup = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow_red', 1);
+
+    $tableCardsCupTurnir = getTableCards($redCardsCup, $yellowCardsCup, $yellowRedCardsCup);
 
     $disqualifiedPlayersCup = getDisqualifiedPlayersByDate($tableCardsCupTurnir, $dateLastTur, 2);
 }
@@ -98,6 +100,10 @@ if ($isCupCurrentTur) {
                                             <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
                                             <?= $tur ?> тур
                                         <?php endforeach ?>
+                                         <?php foreach ($player['yellow_red'] as $tur): ?>
+                                            <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-red-icon.png' ?>" alt="">
+                                            <?= $tur ?> тур
+                                        <?php endforeach ?>
 
                                     </td>
                                 </tr>
@@ -141,6 +147,10 @@ if ($isCupCurrentTur) {
                                     <?php endforeach ?>
                                     <?php foreach ($player['yellow'] as $tur): ?>
                                         <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
+                                        <?= $tur ?> тур
+                                    <?php endforeach ?>
+                                     <?php foreach ($player['yellow_red'] as $tur): ?>
+                                        <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-red-icon.png' ?>" alt="">
                                         <?= $tur ?> тур
                                     <?php endforeach ?>
 
@@ -191,6 +201,10 @@ if ($isCupCurrentTur) {
                                         <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
                                         <?= $tur ?> тур
                                     <?php endforeach ?>
+                                    <?php foreach ($player['yellow_red'] as $tur): ?>
+                                        <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-red-icon.png' ?>" alt="">
+                                        <?= $tur ?> тур
+                                    <?php endforeach ?>
 
                                 </td>
                             </tr>
@@ -229,6 +243,10 @@ if ($isCupCurrentTur) {
                                 <?php endforeach ?>
                                 <?php foreach ($player['yellow'] as $tur): ?>
                                     <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
+                                    <?= $tur ?> тур
+                                <?php endforeach ?>
+                                 <?php foreach ($player['yellow_red'] as $tur): ?>
+                                    <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-red-icon.png' ?>" alt="">
                                     <?= $tur ?> тур
                                 <?php endforeach ?>
 

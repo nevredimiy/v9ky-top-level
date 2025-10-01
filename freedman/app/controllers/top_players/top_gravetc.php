@@ -49,9 +49,9 @@ if (isset($_SERVER['HTTP_REFERER'])) {
             <th class="th_s" data-label="Ф">ФОТО</th>
             <th class="th_s" data-label="Л">ЛОГО</th>
             <th class="th_s" data-label="Г">ГРАВЕЦЬ</th>
-            <th class="th_s" data-label="КПД">КПД</th>
+            <th class="th_s" data-label="ККД">ККД</th>
             <th class="th_s" data-label="М">Матчів</th>
-            <th class="th_s" data-label="КПД/М">КПД/М</th>
+            <th class="th_s" data-label="ККД/М">ККД/М</th>
             <?php for($i = 1; $i <= 10; $i++): ?>
               <th data-label="<?= $i ?>}"><?= $i ?></th>
             <?php endfor ?>

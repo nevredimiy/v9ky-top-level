@@ -42,8 +42,13 @@
                 <?php $i =1 ?>
                 <?php foreach($dataMatchesOfDate as $match): ?>
 
-                    <div class="swiper-slide swiper-slide-active" role="group" aria-label="1 / 5"
-                        style="margin-right: 5px;">
+                    <div 
+                        data-match-id="<?= $match['id'] ?>"
+                        class="swiper-slide swiper-slide-active" 
+                        role="group" 
+                        aria-label="1 / 5"
+                        style="margin-right: 5px;"
+                    >
                         <div class="card-of-matches">
                             <div class="card-of-matches__title-match">
                                 <img class="card-of-matches__shirt card-of-matches__shirt--left"
@@ -162,11 +167,25 @@
                                 </a>
                             </div>
 
-                            <div class="card-of-matches__status">
+                            <div data-match-canseled="<?=$match['canseled']  ?>" class="card-of-matches__status">
                                 <?php if($match['goals1'] == NULL || $match['goals2'] == NULL ) : ?>
                                     МАТЧ ОЧІКУЄТЬСЯ
                                 <?php else:?>
-                                    МАТЧ ЗАВЕРШЕНО
+                                    <?php 
+                                        switch($match['canseled']) {
+                                            case 0:
+                                                echo 'Матч очікується';
+                                                break;
+                                            case 1:
+                                                echo ' Матч завершено';
+                                                break;
+                                            case 2:
+                                                echo 'Матч у прямому ефірі';
+                                                break;
+                                            default:
+                                                echo 'Матч очікується';
+                                        }
+                                    ?>
                                 <?php endif?>
                             </div>
 

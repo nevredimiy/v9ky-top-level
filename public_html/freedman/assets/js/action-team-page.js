@@ -34,7 +34,7 @@ $(document).ready(function () {
                         console.log("Ошибка AJAX:", textStatus, errorThrown);
                         console.log("Ответ сервера:", jqXHR.responseText);
                         $modalLoading.hide();
-                        $modalContent.show().html("<p>Ошибка загрузки данных</p>");
+                        $modalContent.show().html("<p>Помилка завантаження даних</p>");
                     }
                 });
             }

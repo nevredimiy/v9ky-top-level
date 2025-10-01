@@ -8,6 +8,10 @@ if (!isset($currentTur)) {
 
 $dateLastTur = getDateLastTur($turnir);
 
+if(!$dateLastTur){
+    $dateLastTur = date("Y-m-d");
+}
+
 // true - турнір кубка (плей-офф), false - ліга (групповой турнир)
 $isCupCurrentTur = isCupCurrentTur($turnir, $currentTur);
 
@@ -19,11 +23,16 @@ foreach ($matchesLastTur as $match) {
     $matchesLastTurIds[] = $match['id'];
 }
 
-$redCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'red');
-$yellowCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow');
-$tableCardsByDate = getTableCards($redCardsByTypeAndDate, $yellowCardsByTypeAndDate);
-$dateUpcomingTur = getDateUpcomingTur($turnir);
-$disqualifiedPlayers = getDisqualifiedPlayersByDate($tableCardsByDate, $turnir, $dateLastTur);
+if(!empty($matchesLastTurIds)){
+    $redCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'red');    
+    $yellowCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow');   
+    $yellowRedCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow_red'); 
+    $tableCardsByDate = getTableCards($redCardsByTypeAndDate, $yellowCardsByTypeAndDate, $yellowRedCardsByTypeAndDate);  
+    $dateUpcomingTur = getDateUpcomingTur($turnir);
+    $disqualifiedPlayers = getDisqualifiedPlayersByDate($tableCardsByDate, $turnir, $dateLastTur);
+} else {
+    $disqualifiedPlayers = [];
+}
 
 // $redCards = getCardsByType($dbF, $turnir, 'red', $currentTur);
 
@@ -39,7 +48,9 @@ if ($isCupCurrentTur) {
 
     $yellowCardsCup =  getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow', 1);
 
-    $tableCardsCupTurnir = getTableCards($redCardsCup, $yellowCardsCup);
+    $yellowRedCardsCup = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow_red', 1);
+
+    $tableCardsCupTurnir = getTableCards($redCardsCup, $yellowCardsCup, $yellowRedCardsCup);
 
     $disqualifiedPlayersCup = getDisqualifiedPlayersByDate($tableCardsCupTurnir, $dateLastTur, 2);
 }

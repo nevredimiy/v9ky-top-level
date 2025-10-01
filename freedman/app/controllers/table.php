@@ -43,7 +43,7 @@ $colorStyles = [
     'gold' => 'background: #FDBE11',
     'bronze' => 'background: #CD7F32', 
     'red' => 'background: #FF3B3B', 
-    'empty' => 'background: transporant', 
+    'empty' => 'background: transparent', 
 ];
 
 // 2. Получаем результаты матчей
@@ -122,7 +122,7 @@ foreach ($matches as $match) {
 // dump($matchResults);
 
 // 5. Сортируем команды
-foreach ($groupedTeams as $group => &$teams) {
+foreach ($groupedTeams as $group => $teams) {
     usort($teams, function ($a, $b) use ($stats, $matches) {
         $aStats = $stats[$a['id']];
         $bStats = $stats[$b['id']];
@@ -187,6 +187,8 @@ foreach ($groupedTeams as $group => &$teams) {
         // 8. Желтые карточки (чем меньше, тем выше)
         return $samePointsTeams[$a['id']]['yellow_cards'] - $samePointsTeams[$b['id']]['yellow_cards'];
     });
+
+    $groupedTeams[$group] = $teams;
 }
 
 

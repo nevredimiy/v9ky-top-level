@@ -31,25 +31,26 @@ $isCupCurrentTur = isCupCurrentTur($turnir, $currentTur);
 
 $redCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'red');
 $yellowCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow');
+$yellowRedCardsByTypeAndDate = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow_red');
 
 include_once CONTROLLERS . "/head.php";
 include_once CONTROLLERS . "/leagues.php";
 
-$tableCardsByDate = getTableCards($redCardsByTypeAndDate, $yellowCardsByTypeAndDate);
+$tableCardsByDate = getTableCards($redCardsByTypeAndDate, $yellowCardsByTypeAndDate, $yellowRedCardsByTypeAndDate);
 
-
+// dump($tableCardsByDate);
 
 function getDisqualifiedPlayersByDate1($tableCardsByDate, $turnir, $dateLastTur, $countCards = 3)
 {
     $disqualifiedPlayers = [];
 
-    foreach ($tableCardsByDate as $player) {
+    foreach ($tableCardsByDate as $player) {        
 
         // $lastTur = date('Y-m-d', strtotime($dateLastTur));
-        $dateLastTur1 = getDateLastTur($turnir, $player['team_id']);
 
-        // dd($dateLastTur1);
+        $dateLastTur1 = getDateLastTur($turnir, $player['team_id']);
         $lastTur1 = date('Y-m-d H:i:s', strtotime($dateLastTur1));
+        // dump($lastTur1);
 
         if (isset($player['red_date']) && count($player['red_date']) > 0) {
             $lastRedTur = end($player['red_date']);
@@ -69,25 +70,30 @@ function getDisqualifiedPlayersByDate1($tableCardsByDate, $turnir, $dateLastTur,
                     'player_photo' => $player['player_photo'],
                     'red' => $player['red'],
                     'yellow' => $player['yellow'],
+                    'yellow_red' => $player['yellow_red'],
                     'red_date' => $player['red_date'],
-                    'yellow_date' => $player['yellow_date']
+                    'yellow_date' => $player['yellow_date'],
+                    'yellow_red_date' => $player['yellow_red_date']
                 ];
             }
         }
 
         // Перевірка на кількість жовтих карток
 
-        // Желто-красная карточка - когда две желтіе в одном туре
-        $yellowAndRed = 0;
+        // Когда две желтые в одном туре - приравнивается к красной
+        $doubleYellow = 0;
         $doubleYellowInMatch = [];
         foreach ($player['yellow'] as $yellow) {
             if (in_array($yellow, $doubleYellowInMatch)) {
-                $yellowAndRed++;
+                $doubleYellow++;
             }
             $doubleYellowInMatch[] = $yellow;
         }
 
-        $yellowTotal = count($player['yellow_date']) + $yellowAndRed;
+        // Загальна кількість жовтих карток з урахуванням подвійних жовтих
+        $yellowTotal = count($player['yellow_date']) + $doubleYellow + count($player['yellow_red_date']);
+
+        // dd($yellowTotal);
 
         if ($yellowTotal > 0 && $yellowTotal % $countCards == 0) {
             $lastYellowTur = end($player['yellow_date']);
@@ -104,22 +110,52 @@ function getDisqualifiedPlayersByDate1($tableCardsByDate, $turnir, $dateLastTur,
                         'player_photo' => $player['player_photo'],
                         'red' => [],
                         'yellow' => $player['yellow'],
+                        'yellow_red' => $player['yellow_red'],
                         'red_date' => [],
-                        'yellow_date' => $player['yellow_date']
+                        'yellow_date' => $player['yellow_date'],
+                        'yellow_red_date' => $player['yellow_red_date'],
                     ];
                 } elseif (empty($disqualifiedPlayers[$player['player_id']]['yellow'])) {
                     // Только если в массиве ещё не добавлены жёлтые карточки — добавляем
                     $disqualifiedPlayers[$player['player_id']]['yellow'] = $player['yellow'];
                     $disqualifiedPlayers[$player['player_id']]['yellow_date'] = $player['yellow_date'];
+                    $disqualifiedPlayers[$player['player_id']]['yellow_red_date'] = $player['yellow_red_date'];
                 }
             }
         }
+
+        //Желто-красная карточка - это также когда показывается две желтые карточки за матч - приравненвается к красной
+         if (isset($player['yellow_red_date']) && count($player['yellow_red_date']) > 0) {
+            $lastRedTur = end($player['yellow_red_date']);
+            $lastRedTur = date('Y-m-d H:i:s', strtotime($lastRedTur));            
+
+            // $upcomingTur = date('Y-m-d H:i:s', strtotime($dateUpcomingTur));
+
+            // Перевірка, чи гравець дискваліфікований
+            if ($lastRedTur == $lastTur1) {
+
+                $disqualifiedPlayers[$player['player_id']] = [
+                    'player_id' => $player['player_id'],
+                    'lastname' => $player['lastname'],
+                    'firstname' => $player['firstname'],
+                    'team_logo' => $player['team_logo'],
+                    'team' => $player['team'],
+                    'player_photo' => $player['player_photo'],
+                    'red' => $player['red'],
+                    'yellow' => $player['yellow'],
+                    'yellow_red' => $player['yellow_red'],
+                    'red_date' => $player['red_date'],
+                    'yellow_date' => $player['yellow_date'],
+                    'yellow_red_date' => $player['yellow_red_date']
+                ];
+            }
+        }
+
     }
     
     return array_values($disqualifiedPlayers);
 }
 
-// dd($tableCardsByDate);
 
 $disqualifiedPlayers = getDisqualifiedPlayersByDate1($tableCardsByDate, $turnir,  $dateLastTur);
 
@@ -130,7 +166,9 @@ if ($isCupCurrentTur) {
 
     $yellowCardsCup = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow', 1);
 
-    $tableCardsCupTurnir = getTableCards($redCardsCup, $yellowCardsCup);
+    $yellowRedCardsCup = getCardsByTypeAndDate($dbF, $matchesLastTurIds, 'yellow_red', 1);
+
+    $tableCardsCupTurnir = getTableCards($redCardsCup, $yellowCardsCup, $yellowRedCardsCup);
 
     $disqualifiedPlayersCup = getDisqualifiedPlayersByDate($tableCardsCupTurnir, $dateLastTur, 2);
 }
@@ -159,7 +197,7 @@ if ($isCupCurrentTur) {
                         </thead>
                         <tbody>
                             <?php foreach ($disqualifiedPlayersCup as $key => $player): ?>
-                                <tr>
+                                <tr">
                                     <td><?= $key + 1  ?></td>
                                     <td>
                                         <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= $player_face_path ?>/<?= $player['player_photo'] ?>" alt="team-logo">
@@ -177,6 +215,10 @@ if ($isCupCurrentTur) {
                                         <?php endforeach ?>
                                         <?php foreach ($player['yellow'] as $tur): ?>
                                             <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
+                                            <?= $tur ?> тур
+                                        <?php endforeach ?>
+                                         <?php foreach ($player['yellow_red'] as $tur): ?>
+                                            <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-red-icon.png' ?>" alt="">
                                             <?= $tur ?> тур
                                         <?php endforeach ?>
 
@@ -200,7 +242,7 @@ if ($isCupCurrentTur) {
                     </thead>
                     <tbody>
                         <?php foreach ($tableCardsCupTurnir as $key => $player): ?>
-                            <tr>
+                            <tr data-player-id="<?= $player['player_id'] ?>" >
                                 <td><?= $key + 1  ?></td>
                                 <td>
 
@@ -222,6 +264,10 @@ if ($isCupCurrentTur) {
                                     <?php endforeach ?>
                                     <?php foreach ($player['yellow'] as $tur): ?>
                                         <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
+                                        <?= $tur ?> тур
+                                    <?php endforeach ?>
+                                     <?php foreach ($player['yellow_red'] as $tur): ?>
+                                        <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-red-icon.png' ?>" alt="">
                                         <?= $tur ?> тур
                                     <?php endforeach ?>
 
@@ -253,7 +299,7 @@ if ($isCupCurrentTur) {
                     </thead>
                     <tbody>
                         <?php foreach ($disqualifiedPlayers as $key => $player): ?>
-                            <tr data-player-id="<?= $player['player_id'] ?>" >
+                            <tr>
                                 <td><?= $key + 1  ?></td>
                                 <td>
                                     <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= $player_face_path ?>/<?= $player['player_photo'] ?>" alt="team-logo">
@@ -270,6 +316,10 @@ if ($isCupCurrentTur) {
                                     <?php endforeach ?>
                                     <?php foreach ($player['yellow'] as $tur): ?>
                                         <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
+                                        <?= $tur ?> тур
+                                    <?php endforeach ?>
+                                    <?php foreach ($player['yellow_red'] as $tur): ?>
+                                        <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-red-icon.png' ?>" alt="">
                                         <?= $tur ?> тур
                                     <?php endforeach ?>
 
@@ -310,6 +360,10 @@ if ($isCupCurrentTur) {
                                 <?php endforeach ?>
                                 <?php foreach ($player['yellow'] as $tur): ?>
                                     <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-card-icon.png' ?>" alt="">
+                                    <?= $tur ?> тур
+                                <?php endforeach ?>
+                                 <?php foreach ($player['yellow_red'] as $tur): ?>
+                                    <img width="20" height="30" style="width: 20px; height: 30px;" src="<?= IMAGES . '/yellow-red-icon.png' ?>" alt="">
                                     <?= $tur ?> тур
                                 <?php endforeach ?>
 

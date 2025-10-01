@@ -138,6 +138,7 @@ $matchesOfTurAndDate = mergeUniqueById($dataCurrentTur, $dataCurrentDay);
           $dataMatch['anons'] = $match['anons'];
           $dataMatch['goals1'] = $match['goals1'];
           $dataMatch['goals2'] = $match['goals2'];
+          $dataMatch['canseled'] = $match['canseled'];
           break;
       }
   }

@@ -5,6 +5,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+
 require_once dirname(__DIR__) . '/../../freedman/config.php';
 require_once CORE . '/classes/DbFreedman.php';
 $db_config = require_once FREEDMAN . '/db.php';
@@ -16,17 +17,18 @@ require_once CORE . '/functions.php';
 
 // Проверяем, был ли передан match_id
 if (!isset($_POST['match_id'])) {
-    die("<p>Ошибка: отсутствует идентификатор матча</p>");
+    die("<p>Помилка: відсутній ідентифікатор матчу</p>");
 }
 
 $match_id = intval($_POST['match_id']); // Приводим к числу
+
 
 // Получаем данные матча
 $fields = $dbF->query("SELECT `turnir`, `tur`, `team1`, `team2` FROM `v9ky_match` WHERE id = :match_id", [":match_id" => $match_id])->find();
 
 // Проверка: если матч не найден
 if (!$fields) {
-    die("<p>Ошибка: матч не найден</p>");
+    die("<p>Помилка: матч не знайдено</p>");
 }
 
 // Данные тура
@@ -52,6 +54,7 @@ foreach ($dataCurrentTurWithDate as $match) {
         $dataMatch['match_time'] = $match['match_time'];
         $dataMatch['team1_id'] = $match['team1_id'];
         $dataMatch['team2_id'] = $match['team2_id'];
+        $dataMatch['canseled'] = $match['canseled'];
 
         break;
     }
@@ -84,7 +87,6 @@ foreach($matchReport as &$report){
         $report['event_type'] = 'penalty_fail';
     }
 } 
-
 
 // Состав команды
 $team1Composition = getTeamComposition($match_id, $dataMatch['team1_id']);
@@ -134,7 +136,7 @@ $statsList = [
 // Стастистика матча
 $staticMatch = getStaticMatch($match_id, $dataMatch['team1_id'], $dataMatch['team2_id']);
 
-
+// dump($staticMatch);
 
 
 if(isset($staticMatch['team1']['data']['match_date'])) {
@@ -143,13 +145,13 @@ if(isset($staticMatch['team1']['data']['match_date'])) {
     $matchDate = new DateTime($staticMatch['team1']['data']['match_date']);
 
     // Добавляем 5 дней - это количество дней, когда админы должны внести все данные по последнему туру
-    $matchDate->modify('+5 days');
+    $matchDate->modify('+4 days 21 hours');
     
 } else {
     $matchDateSql = $dbF->query("SELECT `date` FROM `v9ky_match` WHERE `id` = :id", [":id" => $match_id])->find();
     
     $matchDate = new DateTime($matchDateSql['date']);
-    $matchDate->modify('+5 days');
+    $matchDate->modify('+4 days 21 hours');
 }
 
 // Текущая дата и время

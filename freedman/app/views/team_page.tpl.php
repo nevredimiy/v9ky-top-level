@@ -465,12 +465,16 @@
 
                 <img src="<?=$team_logo_path?><?= $dataPlayer['team_logo'] ?>" alt="Логотип команди">
                 
-                <?php if ($player['v9ky']):?>
+                <?php if ($player['v9ky']): ?>
                   <img src="/css/components/team-page/assets/images/player-v9ku.png" alt="В9КУ">
-                  <?php elseif ($player['dubler']): ?>
-                  <img src="/css/components/team-page/assets/images/dubler-icon.png" alt="Дублер">
-                  <?php elseif ($player['vibuv']): ?>
-                  <img class="vibuv" src="/css/components/team-page/assets/images/vibuv.png" alt="Вибув">
+                <?php endif ?>
+
+                <?php if ($player['dubler']): ?>
+                    <img src="/css/components/team-page/assets/images/dubler-icon.png" alt="Дублер">
+                <?php endif ?>
+
+                <?php if ($player['vibuv']): ?>
+                    <img class="vibuv" src="<?= IMAGES . '/vibuv.png' ?>" alt="Вибув">
                 <?php endif ?>
 
               </div>

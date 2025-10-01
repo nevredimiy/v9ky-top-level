@@ -167,7 +167,21 @@
                                 <?php if($match['goals1'] == NULL || $match['goals2'] == NULL ) : ?>
                                     МАТЧ ОЧІКУЄТЬСЯ
                                 <?php else:?>
-                                    МАТЧ ЗАВЕРШЕНО
+                                    <?php 
+                                        switch($match['canseled']) {
+                                            case 0:
+                                                echo 'Матч очікується';
+                                                break;
+                                            case 1:
+                                                echo ' Матч завершено';
+                                                break;
+                                            case 2:
+                                                echo 'Матч у прямому ефірі';
+                                                break;
+                                            default:
+                                                echo 'Матч очікується';
+                                        }
+                                    ?>
                                 <?php endif?>
                             </div>
 

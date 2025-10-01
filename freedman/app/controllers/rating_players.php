@@ -39,7 +39,16 @@ if(!isset($dataAllPlayers)) {
 
 if(!empty($dataAllPlayers)){
   // Отсортированный массив по рубрике Топ-Гравець
-  $topGravetc = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'topgravetc', $lastTur);
+  // $topGravetc = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'topgravetc', $lastTur);
+  $topGravetc = getTopGravtsi($allStaticPlayers, $dataAllPlayers, $lastTur);
+
+  
+  // if(isset($_GET['dev']))
+  //  {
+  //    dump($topGravet); 
+  //    dump($topGravetc); 
+  //  }
+  
 
   // Отсортированный массив по рубрике Топ-Голкипер
   // $topGolkiper = getTopPlayers($allStaticPlayers, $dataAllPlayers, 'golkiper', $lastTur);

@@ -30,7 +30,21 @@
                     </div>
                 </div>
                 <?php if($dataMatch['goals1'] != null) :?>
-                <div class="state__text">Матч завершено</div>
+                    <div data-match-canseled="<?=$dataMatch['canseled']  ?>" class="state__text">
+                        
+                        <?php if($dataMatch['canseled'] != null)  :?>
+                            <?php if($dataMatch['canseled'] == 1) :?>
+                                Матч завершено
+                            <?php elseif($dataMatch['canseled'] == 2) :?>
+                                Матч у прямому ефірі
+                            <?php else :?>   
+                                Матч очікується
+                            <?php endif ?>
+                        <?php else :?>   
+                            Матч завершено
+                        <?php endif ?>
+
+                    </div>
                 <?php endif ?>
             </div>
         </div>
@@ -192,25 +206,28 @@
                     </div>
                 </div>
                 <div class="tabs__block">
-                    <?php if($matchDate <= $currentDate ) :?>
+                    
+                     <?php if ($matchDate <= $currentDate) : ?>
                         <?php foreach ($statsList as $key => $stat) : ?>
                             <div class="tabs__block-stats stats">
-                                <div class="stats__title"><?= $stat['title'] ?></div>
+                                <div class="stats__title"><?php echo htmlspecialchars($stat['title']); ?></div>
                                 <div class="stats__view">
-                                    <div class="stats__view-blue" data-value="<?= $staticMatch['team1']['data'][$stat['percentage_key']] ?>">
-                                        <?= $staticMatch['team1']['data'][$key] ?>
+                                    <div class="stats__view-blue"
+                                        data-value="<?php echo isset($staticMatch['team1']['data'][$stat['percentage_key']]) ? $staticMatch['team1']['data'][$stat['percentage_key']] : 0; ?>">
+                                        <?php echo isset($staticMatch['team1']['data'][$key]) ? $staticMatch['team1']['data'][$key] : 0; ?>
                                     </div>
-                                    <div class="stats__view-red" data-value="<?= $staticMatch['team2']['data'][$stat['percentage_key']] ?>">
-                                        <?= $staticMatch['team2']['data'][$key] ?>
+                                    <div class="stats__view-red"
+                                        data-value="<?php echo isset($staticMatch['team2']['data'][$stat['percentage_key']]) ? $staticMatch['team2']['data'][$stat['percentage_key']] : 0; ?>">
+                                        <?php echo isset($staticMatch['team2']['data'][$key]) ? $staticMatch['team2']['data'][$key] : 0; ?>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                    <?php else :?>
+                    <?php else : ?>
                         <div class="tabs__block-stats stats ball__procession">
                             <div class="stats__title">Дані статистики ще не готові</div>
                         </div>
-                    <?php endif ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
