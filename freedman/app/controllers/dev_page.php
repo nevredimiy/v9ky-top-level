@@ -46,6 +46,11 @@ function getDisqualifiedPlayersByDate1($tableCardsByDate, $turnir, $dateLastTur,
 
     foreach ($tableCardsByDate as $player) {        
 
+        if($player['player_id'] == 128050){
+
+           
+        }
+
         // $lastTur = date('Y-m-d', strtotime($dateLastTur));
 
         $dateLastTur1 = getDateLastTur($turnir, $player['team_id']);
@@ -79,19 +84,45 @@ function getDisqualifiedPlayersByDate1($tableCardsByDate, $turnir, $dateLastTur,
         }
 
         // Перевірка на кількість жовтих карток
-
         // Когда две желтые в одном туре - приравнивается к красной
-        $doubleYellow = 0;
-        $doubleYellowInMatch = [];
-        foreach ($player['yellow'] as $yellow) {
-            if (in_array($yellow, $doubleYellowInMatch)) {
-                $doubleYellow++;
+        // $doubleYellow = 0;
+        // $doubleYellowInMatch = [];
+        // foreach ($player['yellow'] as $yellow) {
+        //     if (in_array($yellow, $doubleYellowInMatch)) {
+        //         $doubleYellow++;
+        //     }
+        //     $doubleYellowInMatch[] = $yellow;
+        // }
+
+        // Добавим для проверки еще одну желтокрасную карточку в массив с датой
+        $addedYellowCards = 0;
+        if(!empty($player['yellow_red_date'])){
+            $preYellowCardDate = '';
+
+            foreach($player['yellow_red_date'] as $yellow_red_date){
+                $realYellowCards = 0;
+                foreach($player['yellow_date'] as $yellow_date){
+                    
+                    if($yellow_red_date >= $yellow_date && $preYellowCardDate != $yellow_date && $preYellowCardDate < $yellow_date){
+                        $realYellowCards ++;
+                    }
+                }
+                $preYellowCardDate = $yellow_red_date;
+                $remainder = $realYellowCards % 3;
+                switch ($remainder) {
+                    case 1:
+                        $addedYellowCards += 2;
+                        break;
+                    case 2:
+                        $addedYellowCards += 1;
+                        break;
+                }
             }
-            $doubleYellowInMatch[] = $yellow;
         }
 
+        // Желто-красная карточка не учитывается в сумме жёлтых для дисквалификации по 3 ЖК
         // Загальна кількість жовтих карток з урахуванням подвійних жовтих
-        $yellowTotal = count($player['yellow_date']) + $doubleYellow + count($player['yellow_red_date']);
+        $yellowTotal = count($player['yellow_date']) + $addedYellowCards;
 
         // dd($yellowTotal);
 

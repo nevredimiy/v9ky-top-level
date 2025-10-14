@@ -3901,17 +3901,45 @@ function getDisqualifiedPlayersByDate($tableCardsByDate, $turnir, $dateLastTur, 
 
         // Перевірка на кількість жовтих карток
 
-        // Когда две желтые в одном туре - приравнивается к красной
-        $yellowAndRed = 0;
-        $doubleYellowInMatch = [];
-        foreach ($player['yellow'] as $yellow) {
-            if (in_array($yellow, $doubleYellowInMatch)) {
-                $yellowAndRed++;
+    //    // Когда две желтые в одном туре - приравнивается к красной
+    //     $yellowAndRed = 0;
+    //     $doubleYellowInMatch = [];
+    //     foreach ($player['yellow'] as $yellow) {
+    //         if (in_array($yellow, $doubleYellowInMatch)) {
+    //             $yellowAndRed++;
+    //         }
+    //         $doubleYellowInMatch[] = $yellow;
+    //     }
+
+       // Добавим для проверки еще одну желтокрасную карточку в массив с датой
+        $addedYellowCards = 0;
+        if(!empty($player['yellow_red_date'])){
+            $preYellowCardDate = '';
+
+            foreach($player['yellow_red_date'] as $yellow_red_date){
+                $realYellowCards = 0;
+                foreach($player['yellow_date'] as $yellow_date){
+                    
+                    if($yellow_red_date >= $yellow_date && $preYellowCardDate != $yellow_date && $preYellowCardDate < $yellow_date){
+                        $realYellowCards ++;
+                    }
+                }
+                $preYellowCardDate = $yellow_red_date;
+                $remainder = $realYellowCards % 3;
+                switch ($remainder) {
+                    case 1:
+                        $addedYellowCards += 2;
+                        break;
+                    case 2:
+                        $addedYellowCards += 1;
+                        break;
+                }
             }
-            $doubleYellowInMatch[] = $yellow;
         }
 
-        $yellowTotal = count($player['yellow_date']) + $yellowAndRed + count($player['yellow_red_date']);
+        // Желто-красная карточка не учитывается в сумме жёлтых для дисквалификации по 3 ЖК
+        // Загальна кількість жовтих карток з урахуванням подвійних жовтих
+        $yellowTotal = count($player['yellow_date']) + $addedYellowCards;
 
         if ($yellowTotal > 0 && $yellowTotal % $countCards == 0) {
             $lastYellowTur = end($player['yellow_date']);
