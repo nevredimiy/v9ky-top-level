@@ -3901,17 +3901,18 @@ function getDisqualifiedPlayersByDate($tableCardsByDate, $turnir, $dateLastTur, 
 
         // Перевірка на кількість жовтих карток
 
-    //    // Когда две желтые в одном туре - приравнивается к красной
-    //     $yellowAndRed = 0;
-    //     $doubleYellowInMatch = [];
-    //     foreach ($player['yellow'] as $yellow) {
-    //         if (in_array($yellow, $doubleYellowInMatch)) {
-    //             $yellowAndRed++;
-    //         }
-    //         $doubleYellowInMatch[] = $yellow;
-    //     }
+        // // Когда две желтые в одном туре - приравнивается к красной
+        //  $yellowAndRed = 0;
+        //  $doubleYellowInMatch = [];
+        //  foreach ($player['yellow'] as $yellow) {
+        //      if (in_array($yellow, $doubleYellowInMatch)) {
+        //          $yellowAndRed++;
+        //      }
+        //      $doubleYellowInMatch[] = $yellow;
+        //  }
 
-       // Добавим для проверки еще одну желтокрасную карточку в массив с датой
+        // Создаем переменную, которая будет хранить и добавлять нужное количество желтых карточек к общему количеству
+        // При появлении желто-красной карточки сбиваеться подсчет желтых карточек (%3). В ифе код выравнивает этот казус
         $addedYellowCards = 0;
         if(!empty($player['yellow_red_date'])){
             $preYellowCardDate = '';

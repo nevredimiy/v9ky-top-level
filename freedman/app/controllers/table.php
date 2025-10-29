@@ -127,35 +127,93 @@ foreach ($groupedTeams as $group => $teams) {
         $aStats = $stats[$a['id']];
         $bStats = $stats[$b['id']];
 
-        // 1. Сортировка по очкам в турнире
+        // 1. По очкам в турнире
         if ($bStats['points'] !== $aStats['points']) {
             return $bStats['points'] - $aStats['points'];
         }
 
-        // 2. Группировка команд с одинаковыми очками
+        // 2. Формируем группу с одинаковыми очками
         $samePointsTeams = [];
         foreach ($stats as $teamId => $teamStats) {
             if ($teamStats['points'] === $aStats['points']) {
                 $samePointsTeams[$teamId] = [
                     'id' => $teamId,
-                    'points' => 0, // Виртуальные очки за очные встречи
-                    'goal_difference' => $teamStats['goals_for'] - $teamStats['goals_against'],
-                    'goals_for' => $teamStats['goals_for'],
+                    'points' => 0,
+                    'goals_for' => 0,
+                    'goals_against' => 0,
+                    'goal_difference' => 0,
                     'red_cards' => $teamStats['red_cards'],
-                    'yellow_cards' => $teamStats['yellow_cards']
+                    'yellow_cards' => $teamStats['yellow_cards'],
                 ];
             }
         }
 
-        // 3. Подсчет очков за очные встречи
+        // 2.1. Суммируем голы в личных встречах между командами с одинаковыми очками
         foreach ($matches as $match) {
             $t1 = $match['team1'];
             $t2 = $match['team2'];
+            $g1 = (int) $match['gols1'];
+            $g2 = (int) $match['gols2'];
 
             if (isset($samePointsTeams[$t1]) && isset($samePointsTeams[$t2])) {
-                if ($match['gols1'] > $match['gols2']) {
+                $samePointsTeams[$t1]['goals_for'] += $g1;
+                $samePointsTeams[$t1]['goals_against'] += $g2;
+
+                $samePointsTeams[$t2]['goals_for'] += $g2;
+                $samePointsTeams[$t2]['goals_against'] += $g1;
+            }
+        }
+
+        // Рассчитываем разницу голов
+        foreach ($samePointsTeams as &$team) {
+            $team['goal_difference'] = $team['goals_for'] - $team['goals_against'];
+        }
+        unset($team);
+
+        // 2.2. Разница голов в личных встречах (групповой критерий)
+        if ($samePointsTeams[$b['id']]['goal_difference'] !== $samePointsTeams[$a['id']]['goal_difference']) {
+            return $samePointsTeams[$b['id']]['goal_difference'] - $samePointsTeams[$a['id']]['goal_difference'];
+        }
+
+        // ⚡ 2.3. Разница голов между двумя командами в их очных встречах
+        $aVsBGoalsFor = 0;
+        $aVsBGoalsAgainst = 0;
+
+        foreach ($matches as $match) {
+            $t1 = $match['team1'];
+            $t2 = $match['team2'];
+            $g1 = (int) $match['gols1'];
+            $g2 = (int) $match['gols2'];
+
+            // если это матч именно между этими командами
+            if (($t1 === $a['id'] && $t2 === $b['id']) || ($t1 === $b['id'] && $t2 === $a['id'])) {
+                if ($t1 === $a['id']) {
+                    $aVsBGoalsFor += $g1;
+                    $aVsBGoalsAgainst += $g2;
+                } else {
+                    $aVsBGoalsFor += $g2;
+                    $aVsBGoalsAgainst += $g1;
+                }
+            }
+        }
+
+        $aVsBDiff = $aVsBGoalsFor - $aVsBGoalsAgainst;
+        if ($aVsBDiff !== 0) {
+            // если положительная — A выше, отрицательная — B выше
+            return $aVsBDiff > 0 ? -1 : 1;
+        }
+
+        // 3. Очные очки
+        foreach ($matches as $match) {
+            $t1 = $match['team1'];
+            $t2 = $match['team2'];
+            $g1 = (int) $match['gols1'];
+            $g2 = (int) $match['gols2'];
+
+            if (isset($samePointsTeams[$t1]) && isset($samePointsTeams[$t2])) {
+                if ($g1 > $g2) {
                     $samePointsTeams[$t1]['points'] += 3;
-                } elseif ($match['gols1'] < $match['gols2']) {
+                } elseif ($g1 < $g2) {
                     $samePointsTeams[$t2]['points'] += 3;
                 } else {
                     $samePointsTeams[$t1]['points'] += 1;
@@ -164,32 +222,36 @@ foreach ($groupedTeams as $group => $teams) {
             }
         }
 
-        // 4. Сортировка по очным встречам
+        // 4. По очным очкам
         if ($samePointsTeams[$b['id']]['points'] !== $samePointsTeams[$a['id']]['points']) {
             return $samePointsTeams[$b['id']]['points'] - $samePointsTeams[$a['id']]['points'];
         }
 
-        // 5. Разница забитых и пропущенных мячей в турнире
-        if ($samePointsTeams[$b['id']]['goal_difference'] !== $samePointsTeams[$a['id']]['goal_difference']) {
-            return $samePointsTeams[$b['id']]['goal_difference'] - $samePointsTeams[$a['id']]['goal_difference'];
+        // 5. Разница мячей в турнире
+        $aDiff = $aStats['goals_for'] - $aStats['goals_against'];
+        $bDiff = $bStats['goals_for'] - $bStats['goals_against'];
+        if ($bDiff !== $aDiff) {
+            return $bDiff - $aDiff;
         }
 
-        // 6. Количество забитых мячей (чем больше, тем выше)
-        if ($samePointsTeams[$b['id']]['goals_for'] !== $samePointsTeams[$a['id']]['goals_for']) {
-            return $samePointsTeams[$b['id']]['goals_for'] - $samePointsTeams[$a['id']]['goals_for'];
+        // 6. Забитые мячи
+        if ($bStats['goals_for'] !== $aStats['goals_for']) {
+            return $bStats['goals_for'] - $aStats['goals_for'];
         }
 
-        // 7. Красные карточки (чем меньше, тем выше)
-        if ($samePointsTeams[$a['id']]['red_cards'] !== $samePointsTeams[$b['id']]['red_cards']) {
-            return $samePointsTeams[$a['id']]['red_cards'] - $samePointsTeams[$b['id']]['red_cards'];
+        // 7. Красные карточки
+        if ($aStats['red_cards'] !== $bStats['red_cards']) {
+            return $aStats['red_cards'] - $bStats['red_cards'];
         }
 
-        // 8. Желтые карточки (чем меньше, тем выше)
-        return $samePointsTeams[$a['id']]['yellow_cards'] - $samePointsTeams[$b['id']]['yellow_cards'];
+        // 8. Желтые карточки
+        return $aStats['yellow_cards'] - $bStats['yellow_cards'];
     });
 
     $groupedTeams[$group] = $teams;
 }
+
+
 
 
 // dump($groupedTeams);
